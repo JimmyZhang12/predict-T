@@ -1,0 +1,12 @@
+[submodule "gem5"]
+	path = gem5
+	url = https://github.com/atsmith3/gem5.git
+[submodule "verilator"]
+	path = verilator
+	url = https://github.com/atsmith3/verilator.git
+[submodule "ngspice"]
+	path = ngspice
+	url = https://github.com/atsmith3/ngspice.git
+[submodule "mcpat"]
+	path = mcpat
+	url = https://github.com/atsmith3/mcpat.git
