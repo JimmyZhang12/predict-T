@@ -40,14 +40,14 @@ def run(args):
   run_gem5("fft", "4 4096", "fft_small", "1", "DerivO3CPU", "16kB", "64kB", "256kB")
 
   # Convert Output to McPat:
-  m5_to_mcpat("gem5/output/"+args.output_name+"/stats.txt",
+  m5_to_mcpat(get_stats_file("fft_small"), get_config_file("fft_small"), "mcpat-template.xml", "mcpat_arm.xml")
 
   # Run McPat:
-  run_mcpat("mcpat_arm.xml", "2", "1", "mcpat.out", "mcpat.err")
+  run_mcpat("mcpat_arm.xml", "5", "1", "mcpat.out", "mcpat.err")
 
 
   # Convert output:
 
   #run_gem5("fft", "4 4096", "fft_small", "1", "DerivO3CPU", "16kB", "64kB", "256kB")
 
-
+run(args)

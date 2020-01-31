@@ -44,6 +44,6 @@ def run_gem5(cmd, opts, output_name, num_cpus, cpu_type, l1i_size, l1d_size, l2_
   #print(out)
 
 #Test Code:
-print(get_stats_file("fft_small"))
-print(get_config_file("fft_small"))
-run_gem5("fft", "4 4096", "fft_small", "1", "DerivO3CPU", "16kB", "64kB", "256kB")
+#print(get_stats_file("fft_small"))
+#print(get_config_file("fft_small"))
+#run_gem5("fft", "4 4096", "fft_small", "1", "DerivO3CPU", "16kB", "64kB", "256kB")

@@ -127,3 +127,12 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+
+# VIM
+*.*.swo
+*.*.swp
+
+
+# Project Dir:
+tests/
