@@ -6,10 +6,10 @@ import tempfile
 from contextlib import contextmanager
 
 # Gem5 Global Paths:
-gem5_path = "gem5"
+gem5_path = "../gem5"
 gem5_exe = os.path.join(gem5_path, "build/ARM/gem5.opt")
 gem5_cfg = os.path.join(gem5_path, "configs/example/se.py")
-gem5_out = os.path.join(gem5_path, "output")
+gem5_out = os.path.join(".", "output")
 test_path = "tests/testbin"
 
 def get_stats_file(name):
@@ -46,4 +46,4 @@ def run_gem5(cmd, opts, output_name, num_cpus, cpu_type, l1i_size, l1d_size, l2_
 #Test Code:
 #print(get_stats_file("fft_small"))
 #print(get_config_file("fft_small"))
-#run_gem5("fft", "4 4096", "fft_small", "1", "DerivO3CPU", "16kB", "64kB", "256kB")
+run_gem5("fft", "4 4096", "fft_small", "1", "DerivO3CPU", "16kB", "64kB", "256kB")

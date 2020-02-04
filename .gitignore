@@ -133,6 +133,10 @@ dmypy.json
 *.*.swo
 *.*.swp
 
+*.err
+*.out
+*.xml
 
 # Project Dir:
 tests/
+output/
