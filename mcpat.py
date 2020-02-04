@@ -16,18 +16,26 @@ class Device(object):
     self.data = data
     self.depth = depth
   def __str__(self):
-    return self.name+" "+str(self.data)+" "+str(self.depth)
+    return "  "*self.depth+self.name+" "+str(self.data)
   def __repr__(self):
-    return self.name+" "+str(self.data)+" "+str(self.depth)
+    return "  "*self.depth+self.name+" "+str(self.data)
 
 class Node(object):
   def __init__(self, children=[], device=None):
     self.children = children
     self.device = device
   def __str__(self):
-    return str(self.device)+" "+str(self.children)
+    modules = []
+    modules.append(str(self.device))
+    for child in self.children:
+      modules.append(str(child))
+    return "\n".join(modules)
   def __repr__(self):
-    return str(self.device)+" "+str(self.children)
+    modules = []
+    modules.append(str(self.device))
+    for child in self.children:
+      modules.append(str(child))
+    return "\n".join(modules)
 
 class Epoch(object):
   def __init__(self, device_list = []):
@@ -52,79 +60,119 @@ class Epoch(object):
     children = []
     sublist = []
     for dev in devices[1:]:
-      sublist.append(dev)
       if dev.depth == root.depth + 1:
-        #print(sublist)
-        children.append(self.build(sublist))
-        #print(children)
+        node = self.build(sublist)
+        if node != None:
+          children.append(node)
+          #print(node)
         sublist = []
+      sublist.append(dev)
+    node = self.build(sublist)
+    if node != None:
+      children.append(node)
 
     """ Post-Order Build Tree: """
     return Node(children, root)
 
-def strip_header(lines):
-  start = False
-  ret = []
-  for line in lines:
-    if("Processor:" in line):
-      start = True
-    if start:
-      ret.append(line)
-  return ret
+  def find(self, path):
+    def _find(path, subtree):
+      print(path, subtree.device.name)
 
-def strip_space(lines):
-  ret = []
-  for line in lines:
-    if "*****" in line or "Device Type=" in line:
-      continue
-    else:
-      ret.append(line)
-  return ret
+      """ Base Case """
+      if path.split(":")[0] == subtree.device.name and len(path.split(":")) == 1:
+        return subtree.device
+      elif len(path.split(":")) == 1:
+        return None
 
-def line_to_dict(line):
-  ret = {}
-  temp = line.split(":")[0].split("=")
-  ret["lspace"] = len(temp[0]) - len(temp[0].lstrip())
-  return ret
+      """ Recursive Case """
+      for i in subtree.children:
+        if i.device.name == path.split(":")[1]:
+          return _find(":".join(path.split(":")[1:]), i)
+      return None
 
-def split_list(lines):
-  ret = []
-  sub = []
-  for i in lines:
-    if i == "\n":
-      ret.append(sub)
-      sub = []
-    else:
-      sub.append(i.rstrip())
-  return ret
-
-def to_devices(intermediate_dev_list):
-  ret = []
-  for dev in intermediate_dev_list:
-    data = {}
-    for attr in dev[1:]:
-      data[attr.split("=")[0].strip()] = attr.split("=")[1].strip()
-    ret.append(Device(dev[0].split(":")[0].strip(), data, math.floor((len(dev[0]) - len(dev[0].lstrip()))/2)))
-  return ret
+    return _find(path, self.dev_tree)
 
 
 
-
-
-""" Returns an array of Epochs """
 def parse_output(output_file):
+  def strip_header(lines):
+    start = False
+    ret = []
+    for line in lines:
+      if("Processor:" in line):
+        start = True
+      if start:
+        ret.append(line)
+    return ret
+
+  def strip_space(lines):
+    ret = []
+    last_line_star = False
+    start_core = False
+    for line in lines:
+      if "Core:" in line:
+        start_core = True
+        if last_line_star:
+          #Fix spacing after ******
+          ret.append("  "+line)
+          last_line_star = False
+      elif "*****" in line:
+        last_line_star = True
+      elif "Device Type=" in line or "     Local Predictor:" in line:
+        continue
+      else:
+        if last_line_star:
+          #Fix spacing after ******
+          ret.append("  "+line)
+          last_line_star = False
+        elif start_core:
+          ret.append(line.replace(" ", "", 2))
+        else:
+          ret.append(line)
+    return ret
+
+  def line_to_dict(line):
+    ret = {}
+    temp = line.split(":")[0].split("=")
+    ret["lspace"] = len(temp[0]) - len(temp[0].lstrip())
+    return ret
+
+  def split_list(lines):
+    ret = []
+    sub = []
+    for i in lines:
+      if i == "\n":
+        ret.append(sub)
+        sub = []
+      else:
+        sub.append(i.rstrip())
+    return ret
+
+  def to_devices(intermediate_dev_list):
+    ret = []
+    for dev in intermediate_dev_list:
+      data = {}
+      print(dev)
+      for attr in dev[1:]:
+        data[attr.split("=")[0].strip()] = attr.split("=")[1].strip()
+      ret.append(Device(dev[0].split(":")[0].strip(), data, int(math.floor((len(dev[0]) - len(dev[0].lstrip()))/2))))
+      if ret[-1].depth == 4:
+        ret[-1].depth = 3
+      if ret[-1].depth == 5:
+        ret[-1].depth = 3
+      if ret[-1].depth == 6:
+        ret[-1].depth = 4
+    return ret
+
+  """ Returns an Epochs """
   with open(output_file, "r") as of:
     lines = of.readlines()
     lines = strip_header(lines)
     lines = strip_space(lines)
     temp = split_list(lines)
     dev_list = to_devices(temp)
-    for dev in dev_list:
-      print(dev)
-    print("\n")
     epoch = Epoch(dev_list)
-    print("\n")
-    print(epoch)
+    return epoch
 
 def run_mcpat(xml, print_level, opt_for_clk, ofile, errfile):
   global mcpat_path
@@ -142,5 +190,8 @@ def run_mcpat(xml, print_level, opt_for_clk, ofile, errfile):
     p.wait()
 
 #Test Code:
-#run_mcpat("mcpat_arm.xml", "0", "1", "mcpat.out", "mcpat.err")
-parse_output("mcpat.out")
+#run_mcpat("mcpat_arm.xml", "5", "1", "mcpat.out", "mcpat.err")
+#epoch = parse_output("mcpat.out")
+#print(epoch.find("Processor:Total Cores"))
+#print(epoch.find("Processor:Core:Instruction Fetch Unit:Branch Target Buffer"))
+#print(epoch.find("Processor:NOC:Router:Arbiter"))
