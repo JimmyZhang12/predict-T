@@ -203,7 +203,7 @@ def plot(epochs):
     return data
 
 
-  def plot_components_line(components):
+  def plot_components_line(components, title, fname):
     def format_values(data):
       """ Convert the data elements to their values """
       for key, value in data.items():
@@ -223,28 +223,90 @@ def plot(epochs):
 
     fig, plts = plt.subplots(len(components), 1)
 
+    plt.subplots_adjust(hspace=0.35)
+    fig.set_size_inches(20, 20)
+
     """ Plot a component dict as a line chart """
     i = 0
     for key, value in components.items():
       data = format_values(value)
       data = total(data)
-      plts[i].plot(range(len(data)), data, label=key)
-      plts[i].set_xlabel("Time (ms)")
+      plts[i].plot(range(len(data)), data, label=key.split(":")[-1])
+      plts[i].set_xlabel("Epoch")
       plts[i].set_ylabel("Power (W)")
+      plts[i].ticklabel_format(useOffset=False)
+      #plts[i].set_title(key.split(":")[1]+" Power")
       print(data)
       plts[i].legend()
       i+=1
-    plt.show()
+    fig.suptitle(title)
+    #plt.show()
+    plt.savefig(fname)
+
+  def plot_components_hierarchy(components, title, fname):
+    def format_values(data):
+      """ Convert the data elements to their values """
+      for key, value in data.items():
+        for i in range(len(value)):
+          data[key][i] = float(value[i].strip().split()[0])
+      return data
+
+    def total(data):
+      total = []
+      for i in range(len(data.itervalues().next())):
+        sum = 0
+        for key, value in data.items():
+          if key != "Area":
+            sum += value[i]
+        total.append(sum)
+      return total
+
+    fig, plts = plt.subplots(len(components), 1)
+    plt.subplots_adjust(hspace=0.25)
+    fig.set_size_inches(10, 20, dpi=300)
+
+    """ Plot a component dict as a line chart """
+    i = 0
+    for key, value in components.items():
+      for unit, d, in value.items():
+        data = format_values(d)
+        data = total(data)
+        plts[i].plot(range(len(data)), data, label=unit.split(":")[-1])
+      plts[i].set_title(key.split(":")[1]+" Power")
+      plts[i].set_xlabel("Epoch)")
+      plts[i].set_ylabel("Power (W)")
+      plts[i].legend()
+      i+=1
+    plt.savefig(fname)
 
 
   components1 = {}
   proc_totals = get_data(epochs, "Processor")
-  components1["Processor:Core"] = get_data(epochs, "Processor:Core")
+  components1["Processor:Core"] = get_data(epochs, "Processor:Core:Load Store Unit")
   components1["Processor:L2"] = get_data(epochs, "Processor:L2")
   components1["Processor:Memory Controller"] = get_data(epochs, "Processor:Memory Controller")
   components1["Processor:NOC"] = get_data(epochs, "Processor:NOC")
+  plot_components_line(components1, "Processor", "processor.png")
 
-  plot_components_line(components1)
+  componentC = {"Processor:Core:Instruction Fetch Unit": get_data(epochs, "Processor:Core:Instruction Fetch Unit"),
+                "Processor:Core:Renaming Unit": get_data(epochs, "Processor:Core:Renaming Unit"),
+                "Processor:Core:Load Store Unit": get_data(epochs, "Processor:Core:Load Store Unit"),
+                "Processor:Core:Memory Management Unit": get_data(epochs, "Processor:Core:Memory Management Unit"),
+                "Processor:Core:Execution Unit:Register Files": get_data(epochs, "Processor:Core:Execution Unit:Register Files"),
+                "Processor:Core:Execution Unit:Instruction Scheduler": get_data(epochs, "Processor:Core:Execution Unit:Instruction Scheduler"),
+                "Processor:Core:Execution Unit:Integer ALUs (Count": get_data(epochs, "Processor:Core:Execution Unit:Integer ALUs (Count"),
+                "Processor:Core:Execution Unit:Floating Point Units (FPUs) (Count": get_data(epochs, "Processor:Core:Execution Unit:Floating Point Units (FPUs) (Count")}
+  componentMC={"Processor:Memory Controller:Front End Engine": get_data(epochs, "Processor:Memory Controller:Front End Engine"),
+               "Processor:Memory Controller:Transaction Engine": get_data(epochs, "Processor:Memory Controller:Transaction Engine"),
+               "Processor:Memory Controller:PHY": get_data(epochs, "Processor:Memory Controller:PHY")}
+  componentNOC={"Processor:NOC:Router": get_data(epochs, "Processor:NOC:Router"),
+                "Processor:NOC:Router:Virtual Channel Buffer": get_data(epochs, "Processor:NOC:Router:Virtual Channel Buffer"),
+                "Processor:NOC:Router:Crossbar": get_data(epochs, "Processor:NOC:Router:Crossbar"),
+                "Processor:NOC:Router:Arbiter": get_data(epochs, "Processor:NOC:Router:Arbiter"),
+                "Processor:NOC:Per Router Links": get_data(epochs, "Processor:NOC:Per Router Links")}
+  plot_components_line(componentC, "Core", "core.png")
+  plot_components_line(componentMC, "Memory Controller", "mc.png")
+  plot_components_line(componentNOC, "NOC", "noc.png")
 
 #Test Code:
 #run_mcpat("mcpat_arm.xml", "5", "1", "mcpat.out", "mcpat.err")

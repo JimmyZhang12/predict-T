@@ -115,28 +115,28 @@ def m5_to_mcpat(m5_stats_file, m5_config_file, mcpat_template_file, threads):
   mcpat_trees = [None]*len(epochs)
   threads = []
 
-  """ Initialize Input Queue """
-  for i, epoch in zip(range(len(epochs)), epochs):
-    input_queue.put((i, epoch))
+  #""" Initialize Input Queue """
+  #for i, epoch in zip(range(len(epochs)), epochs):
+  #  input_queue.put((i, epoch))
 
-  """ Launch Worker Threads """
-  for i in range(16):
-    thr = Thread(target=mcpat_thread, args=[config, input_queue, output_queue])
-    thr.start()
-    threads.append(thr)
+  #""" Launch Worker Threads """
+  #for i in range(16):
+  #  thr = Thread(target=mcpat_thread, args=[config, input_queue, output_queue])
+  #  thr.start()
+  #  threads.append(thr)
 
-  """ Dequeue from Output Queue """
-  for thr in threads:
-    thr.join()
+  #""" Dequeue from Output Queue """
+  #for thr in threads:
+  #  thr.join()
 
-  while not output_queue.empty():
-    ret = output_queue.get()
-    mcpat_trees[ret[0]] = ret[1]
+  #while not output_queue.empty():
+  #  ret = output_queue.get()
+  #  mcpat_trees[ret[0]] = ret[1]
 
 
-  with open("mcpat_epochs.pickle", "w") as mpe:
-    pickle.dump(mcpat_trees, mpe)
-  with open("mcpat_epochs.pickle", "r") as mpe:
+  #with open("mcpat_epochs.pickle", "w") as mpe:
+  #  pickle.dump(mcpat_trees, mpe)
+  with open("mcpat_epochs_fft_small_100.pickle", "r") as mpe:
     mcpat_trees = pickle.load(mpe)
   plot(mcpat_trees)
 

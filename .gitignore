@@ -140,6 +140,8 @@ dmypy.json
 *.json
 *.pickle
 
+*.png
+
 # Project Dir:
 tests/
 output/
