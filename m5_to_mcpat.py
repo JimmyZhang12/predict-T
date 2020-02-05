@@ -1,6 +1,9 @@
 import os
 import sys
 import re
+import pickle
+
+from mcpat import *
 
 def parse_stats(stat_file):
   epoch = []
@@ -89,13 +92,22 @@ def replace(xml_line, stats, config):
 def m5_to_mcpat(m5_stats_file, m5_config_file, mcpat_template_file, mcpat_input_file):
   epoch = parse_stats(m5_stats_file)
   config = parse_config(m5_config_file)
-  for stats in epoch:
-    with open(mcpat_template_file, "r") as mct, open(mcpat_input_file, "w") as mc:
-      in_xml = mct.readlines()
-      out_xml = []
-      for line in in_xml:
-        out_xml.append(replace(line, stats, config))
-      mc.writelines(out_xml)
+  mcpat_trees = []
+  #for stats in epoch:
+  #  with open(mcpat_template_file, "r") as mct, open(mcpat_input_file, "w") as mc:
+  #    in_xml = mct.readlines()
+  #    out_xml = []
+  #    for line in in_xml:
+  #      out_xml.append(replace(line, stats, config))
+  #    mc.writelines(out_xml)
+  #  run_mcpat(mcpat_input_file, "5", "1", "mcpat.out", "mcpat.err")
+  #  mcpat_trees.append(parse_output("mcpat.out"))
+  #with open("mcpat_epochs.txt", "w") as mpe:
+  #  pickle.dump(mcpat_trees, mpe)
+  with open("mcpat_epochs.txt", "r") as mpe:
+    mcpat_trees = pickle.load(mpe)
+  plot(mcpat_trees)
+
 
   #print_stats(stats)
   #print_config(config)
