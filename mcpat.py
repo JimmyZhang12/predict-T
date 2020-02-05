@@ -211,7 +211,7 @@ def plot(epochs):
           data[key][i] = float(value[i].strip().split()[0])
       return data
 
-    def create_data_frame(data):
+    def total(data):
       total = []
       for i in range(len(data.itervalues().next())):
         sum = 0
@@ -220,7 +220,22 @@ def plot(epochs):
             sum += value[i]
         total.append(sum)
       return total
+
+    fig, plts = plt.subplots(len(components), 1)
+
     """ Plot a component dict as a line chart """
+    i = 0
+    for key, value in components.items():
+      data = format_values(value)
+      data = total(data)
+      plts[i].plot(range(len(data)), data, label=key)
+      plts[i].set_xlabel("Time (ms)")
+      plts[i].set_ylabel("Power (W)")
+      print(data)
+      plts[i].legend()
+      i+=1
+    plt.show()
+
 
   components1 = {}
   proc_totals = get_data(epochs, "Processor")
@@ -229,7 +244,7 @@ def plot(epochs):
   components1["Processor:Memory Controller"] = get_data(epochs, "Processor:Memory Controller")
   components1["Processor:NOC"] = get_data(epochs, "Processor:NOC")
 
-  print(components1)
+  plot_components_line(components1)
 
 #Test Code:
 #run_mcpat("mcpat_arm.xml", "5", "1", "mcpat.out", "mcpat.err")

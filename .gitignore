@@ -137,6 +137,10 @@ dmypy.json
 *.out
 *.xml
 
+*.json
+*.pickle
+
 # Project Dir:
 tests/
 output/
+mcpat_io/
