@@ -4,6 +4,8 @@ import re
 import pickle
 from threading import Thread
 from Queue import Queue
+from time import sleep
+import progressbar
 
 from mcpat import *
 
@@ -91,14 +93,16 @@ def replace(xml_line, stats, config):
 # m5_to_mcpat
 # Takes in the output files from gem5 run (config.ini, stats.txt) and converts to a 
 # McPat input xml file based on a template.
-def m5_to_mcpat(m5_stats_file, m5_config_file, mcpat_template_file, threads):
+def m5_to_mcpat(m5_stats_file, m5_config_file, mcpat_template_file, mcpat_output_path, testname):
+  os.mkdir(mcpat_output_path)
+
   def mcpat_thread(config, iq, oq):
     while not iq.empty():
       work = iq.get()
-      t_f = "mcpat_io/mcpat-template.xml"
-      i_f = "mcpat_io/mp_arm_"+str(work[0])+".xml"
-      o_f = "mcpat_io/mp_"+str(work[0])+".out"
-      e_f = "mcpat_io/mp_"+str(work[0])+".err"
+      t_f = "mcpat-template.xml"
+      i_f = os.path.join(mcpat_output_path,"mp_arm_"+str(work[0])+".xml")
+      o_f = os.path.join(mcpat_output_path,"mp_"+str(work[0])+".out")
+      e_f = os.path.join(mcpat_output_path,"mp_"+str(work[0])+".err")
       with open(t_f, "r") as tf, open(i_f, "w") as inf:
         in_xml = tf.readlines()
         out_xml = []
@@ -115,30 +119,38 @@ def m5_to_mcpat(m5_stats_file, m5_config_file, mcpat_template_file, threads):
   mcpat_trees = [None]*len(epochs)
   threads = []
 
-  #""" Initialize Input Queue """
-  #for i, epoch in zip(range(len(epochs)), epochs):
-  #  input_queue.put((i, epoch))
+  """ Initialize Input Queue """
+  for i, epoch in zip(range(len(epochs)), epochs):
+    input_queue.put((i, epoch))
 
-  #""" Launch Worker Threads """
-  #for i in range(16):
-  #  thr = Thread(target=mcpat_thread, args=[config, input_queue, output_queue])
-  #  thr.start()
-  #  threads.append(thr)
+  """ Launch Worker Threads """
+  for i in range(16):
+    thr = Thread(target=mcpat_thread, args=[config, input_queue, output_queue])
+    thr.start()
+    threads.append(thr)
 
-  #""" Dequeue from Output Queue """
-  #for thr in threads:
-  #  thr.join()
+  bar = progressbar.ProgressBar(maxval=100, widgets=[progressbar.Bar('=', '[', ']'), ' ', progressbar.Percentage()]) #bar.start()
+  while not input_queue.empty():
+    progress = int((len(epochs)-input_queue.qsize())*100/len(epochs))
+    bar.update(progress)
+    sleep(0.1)
+  bar.finish()
 
-  #while not output_queue.empty():
-  #  ret = output_queue.get()
-  #  mcpat_trees[ret[0]] = ret[1]
+  """ Dequeue from Output Queue """
+  for thr in threads:
+    thr.join()
 
+  while not output_queue.empty():
+    ret = output_queue.get()
+    mcpat_trees[ret[0]] = ret[1]
 
-  #with open("mcpat_epochs.pickle", "w") as mpe:
-  #  pickle.dump(mcpat_trees, mpe)
-  with open("mcpat_epochs_fft_small_100.pickle", "r") as mpe:
+  sfile = os.path.join(mcpat_output_path, testname+".pickle")
+
+  with open(sfile, "w") as mpe:
+    pickle.dump(mcpat_trees, mpe)
+  with open(sfile, "r") as mpe:
     mcpat_trees = pickle.load(mpe)
-  plot(mcpat_trees)
+  #plot(mcpat_trees, mcpat_output_path)
 
 
   #print_stats(stats)
@@ -148,4 +160,4 @@ def m5_to_mcpat(m5_stats_file, m5_config_file, mcpat_template_file, threads):
 
 # Test Code:
 #m5_to_mcpat("gem5/output/fft_small_x86/stats.txt", "gem5/output/fft_small_x86/config.ini", "mcpat_template.xml", "mcpat_x86.xml")
-m5_to_mcpat("output/fft_small/stats.txt", "output/fft_small/config.ini", "mcpat-template.xml", "mcpat_arm.xml")
+#m5_to_mcpat("output/fft_small/stats.txt", "output/fft_small/config.ini", "mcpat-template.xml", "mcpat_arm.xml")
