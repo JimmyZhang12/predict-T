@@ -94,7 +94,8 @@ def replace(xml_line, stats, config):
 # Takes in the output files from gem5 run (config.ini, stats.txt) and converts to a 
 # McPat input xml file based on a template.
 def m5_to_mcpat(m5_stats_file, m5_config_file, mcpat_template_file, mcpat_output_path, testname):
-  os.mkdir(mcpat_output_path)
+  if not os.path.isdir(mcpat_output_path):
+    os.mkdir(mcpat_output_path)
 
   def mcpat_thread(config, iq, oq):
     while not iq.empty():
@@ -150,7 +151,7 @@ def m5_to_mcpat(m5_stats_file, m5_config_file, mcpat_template_file, mcpat_output
     pickle.dump(mcpat_trees, mpe)
   with open(sfile, "r") as mpe:
     mcpat_trees = pickle.load(mpe)
-  #plot(mcpat_trees, mcpat_output_path)
+  plot(mcpat_trees, testname, mcpat_output_path)
 
 
   #print_stats(stats)

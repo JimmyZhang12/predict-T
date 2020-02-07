@@ -190,11 +190,11 @@ def run_mcpat(xml, print_level, opt_for_clk, ofile, errfile):
     "-opt_for_clk",
     opt_for_clk]
   #print(" ".join(mcpat))
-  #with open(ofile, "w") as ostd, open(errfile, "w") as oerr:
-  #  p = subprocess.Popen(mcpat, stdout=ostd, stderr=oerr)
-  #  p.wait()
+  with open(ofile, "w") as ostd, open(errfile, "w") as oerr:
+    p = subprocess.Popen(mcpat, stdout=ostd, stderr=oerr)
+    p.wait()
 
-def plot(epochs, path):
+def plot(epochs, testname, path):
   def get_data(epochs, path):
     data = defaultdict(list)
     for epoch in epochs:
@@ -286,7 +286,7 @@ def plot(epochs, path):
   components1["Processor:L2"] = get_data(epochs, "Processor:L2")
   components1["Processor:Memory Controller"] = get_data(epochs, "Processor:Memory Controller")
   components1["Processor:NOC"] = get_data(epochs, "Processor:NOC")
-  plot_components_line(components1, "Processor", os.path.join(path, "processor.png"))
+  plot_components_line(components1, "Processor", os.path.join(path, testname+"_processor.png"))
 
   componentC = {"Processor:Core:Instruction Fetch Unit": get_data(epochs, "Processor:Core:Instruction Fetch Unit"),
                 "Processor:Core:Renaming Unit": get_data(epochs, "Processor:Core:Renaming Unit"),
@@ -304,9 +304,9 @@ def plot(epochs, path):
                 "Processor:NOC:Router:Crossbar": get_data(epochs, "Processor:NOC:Router:Crossbar"),
                 "Processor:NOC:Router:Arbiter": get_data(epochs, "Processor:NOC:Router:Arbiter"),
                 "Processor:NOC:Per Router Links": get_data(epochs, "Processor:NOC:Per Router Links")}
-  plot_components_line(componentC, "Core", os.path.join(path,"core.png"))
-  plot_components_line(componentMC, "Memory Controller", os.path.join(path,"mc.png"))
-  plot_components_line(componentNOC, "NOC", os.path.join(path,"noc.png"))
+  plot_components_line(componentC, "Core", os.path.join(path,testname+"_core.png"))
+  plot_components_line(componentMC, "Memory Controller", os.path.join(path, testname+"_mc.png"))
+  plot_components_line(componentNOC, "NOC", os.path.join(path,testname+"_noc.png"))
 
 #Test Code:
 #run_mcpat("mcpat_arm.xml", "5", "1", "mcpat.out", "mcpat.err")
