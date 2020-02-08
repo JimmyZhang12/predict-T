@@ -216,7 +216,7 @@ def plot(epochs, testname, path):
       for i in range(len(data.itervalues().next())):
         sum = 0
         for key, value in data.items():
-          if key != "Area":
+          if key == "Runtime Dynamic" or key == "Gate Leakage" or key == "Subthreshold Leakage with power gating":
             sum += value[i]
         total.append(sum)
       return total
@@ -256,7 +256,7 @@ def plot(epochs, testname, path):
       for i in range(len(data.itervalues().next())):
         sum = 0
         for key, value in data.items():
-          if key != "Area":
+          if key == "Runtime Dynamic" or key == "Gate Leakage" or key == "Subthreshold Leakage with power gating":
             sum += value[i]
         total.append(sum)
       return total
