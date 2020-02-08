@@ -15,7 +15,7 @@ prod.o: main.c
 	$(CC) -c $< $(CFLAGS) -DPRODUCER -o $@
 
 cons.o: main.c
-	$(CC) -c $< $(CFLAGS) -DPRODUCER -o $@
+	$(CC) -c $< $(CFLAGS) -o $@
 
 clean:
 	rm -f *.o producer consumer

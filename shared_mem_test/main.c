@@ -48,13 +48,24 @@ int main(int argc, char** argv) {
   shm_ptr->done = 0;
   shm_ptr->str[0] = 0;
 
+  uint8_t was_consumed = 0;
   for(int i = 0; i < 20; i++) {
-    sleep(1);
-    pthread_mutex_lock(&shm_ptr->mutex);
-    snprintf(shm_ptr->str, STR_LENGTH, "%s %d\n", "Hello", i);
-    shm_ptr->new_data = 1;
-    pthread_mutex_unlock(&shm_ptr->mutex);
+    was_consumed = 0;
+    while(was_consumed == 0) { 
+      sleep(1);
+      pthread_mutex_lock(&shm_ptr->mutex);
+      if(shm_ptr->new_data == 0) {
+        was_consumed = 1;
+        snprintf(shm_ptr->str, STR_LENGTH, "%s %d\n", "Hello", i);
+        shm_ptr->new_data = 1;
+        if(i == 20-1) {
+          shm_ptr->done = 1;
+        }
+      }
+      pthread_mutex_unlock(&shm_ptr->mutex);
+    }
   }
+
   munmap(shm_ptr, SHM_LENGTH);
   shm_unlink(SHM_NAME);
   return 0;
@@ -75,6 +86,7 @@ int main(int argc, char** argv) {
 
   int done = 0;
   while(done == 0) {
+    sleep(1);
     pthread_mutex_lock(&shm_ptr->mutex);
     if(shm_ptr->new_data == 1) {
       printf("%s", shm_ptr->str);
