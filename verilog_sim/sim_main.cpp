@@ -4,6 +4,9 @@
 // without warranty, 2017 by Wilson Snyder.
 //======================================================================
 
+// Include Shared Memory Struct for InterProcess Communication:
+//#include "interprocess.h"
+
 // Include common routines
 #include <verilated.h>
 
@@ -27,6 +30,8 @@ int main(int argc, char** argv, char** env) {
 
     // Prevent unused variable warnings
     if (0 && argc && argv && env) {}
+
+    // Wait for shared mem to be initialized by the producer process:
 
     // Set debug level, 0 is off, 9 is highest presently used
     // May be overridden by commandArgs
@@ -61,8 +66,8 @@ int main(int argc, char** argv, char** env) {
     // Set some inputs
     top->clk = 0;
     top->rst = 0;
-    top->a = 100;
-    top->b = 55;
+    top->a = 0x70000000;
+    top->b = 0xFFFFFFFF;
     top->start = 0;
     top->cnt = 0;
 
@@ -71,12 +76,12 @@ int main(int argc, char** argv, char** env) {
     // Simulate until $finish
     while (!Verilated::gotFinish()) {
         main_time++;  // Time passes...
-        if ((main_time % 10) == 3) {
+        if ((main_time % 2)) {
             top->clk = 1;
             clk_cnt++;
         }
-        if ((main_time % 10) == 8) {
-            top->clk = 0;
+        else {
+          top->clk = 0;
         }
         if (clk_cnt == 1) {
           top->rst = 1;
@@ -101,7 +106,7 @@ int main(int argc, char** argv, char** env) {
 #endif
 
         // Read outputs
-        //VL_PRINTF("[%" VL_PRI64 "d] clk=%u\n", main_time, top->cnt);
+        VL_PRINTF("[%" VL_PRI64 "d] clk=%u, res=%u\n", main_time, top->cnt, top->res);
     }
 
     // Final model cleanup

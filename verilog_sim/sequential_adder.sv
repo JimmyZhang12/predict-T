@@ -167,7 +167,7 @@ always_comb begin : next_state_logic
     complete : begin
       next_state = idle;
     end
-    default : /* Do Nothing */;
+    default : next_state = idle;
   endcase
 end : next_state_logic
 
