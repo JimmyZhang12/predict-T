@@ -10,21 +10,36 @@
 module top (
   // Declare some signals so we can see how I/O works
   input         clk,
-  input logic[31:0] mul_a,
-  input logic[31:0] mul_b,
-  output logic[31:0] mul_res,
-  output logic[31:0] add_res
+  input         rst,
+  input logic [31:0] a,
+  input logic [31:0] b,
+  input logic start,
+  output logic [31:0] res,
+  output logic ready,
+  output logic overflow
 );
-  import "DPI-C" context function void hello_world(input int a);
+  import "DPI-C" context function void hello_world(input int id);
   export "DPI-C" function hello_world_v;
 
-  function void hello_world_v (int a);
-    $display("Hello World from Verilog %d", a);
+  function void hello_world_v (int id);
+    $display("Hello World from Verilog %d", id);
   endfunction
 
-  function void call_hello (int a);
-    hello_world(a);
+  function void call_hello (int id);
+    hello_world(id);
   endfunction
+
+  sequential_adder sa
+  (
+    .clk(clk),
+    .rst(rst),
+    .a(a),
+    .b(b),
+    .start(start),
+    .ready(ready),
+    .overflow(overflow),
+    .res(res)
+  );
 
   // Print some stuff as an example
   initial begin
