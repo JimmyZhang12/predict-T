@@ -60,16 +60,37 @@ int main(int argc, char** argv, char** env) {
 
     // Set some inputs
     top->clk = 0;
+    top->rst = 0;
+    top->a = 100;
+    top->b = 55;
+    top->start = 0;
+    top->cnt = 0;
+
+    uint64_t clk_cnt = 0;
 
     // Simulate until $finish
     while (!Verilated::gotFinish()) {
         main_time++;  // Time passes...
         if ((main_time % 10) == 3) {
             top->clk = 1;
+            clk_cnt++;
         }
         if ((main_time % 10) == 8) {
             top->clk = 0;
         }
+        if (clk_cnt == 1) {
+          top->rst = 1;
+        }
+        else {
+          top->rst = 0;
+        }
+        if (clk_cnt == 4) {
+          top->start = 1;
+        }
+        else {
+          top->start = 0;
+        }
+        top->cnt = clk_cnt;
 
         // Evaluate model
         top->eval();
@@ -80,7 +101,7 @@ int main(int argc, char** argv, char** env) {
 #endif
 
         // Read outputs
-        VL_PRINTF("[%" VL_PRI64 "d] clk=%x\n", main_time, top->clk);
+        //VL_PRINTF("[%" VL_PRI64 "d] clk=%u\n", main_time, top->cnt);
     }
 
     // Final model cleanup

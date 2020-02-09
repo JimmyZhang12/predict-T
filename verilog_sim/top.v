@@ -10,6 +10,7 @@
 module top (
   // Declare some signals so we can see how I/O works
   input         clk,
+  input logic [63:0] cnt,
   input         rst,
   input logic [31:0] a,
   input logic [31:0] b,
@@ -45,8 +46,13 @@ module top (
   initial begin
     $display("Running Call Hello\n");
     call_hello(10);
-    $write("*-* All Finished *-*\n");
-    $finish;
+  end
+
+  always_ff @(posedge clk) begin
+    if(cnt == 20) begin
+      $write("*-* All Finished *-*\n");
+      $finish;
+    end
   end
 
 endmodule

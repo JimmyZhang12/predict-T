@@ -120,35 +120,35 @@ def m5_to_mcpat(m5_stats_file, m5_config_file, mcpat_template_file, mcpat_output
   mcpat_trees = [None]*len(epochs)
   threads = []
 
-  """ Initialize Input Queue """
-  for i, epoch in zip(range(len(epochs)), epochs):
-    input_queue.put((i, epoch))
+  #""" Initialize Input Queue """
+  #for i, epoch in zip(range(len(epochs)), epochs):
+  #  input_queue.put((i, epoch))
 
-  """ Launch Worker Threads """
-  for i in range(16):
-    thr = Thread(target=mcpat_thread, args=[config, input_queue, output_queue])
-    thr.start()
-    threads.append(thr)
+  #""" Launch Worker Threads """
+  #for i in range(16):
+  #  thr = Thread(target=mcpat_thread, args=[config, input_queue, output_queue])
+  #  thr.start()
+  #  threads.append(thr)
 
-  bar = progressbar.ProgressBar(maxval=100, widgets=[progressbar.Bar('=', '[', ']'), ' ', progressbar.Percentage()]) #bar.start()
-  while not input_queue.empty():
-    progress = int((len(epochs)-input_queue.qsize())*100/len(epochs))
-    bar.update(progress)
-    sleep(0.1)
-  bar.finish()
+  #bar = progressbar.ProgressBar(maxval=100, widgets=[progressbar.Bar('=', '[', ']'), ' ', progressbar.Percentage()]) #bar.start()
+  #while not input_queue.empty():
+  #  progress = int((len(epochs)-input_queue.qsize())*100/len(epochs))
+  #  bar.update(progress)
+  #  sleep(0.1)
+  #bar.finish()
 
-  """ Dequeue from Output Queue """
-  for thr in threads:
-    thr.join()
+  #""" Dequeue from Output Queue """
+  #for thr in threads:
+  #  thr.join()
 
-  while not output_queue.empty():
-    ret = output_queue.get()
-    mcpat_trees[ret[0]] = ret[1]
+  #while not output_queue.empty():
+  #  ret = output_queue.get()
+  #  mcpat_trees[ret[0]] = ret[1]
 
   sfile = os.path.join(mcpat_output_path, testname+".pickle")
 
-  with open(sfile, "w") as mpe:
-    pickle.dump(mcpat_trees, mpe)
+  #with open(sfile, "w") as mpe:
+  #  pickle.dump(mcpat_trees, mpe)
   with open(sfile, "r") as mpe:
     mcpat_trees = pickle.load(mpe)
   plot(mcpat_trees, testname, mcpat_output_path)

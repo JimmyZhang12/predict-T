@@ -52,7 +52,7 @@ int main(int argc, char** argv) {
   for(int i = 0; i < 20; i++) {
     was_consumed = 0;
     while(was_consumed == 0) { 
-      sleep(1);
+      usleep(100);
       pthread_mutex_lock(&shm_ptr->mutex);
       if(shm_ptr->new_data == 0) {
         was_consumed = 1;
@@ -86,7 +86,7 @@ int main(int argc, char** argv) {
 
   int done = 0;
   while(done == 0) {
-    sleep(1);
+    usleep(100);
     pthread_mutex_lock(&shm_ptr->mutex);
     if(shm_ptr->new_data == 1) {
       printf("%s", shm_ptr->str);
