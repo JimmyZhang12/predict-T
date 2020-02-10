@@ -47,13 +47,15 @@ VERILATOR_FLAGS += --trace
 VERILATOR_FLAGS += --assert
 # Generate coverage analysis
 VERILATOR_FLAGS += --coverage
+# Linker Flags:
+VERILATOR_FLAGS += -LDFLAGS "-lrt -lpthread"
 # Run Verilator in debug mode
 #VERILATOR_FLAGS += --debug
 # Add this trace to get a backtrace in gdb
-#VERILATOR_FLAGS += --gdbbt
+VERILATOR_FLAGS += -CFLAGS "-g -O0" --gdbbt
 
 # Input files for Verilator
-VERILATOR_INPUT = -f input.vc top.v sim_main.cpp hello.c
+VERILATOR_INPUT = -f input.vc top.v sim_main.cpp hello.c interprocess.c
 
 ######################################################################
 default: run

@@ -227,15 +227,16 @@ always_comb begin : control_logic
 end : control_logic
 
 assign overflow = reg_c_out; 
-
+/* verilator lint_off BLKSEQ */
 always @ (posedge clk) begin
   if(rst == 1'b1) begin
-    state <= idle;
+    state = idle;
   end
   else begin
-    state <= next_state;
+    state = next_state;
   end
 end
+/* verilator lint_on BLKSEQ */
 
 endmodule;
 

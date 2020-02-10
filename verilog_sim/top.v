@@ -15,6 +15,7 @@ module top (
   input logic [31:0] a,
   input logic [31:0] b,
   input logic start,
+  input logic sim_over,
   output logic [31:0] res,
   output logic ready,
   output logic overflow
@@ -49,7 +50,7 @@ module top (
   end
 
   always_ff @(posedge clk) begin
-    if(cnt == 20) begin
+    if(sim_over == 1) begin
       $write("*-* All Finished *-*\n");
       $finish;
     end

@@ -5,7 +5,9 @@
 //======================================================================
 
 // Include Shared Memory Struct for InterProcess Communication:
-//#include "interprocess.h"
+#include <signal.h>
+#include "interprocess.h"
+mapped* shm_p = NULL;
 
 // Include common routines
 #include <verilated.h>
@@ -31,7 +33,9 @@ int main(int argc, char** argv, char** env) {
     // Prevent unused variable warnings
     if (0 && argc && argv && env) {}
 
-    // Wait for shared mem to be initialized by the producer process:
+    // Init shared mem, note this process must be started after
+    // the driver process.
+    mapped* shm_p = create_shm(NINIT);  
 
     // Set debug level, 0 is off, 9 is highest presently used
     // May be overridden by commandArgs
@@ -66,47 +70,78 @@ int main(int argc, char** argv, char** env) {
     // Set some inputs
     top->clk = 0;
     top->rst = 0;
-    top->a = 0x70000000;
-    top->b = 0xFFFFFFFF;
+    top->a = 0;
+    top->b = 0;
     top->start = 0;
     top->cnt = 0;
+    top->sim_over = 0;
+
+    v_incoming_signals new_signals;
+    new_signals.start = 0;
+    new_signals.rst = 0;
+    new_signals.a = 0;
+    new_signals.b = 0;
+    new_signals.next_clk_cnt = 0;
+    new_signals.sim_over = 0;
 
     uint64_t clk_cnt = 0;
+    
+    bool ready = false;
+    uint64_t next_clk_cnt = 0;
+    uint64_t new_next_clk_cnt = 0;
 
     // Simulate until $finish
     while (!Verilated::gotFinish()) {
-        main_time++;  // Time passes...
-        if ((main_time % 2)) {
-            top->clk = 1;
-            clk_cnt++;
+      if(new_signals.next_clk_cnt == clk_cnt) {
+        printf("%d %d\n", next_clk_cnt, clk_cnt);
+        // Wait Until New Data:
+        ready = false;
+        // Set the Top Level signals:
+        next_clk_cnt = new_signals.next_clk_cnt;
+        top->rst = new_signals.rst;
+        top->a = new_signals.a;
+        top->b = new_signals.b;
+        top->start = new_signals.start;
+        top->sim_over = new_signals.sim_over;
+        if(top->sim_over != 1) {
+          do {
+            usleep(10);
+            pthread_mutex_lock(&shm_p->pv.mutex);
+            if(shm_p->pv.new_data == NEW_DATA) {
+              ready = true;
+              new_signals.next_clk_cnt = shm_p->pv.data.next_clk_cnt;
+              new_signals.rst = shm_p->pv.data.rst;
+              new_signals.a = shm_p->pv.data.a;
+              new_signals.b = shm_p->pv.data.b;
+              new_signals.start = shm_p->pv.data.start;
+              new_signals.sim_over = shm_p->pv.data.sim_over;
+              shm_p->pv.new_data = NO_NEW_DATA;
+            }
+            pthread_mutex_unlock(&shm_p->pv.mutex);
+          } while (!ready);
         }
-        else {
-          top->clk = 0;
-        }
-        if (clk_cnt == 1) {
-          top->rst = 1;
-        }
-        else {
-          top->rst = 0;
-        }
-        if (clk_cnt == 4) {
-          top->start = 1;
-        }
-        else {
-          top->start = 0;
-        }
-        top->cnt = clk_cnt;
+      }
+      main_time++;  // Time passes...
+      // Clk Driver:
+      if ((main_time % 2)) {
+        top->clk = 1;
+      }
+      else {
+        top->clk = 0;
+        clk_cnt++;
+      }
+      top->cnt = clk_cnt;
 
-        // Evaluate model
-        top->eval();
+      // Evaluate model
+      top->eval();
 
 #if VM_TRACE
-        // Dump trace data for this cycle
-        if (tfp) tfp->dump(main_time);
+      // Dump trace data for this cycle
+      if (tfp) tfp->dump(main_time);
 #endif
 
-        // Read outputs
-        VL_PRINTF("[%" VL_PRI64 "d] clk=%u, res=%u\n", main_time, top->cnt, top->res);
+      // Read outputs
+      VL_PRINTF("[%" VL_PRI64 "d] clk=%u, res=%u\n", main_time, top->cnt, top->res);
     }
 
     // Final model cleanup
@@ -125,6 +160,9 @@ int main(int argc, char** argv, char** env) {
 
     // Destroy model
     delete top; top = NULL;
+
+    // destry shared mem:
+    destroy_shm(shm_p);   
 
     // Fin
     exit(0);

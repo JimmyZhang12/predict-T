@@ -61,16 +61,12 @@ typedef struct {
 // Returns:
 //   ptr to shared mem struct on success
 //   NULL on failure
-mapped* shm_create(int process);
+mapped* create_shm(int process);
 
 // shm_destroy
-//   Creates, mmaps and initializes data/mutexes in shared mem region if INIT.
-//   Opens shm and mmaps if !INIT
+//   Unmaps and Unlinks shared memory region
 // Input:
 //   ptr to shared mem region
-// Returns:
-//   1 on success
-//   0 on error
-int shm_destroy(int process, mapped* shm_ptr);
+void destroy_shm(mapped* shm_ptr);
 
 #endif

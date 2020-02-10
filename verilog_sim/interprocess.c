@@ -4,8 +4,8 @@ int shm_fd = 0;
 
 // shm_init
 //   helper to initialize data/mutexes in mapped struct
-void shm_init(mapped* p) {
-	pthread_mutex_init(&p->pv.mutex);
+void init_shm(mapped* p) {
+	pthread_mutex_init(&p->pv.mutex, NULL);
 	p->pv.new_data = NO_NEW_DATA;
 	p->pv.data.next_clk_cnt = 0;
 	p->pv.data.a = 0;
@@ -14,7 +14,7 @@ void shm_init(mapped* p) {
 	p->pv.data.start = 0;
   p->pv.data.sim_over = 0;
   
-	pthread_mutex_init(&p->vp.mutex);
+	pthread_mutex_init(&p->vp.mutex, NULL);
 	p->vp.new_data = NO_NEW_DATA;
 	p->vp.data.clk_cnt = 0;
 	p->vp.data.res = 0;
@@ -28,7 +28,7 @@ void shm_init(mapped* p) {
 // Returns:
 //   ptr to shared mem struct on success
 //   NULL on failure
-mapped* shm_create(int should_init) {
+mapped* create_shm(int should_init) {
 	mapped* shm_ptr = NULL;
   if(should_init == INIT) {
 		shm_fd = shm_open(SHM_NAME, O_CREAT | O_RDWR, 0666);
@@ -44,7 +44,7 @@ mapped* shm_create(int should_init) {
 			exit(-1);
 		}
 		// Initialize Data:
-		shm_init(shm_ptr);
+		init_shm(shm_ptr);
   }
   else {
 		shm_fd = shm_open(SHM_NAME, O_RDWR, 0666);
@@ -63,18 +63,10 @@ mapped* shm_create(int should_init) {
 }
 
 // shm_destroy
-//   Creates, mmaps and initializes data/mutexes in shared mem region if INIT.
-//   Opens shm and mmaps if !INIT
+//   Unmaps and Unlinks shared memory region
 // Input:
 //   ptr to shared mem region
-// Returns:
-//   1 on success
-//   0 on error
-int shm_destroy(int process, mapped* shm_ptr) {
-	if(should_init == INIT) {
-		
-	}
-	else {
-
-  }
+void destroy_shm(mapped* shm_ptr) {
+  munmap(shm_ptr, SHM_LENGTH);
+  shm_unlink(SHM_NAME);
 }
