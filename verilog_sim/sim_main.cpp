@@ -105,8 +105,7 @@ int main(int argc, char** argv, char** env) {
         top->sim_over = new_signals.sim_over;
         if(top->sim_over != 1) {
           do {
-            usleep(10);
-            pthread_mutex_lock(&shm_p->pv.mutex);
+            sem_wait(&shm_p->pv.sem);
             if(shm_p->pv.new_data == NEW_DATA) {
               ready = true;
               new_signals.next_clk_cnt = shm_p->pv.data.next_clk_cnt;
@@ -117,7 +116,7 @@ int main(int argc, char** argv, char** env) {
               new_signals.sim_over = shm_p->pv.data.sim_over;
               shm_p->pv.new_data = NO_NEW_DATA;
             }
-            pthread_mutex_unlock(&shm_p->pv.mutex);
+            sem_post(&shm_p->pv.sem);
           } while (!ready);
         }
       }

@@ -33,8 +33,7 @@ int main(int argc, char** argv) {
   for(int i = 0; i < NUM_SIGNALS; i++) {
     sent = 0;
     while(sent == 0) {
-      usleep(10);
-      pthread_mutex_lock(&p->pv.mutex);
+      sem_wait(&p->pv.sem);
       if(p->pv.new_data == NO_NEW_DATA) {
         // We can send new data to the Verilog Sim:
         p->pv.new_data = NEW_DATA;
@@ -46,7 +45,7 @@ int main(int argc, char** argv) {
         p->pv.data.next_clk_cnt = nxt_times[i];
         p->pv.data.sim_over = sim_over[i];
       }
-      pthread_mutex_unlock(&p->pv.mutex);
+      sem_post(&p->pv.sem);
     }
     printf("Sent signal packet %d\n",i);
   }

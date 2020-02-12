@@ -5,7 +5,7 @@ int shm_fd = 0;
 // shm_init
 //   helper to initialize data/mutexes in mapped struct
 void init_shm(mapped* p) {
-	pthread_mutex_init(&p->pv.mutex, NULL);
+	sem_init(&p->pv.sem, 1, 1);
 	p->pv.new_data = NO_NEW_DATA;
 	p->pv.data.next_clk_cnt = 0;
 	p->pv.data.a = 0;
@@ -14,7 +14,7 @@ void init_shm(mapped* p) {
 	p->pv.data.start = 0;
   p->pv.data.sim_over = 0;
   
-	pthread_mutex_init(&p->vp.mutex, NULL);
+	sem_init(&p->vp.sem, 1, 1);
 	p->vp.new_data = NO_NEW_DATA;
 	p->vp.data.clk_cnt = 0;
 	p->vp.data.res = 0;

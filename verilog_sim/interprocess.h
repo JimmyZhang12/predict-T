@@ -10,7 +10,7 @@
 #include <sys/shm.h> 
 #include <sys/stat.h>
 #include <unistd.h>
-#include <pthread.h>
+#include <semaphore.h>
 
 #define NEW_DATA    1
 #define NO_NEW_DATA 0    // Also doubles as the data was already consumed
@@ -37,13 +37,13 @@ typedef struct {
 } p_incoming_signals;
 
 typedef struct {
-  pthread_mutex_t mutex;
+  sem_t sem;
   uint8_t new_data;
   v_incoming_signals data;
 } p_to_v;
 
 typedef struct {
-  pthread_mutex_t mutex;
+  sem_t sem;
   uint8_t new_data;
   p_incoming_signals data;
 } v_to_p;
