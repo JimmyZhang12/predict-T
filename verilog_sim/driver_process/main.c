@@ -30,6 +30,7 @@ int main(int argc, char** argv) {
   sigaction(SIGINT, &sa, NULL);
 
   int sent = 0;
+  int done = 0;
   for(int i = 0; i < NUM_SIGNALS; i++) {
     sent = 0;
     while(sent == 0) {
@@ -46,10 +47,27 @@ int main(int argc, char** argv) {
         p->pv.data.sim_over = sim_over[i];
       }
       sem_post(&p->pv.sem);
+      sem_wait(&p->vp.sem);
+      if(p->vp.new_data == NEW_DATA) {
+        printf("Recieved: %u %u %u %u\n", p->vp.data.clk_cnt, p->vp.data.ready, p->vp.data.res, p->vp.data.overflow);
+        p->vp.new_data = NO_NEW_DATA;
+      }
+      sem_post(&p->vp.sem);
     }
     printf("Sent signal packet %d\n",i);
   }
-
+  // wait for the simulation to drain of events
+  while(done == 0) {
+    sem_wait(&p->vp.sem);
+    if(p->vp.new_data == NEW_DATA) {
+      printf("Recieved: %u %u %u %u\n", p->vp.data.clk_cnt, p->vp.data.ready, p->vp.data.res, p->vp.data.overflow);
+      if(p->vp.data.sim_done) {
+        done = 1;
+      }
+      p->vp.new_data = NO_NEW_DATA;
+    }
+    sem_post(&p->vp.sem);
+  }
   destroy_shm(p);
   return 0;
 }

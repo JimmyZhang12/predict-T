@@ -85,6 +85,7 @@ int main(int argc, char** argv, char** env) {
     new_signals.sim_over = 0;
 
     uint64_t clk_cnt = 0;
+    int tr_old = 0;
     
     bool ready = false;
     uint64_t next_clk_cnt = 0;
@@ -92,6 +93,7 @@ int main(int argc, char** argv, char** env) {
 
     // Simulate until $finish
     while (!Verilated::gotFinish()) {
+      // Recieve from driver.
       if(new_signals.next_clk_cnt == clk_cnt) {
         printf("%d %d\n", next_clk_cnt, clk_cnt);
         // Wait Until New Data:
@@ -120,6 +122,26 @@ int main(int argc, char** argv, char** env) {
           } while (!ready);
         }
       }
+      // send to driver.
+      if(top->ready == 1 && tr_old == 0) {
+        // Wait Until New Data:
+        ready = false;
+        // Set the Top Level signals:
+        do {
+          sem_wait(&shm_p->vp.sem);
+          if(shm_p->vp.new_data == NO_NEW_DATA) {
+            ready = true;
+            shm_p->vp.data.clk_cnt = top->cnt;
+            shm_p->vp.data.ready = top->ready;
+            shm_p->vp.data.res = top->res;
+            shm_p->vp.data.overflow = top->overflow;
+            shm_p->vp.data.sim_done = 0;
+            shm_p->vp.new_data = NEW_DATA;
+          }
+          sem_post(&shm_p->vp.sem);
+        } while (!ready);
+      }
+      tr_old = top->ready;
       main_time++;  // Time passes...
       // Clk Driver:
       if ((main_time % 2)) {
@@ -142,6 +164,23 @@ int main(int argc, char** argv, char** env) {
       // Read outputs
       VL_PRINTF("[%" VL_PRI64 "d] clk=%u, res=%u\n", main_time, top->cnt, top->res);
     }
+
+    // Tell driver we are done
+    ready = false;
+    // Set the Top Level signals:
+    do {
+      sem_wait(&shm_p->vp.sem);
+      if(shm_p->vp.new_data == NO_NEW_DATA) {
+        ready = true;
+        shm_p->vp.data.clk_cnt = top->cnt;
+        shm_p->vp.data.ready = top->ready;
+        shm_p->vp.data.res = top->res;
+        shm_p->vp.data.overflow = top->overflow;
+        shm_p->vp.data.sim_done = 1;
+        shm_p->vp.new_data = NEW_DATA;
+      }
+      sem_post(&shm_p->vp.sem);
+    } while(!ready);
 
     // Final model cleanup
     top->final();

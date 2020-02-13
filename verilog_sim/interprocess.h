@@ -34,6 +34,7 @@ typedef struct {
   uint32_t res;          // Result of A+B
   uint32_t overflow;     // Overflow?
   uint32_t ready;        // Result Ready
+  uint32_t sim_done;     // Terminate Simulation
 } p_incoming_signals;
 
 typedef struct {

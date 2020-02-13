@@ -20,6 +20,7 @@ void init_shm(mapped* p) {
 	p->vp.data.res = 0;
 	p->vp.data.overflow = 0;
 	p->vp.data.ready = 0;
+	p->vp.data.sim_done = 0;
 }
 
 // shm_create
