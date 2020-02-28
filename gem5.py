@@ -17,13 +17,17 @@ def get_stats_file(gem5_out):
 def get_config_file(gem5_out):
   return os.path.join(gem5_out, "config.ini")
 
-def run_gem5(cmd, opts, outname, outdir, num_cpus, cpu_type, l1i_size, l1d_size, l2_size):
+def run_gem5(cmd, opts, outname, outdir, num_cpus, cpu_type, l1i_size, l1d_size, l2_size, mcpat_template, mcpat_path, mcpat_out, mcpat_testname):
   global gem5_path
   global gem5_exe
   global gem5_cfg
   global gem5_out
   gem5 = [gem5_exe,
     "--outdir="+os.path.join(".", outdir),
+    "--mcpat_template="+mcpat_template,
+    "--mcpat_path="+mcpat_path,
+    "--mcpat_out="+mcpat_out,
+    "--mcpat_testname="+mcpat_testname,
     gem5_cfg,
     "--cmd="+os.path.join(test_path, cmd),
     "--options="+opts,

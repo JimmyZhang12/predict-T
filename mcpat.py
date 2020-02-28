@@ -179,6 +179,16 @@ def parse_output(output_file):
     epoch = Epoch(dev_list)
     return epoch
 
+def print_to_csv(epochs, fname):
+  with open(fname, "w") as ocsv:
+    for epoch in epochs:
+      # Get the data for the processor (Root of tree):
+      data_line = []
+      for key, value in epoch.find("Processor").data.items():
+        data_line.append(value)
+      ocsv.write(",".join(data_line)+"\n")
+
+
 def run_mcpat(xml, print_level, opt_for_clk, ofile, errfile):
   global mcpat_path
   global mcpat_exe
