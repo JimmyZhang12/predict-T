@@ -22,6 +22,7 @@ endmodule
 module DAC6_TB;
   electrical Aout,Vdd,Vss; // analog pins
   real Vsup,Vgnd,Tr; // control variables to drive analog supplies
+	reg[31:0] v_setpoint, effective_load_resistance;
   reg [5:0] Din; // digital input bus
   DAC6 DUT(Din,Aout, Vdd,Vss); // instanciate the digital to analog converter
   analog begin // analog drive description:
@@ -29,20 +30,35 @@ module DAC6_TB;
     V(Vss) <+ transition(Vgnd,0,Tr); // using the control variables
   end
   initial begin // This is the sequential test procedure
+    $create_shm(1);
+    $wait_driver_data;
+		v_setpoint =  $get_voltage_setpoint();
+		effective_load_resistance = $get_effective_resistance();
+    $display("%d, %d",  v_setpoint, effective_load_resistance);
+    $ack_driver_data;
+    $wait_driver_data;
+		v_setpoint =  $get_voltage_setpoint();
+		effective_load_resistance = $get_effective_resistance();
+    $display("%d, %d",  v_setpoint, effective_load_resistance);
+    $ack_driver_data;
+    $wait_driver_data;
+		v_setpoint =  $get_voltage_setpoint();
+		effective_load_resistance = $get_effective_resistance();
+    $display("%d, %d",  v_setpoint, effective_load_resistance);
+    $ack_driver_data;
+    $wait_driver_data;
+		v_setpoint =  $get_voltage_setpoint();
+		effective_load_resistance = $get_effective_resistance();
+    $display("%d, %d",  v_setpoint, effective_load_resistance);
+    $ack_driver_data;
+    $destroy_shm;
+    $finish;
     Din=0; // Initialize digital input bus to zero
     Vsup=3; Vgnd=0; // Initial 3 volt supply and ground voltage
     Tr=200n; // risetime for supply changes
     repeat(63) #50 Din=Din+1; // step Din thru all codes, incrementing every 50 ns
     #100 Din=8'b100000; // step to half scale input
     #100 Vsup=2.4; // Check that output follows supply midpoint
-    #100 $hello;
-    #101 $hello;
-    #102 $hello;
-    #103 $hello;
-    #104 $hello;
-    #105 $hello;
-    #106 $hello;
-    #107 $hello;
     #300 Vsup=3.0;
     #300 Vgnd=0.4; // Check that it follows negative reference too
     #300 Vgnd=0;
