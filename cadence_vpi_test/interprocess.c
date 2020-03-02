@@ -32,7 +32,21 @@ void init_shm(mapped* p) {
 //   ptr to shared mem struct on success
 //   NULL on failure
 void create_shm(int should_init) {
-	mapped* shm_ptr = NULL;
+#ifdef WITH_VPI
+  vpiHandle systfref, argsiter, argh;
+  struct t_vpi_value value;
+  systfref = vpi_handle(vpiSysTfCall, NULL); /* get system function that invoked C routine */
+  argsiter = vpi_iterate(vpiArgument, systfref);/* get iterator (list) of passed arguments */
+  argh = vpi_scan(argsiter);/* get the one argument - add loop for more args */
+	if(!argh){
+    vpi_printf("$VPI missing parameter.\n");
+    return 0;
+  }
+  value.format = vpiIntVal;
+  vpi_get_value(argh, &value);
+  should_init = value.value.integer;
+  vpi_free_object(argsiter);
+#endif
   if(should_init == INIT) {
 		shm_fd = shm_open(SHM_NAME, O_CREAT | O_RDWR, 0666);
 		if(shm_fd == -1) {
@@ -83,8 +97,11 @@ void destroy_shm(mapped* shm_ptr) {
 #ifdef WITH_VPI
 void wait_driver_data() {
   while(1) {
+		usleep(1000);
     sem_wait(&shm_ptr->pv.sem);
+		//printf("shm_ptr->pv.new_data = %d\n", shm_ptr->pv.new_data);
     if(shm_ptr->pv.new_data == NEW_DATA) {
+			printf("Got Data from Driver");
       sem_post(&shm_ptr->pv.sem);
       return;
     }
@@ -184,8 +201,10 @@ void send_powersupply_stats(uint32_t voltage) {
 void set_driver_signals(uint32_t voltage_setpoint, uint32_t resistance) {
   // Wait for the verilog simulation to consume the previous data:
   while(1) {
+		usleep(1000);
     sem_wait(&shm_ptr->pv.sem);
     if(shm_ptr->pv.new_data == NO_NEW_DATA) {
+			printf("Sending V:%d R:%d\n");
       shm_ptr->pv.data.v_set = voltage_setpoint;
       shm_ptr->pv.data.curr_r_load = resistance;
       shm_ptr->pv.new_data = NEW_DATA;
@@ -201,8 +220,10 @@ void set_driver_signals(uint32_t voltage_setpoint, uint32_t resistance) {
 // register_create_shm
 void register_create_shm() {
     s_vpi_systf_data data;
-    data.type = vpiSysTask;
+    data.type = vpiSysFunc;
+    data.sysfunctype = vpiIntFunc;
     data.tfname ="$create_shm";
+    data.user_data ="$create_shm";
     data.calltf=create_shm;
     data.compiletf=0;
     data.sizetf=0;
