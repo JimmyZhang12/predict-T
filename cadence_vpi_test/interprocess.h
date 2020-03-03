@@ -65,16 +65,15 @@ void create_shm(int process);
 //   ptr to shared mem region
 void destroy_shm();
 
-void set_driver_signals(uint32_t voltage_setpoint, uint32_t resistance);
-
-#ifdef WITH_VPI
 void wait_driver_data();
-static int get_voltage_setpoint();
-static int get_effective_resistance();
+int get_voltage_setpoint();
+int get_effective_resistance();
 uint32_t get_terminate_simulation();
 void ack_driver_data();
 void send_powersupply_stats(uint32_t voltage);
+void set_driver_signals(uint32_t voltage_setpoint, uint32_t resistance);
 
+#ifdef WITH_VPI
 void register_create_shm();
 void register_destroy_shm();
 void register_wait_driver_data();

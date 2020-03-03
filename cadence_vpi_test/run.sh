@@ -2,7 +2,7 @@
 
 # BUILD:
 #gcc hello_vpi.c -m32 -fPIC -shared -I/software/cadence-Aug2016/INCISIVE152/tools.lnx86/include -o hello_vpi.so
-gcc interprocess.c -DWITH_VPI -std=c11 -D_XOPEN_SOURCE=500 -m32 -fPIC -shared -I/software/cadence-Aug2016/INCISIVE152/tools.lnx86/include -lpthread -o interprocess.so
+gcc interprocess.c -O0 -g -DWITH_VPI -std=c11 -D_XOPEN_SOURCE=500 -m32 -fPIC -shared -I/software/cadence-Aug2016/INCISIVE152/tools.lnx86/include -lpthread -o interprocess.so
 
 # RUN:
 #irun tb.vams -top DAC6_TB +access+r -v ./hello_vpi.so -analogcontrol scf.scs

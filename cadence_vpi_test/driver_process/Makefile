@@ -2,8 +2,8 @@ PROG=driver_process
 
 OBJS=main.o interprocess.o
 
-CFLAGS=-Wall -std=c11 -D_XOPEN_SOURCE=500 -O0 -g
-LFLAGS=-lrt -lpthread
+CFLAGS=-Wall -std=c11 -D_XOPEN_SOURCE=500 -O0 -g -m32
+LFLAGS=-lrt -lpthread -m32
 
 .PHONY: clean
 

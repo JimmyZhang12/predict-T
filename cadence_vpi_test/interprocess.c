@@ -8,7 +8,7 @@
 
 int shm_fd = 0;
 
-mapped* shm_ptr = NULL;
+static mapped* shm_ptr = NULL;
 
 // shm_init
 //   helper to initialize data/mutexes in mapped struct
@@ -62,6 +62,7 @@ void create_shm(int should_init) {
 		}
 		// Initialize Data:
 		init_shm(shm_ptr);
+		printf("Shared memory region at: %p with size: %lu\n", shm_ptr, SHM_LENGTH); 
   }
   else {
 		shm_fd = shm_open(SHM_NAME, O_RDWR, 0666);
@@ -82,7 +83,7 @@ void create_shm(int should_init) {
 //   Unmaps and Unlinks shared memory region
 // Input:
 //   ptr to shared mem region
-void destroy_shm(mapped* shm_ptr) {
+void destroy_shm() {
   munmap(shm_ptr, SHM_LENGTH);
   shm_unlink(SHM_NAME);
 }
@@ -94,14 +95,13 @@ void destroy_shm(mapped* shm_ptr) {
 //*******************************************************************
 // driver_data_ready:
 //   Call to block simulation until data is sent to it:
-#ifdef WITH_VPI
 void wait_driver_data() {
+  printf("Shared memory region at: %p with size: %lu\n", shm_ptr, SHM_LENGTH); 
   while(1) {
 		usleep(1000);
     sem_wait(&shm_ptr->pv.sem);
-		//printf("shm_ptr->pv.new_data = %d\n", shm_ptr->pv.new_data);
+		//printf("pv.nd:%d, pv.vs:%d, pv.er:%d, pv.ts:%d\n", shm_ptr->pv.new_data, shm_ptr->pv.data.v_set, shm_ptr->pv.data.curr_r_load, shm_ptr->pv.data.sim_over);
     if(shm_ptr->pv.new_data == NEW_DATA) {
-			printf("Got Data from Driver");
       sem_post(&shm_ptr->pv.sem);
       return;
     }
@@ -115,9 +115,12 @@ uint32_t get_size() {
 
 // get_setpoint_voltage
 //   get the new voltage setpoint:
-static int get_voltage_setpoint() {
+int get_voltage_setpoint() {
+#ifdef WITH_VPI
   vpiHandle systfref, argsiter, argh;
   struct t_vpi_value value;
+#endif
+	int ret = 0;
 
   //systfref = vpi_handle(vpiSysTfCall, NULL); /* get system function that invoked C routine */
   //argsiter = vpi_iterate(vpiArgument, systfref);/* get iterator (list) of passed arguments */
@@ -140,36 +143,60 @@ static int get_voltage_setpoint() {
   //vpi_free_object(argsiter);
 
   sem_wait(&shm_ptr->pv.sem);
+#ifdef WITH_VPI
   systfref = vpi_handle(vpiSysTfCall, NULL); /* get system function that invoked C routine */
   value.value.integer = (int)shm_ptr->pv.data.v_set;
   value.format = vpiIntVal;/* return the result */
   vpi_put_value(systfref, &value, NULL, vpiNoDelay);
+#else
+  ret = (int)shm_ptr->pv.data.v_set;
+#endif
   sem_post(&shm_ptr->pv.sem);
-  return 0;
+  return ret;
 }
 
 // get_setpoint_voltage
 //   get the new voltage setpoint:
-static int get_effective_resistance() {
+int get_effective_resistance() {
+#ifdef WITH_VPI
   vpiHandle systfref, argsiter, argh;
   struct t_vpi_value value;
+#endif
+	int ret = 0;
 
   sem_wait(&shm_ptr->pv.sem);
+#ifdef WITH_VPI
   systfref = vpi_handle(vpiSysTfCall, NULL); /* get system function that invoked C routine */
   value.value.integer = (int)shm_ptr->pv.data.curr_r_load;
   value.format = vpiIntVal;/* return the result */
   vpi_put_value(systfref, &value, NULL, vpiNoDelay);
+#else
+  ret = (int)shm_ptr->pv.data.curr_r_load;
+#endif
   sem_post(&shm_ptr->pv.sem);
-  return 0;
+  return ret;
 }
 
 // get_terminate_simulation
 //   get the new voltage setpoint:
 uint32_t get_terminate_simulation() {
+#ifdef WITH_VPI
+  vpiHandle systfref, argsiter, argh;
+  struct t_vpi_value value;
+#endif
+	int ret = 0;
+
   sem_wait(&shm_ptr->pv.sem);
-  uint32_t term = shm_ptr->pv.data.sim_over; 
+#ifdef WITH_VPI
+  systfref = vpi_handle(vpiSysTfCall, NULL); /* get system function that invoked C routine */
+  value.value.integer = (int)shm_ptr->pv.data.sim_over;
+  value.format = vpiIntVal;/* return the result */
+  vpi_put_value(systfref, &value, NULL, vpiNoDelay);
+#else
+  ret = (int)shm_ptr->pv.data.sim_over;
+#endif
   sem_post(&shm_ptr->pv.sem);
-  return term;
+  return ret;
 }
 
 // ack_driver_data
@@ -196,15 +223,13 @@ void send_powersupply_stats(uint32_t voltage) {
   }
 }
 
-#endif
-
 void set_driver_signals(uint32_t voltage_setpoint, uint32_t resistance) {
   // Wait for the verilog simulation to consume the previous data:
   while(1) {
 		usleep(1000);
     sem_wait(&shm_ptr->pv.sem);
     if(shm_ptr->pv.new_data == NO_NEW_DATA) {
-			printf("Sending V:%d R:%d\n");
+			printf("Sending V:%d R:%d\n", voltage_setpoint, resistance);
       shm_ptr->pv.data.v_set = voltage_setpoint;
       shm_ptr->pv.data.curr_r_load = resistance;
       shm_ptr->pv.new_data = NEW_DATA;
@@ -216,7 +241,6 @@ void set_driver_signals(uint32_t voltage_setpoint, uint32_t resistance) {
 }
 
 #ifdef WITH_VPI
-
 // register_create_shm
 void register_create_shm() {
     s_vpi_systf_data data;
