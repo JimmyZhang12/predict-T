@@ -1,0 +1,6 @@
+disks/
+binaries/
+*.tar.gz
+*.tar.bz2
+checkpoint/
+configs/
