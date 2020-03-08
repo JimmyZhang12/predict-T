@@ -43,7 +43,7 @@ void init_shm(mapped* p) {
 // Returns:
 //   ptr to shared mem struct on success
 //   NULL on failure
-void create_shm(int should_init, char* name) {
+int create_shm(int should_init, char* name) {
 #ifdef WITH_VPI
   vpiHandle systfref, argsiter, argh;
   struct t_vpi_value value;
@@ -107,6 +107,7 @@ void create_shm(int should_init, char* name) {
       exit(-1);
     }
   }
+  return 0;
 }
 
 // shm_destroy
@@ -235,9 +236,23 @@ void ack_driver_data() {
   sem_post(&shm_ptr->pv.sem);
 }
 
-void send_voltage(uint32_t voltage) {
+int send_voltage(int voltage) {
+#ifdef WITH_VPI
+  vpiHandle systfref, argsiter, argh;
+  struct t_vpi_value value;
+  systfref = vpi_handle(vpiSysTfCall, NULL); /* get system function that invoked C routine */
+  argsiter = vpi_iterate(vpiArgument, systfref);/* get iterator (list) of passed arguments */
+  argh = vpi_scan(argsiter);/* get the one argument - add loop for more args */
+  if(!argh){
+    vpi_printf("$VPI missing parameter.\n");
+    return 0;
+  }
+  value.format = vpiIntVal;
+  vpi_get_value(argh, &value);
+  voltage = value.value.integer;
+#endif
   sem_wait(&shm_ptr->vp.sem);
-  shm_ptr->vp.data.curr_v = voltage;
+  shm_ptr->vp.data.curr_v = (uint32_t)voltage;
   shm_ptr->vp.new_data = NEW_DATA;
   sem_post(&shm_ptr->vp.sem);
 
@@ -246,10 +261,11 @@ void send_voltage(uint32_t voltage) {
     sem_wait(&shm_ptr->vp.sem);
     if(shm_ptr->vp.new_data == NO_NEW_DATA) {
       sem_post(&shm_ptr->vp.sem);
-      return;
+      return 0;
     }
     sem_post(&shm_ptr->vp.sem);
   }
+  return 0;
 }
 
 uint32_t get_voltage() {
@@ -259,15 +275,15 @@ uint32_t get_voltage() {
     if(shm_ptr->vp.new_data == NEW_DATA) {
       ret = shm_ptr->vp.data.curr_v;
       shm_ptr->vp.new_data = NO_NEW_DATA;
-      sem_post(&shm_ptr->pv.sem);
+      sem_post(&shm_ptr->vp.sem);
       return ret;
     }
-    sem_post(&shm_ptr->pv.sem);
+    sem_post(&shm_ptr->vp.sem);
   }
   return ret;
 }
 
-void set_driver_signals(uint32_t voltage_setpoint, uint32_t resistance) {
+void set_driver_signals(uint32_t voltage_setpoint, uint32_t resistance, uint32_t terminate_sim) {
   // Wait for the verilog simulation to consume the previous data:
   while(1) {
     sem_wait(&shm_ptr->pv.sem);
@@ -275,6 +291,7 @@ void set_driver_signals(uint32_t voltage_setpoint, uint32_t resistance) {
       printf("Sending V:%d R:%d\n", voltage_setpoint, resistance);
       shm_ptr->pv.data.v_set = voltage_setpoint;
       shm_ptr->pv.data.curr_r_load = resistance;
+      shm_ptr->pv.data.sim_over = terminate_sim;
       shm_ptr->pv.new_data = NEW_DATA;
       sem_post(&shm_ptr->pv.sem);
       return;
@@ -377,7 +394,8 @@ void register_ack_driver_data() {
 
 void register_send_voltage() {
     s_vpi_systf_data data;
-    data.type = vpiSysTask;
+    data.type = vpiSysFunc;
+    data.sysfunctype = vpiIntFunc;
     data.tfname ="$send_voltage";
     data.calltf=send_voltage;
     data.compiletf=0;

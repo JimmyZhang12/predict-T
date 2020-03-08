@@ -7,20 +7,21 @@ export PATH=/software/cadence-Aug2016/INNOVUS161/tools.lnx86/bin:/software/caden
 export LM_LICENSE_FILE=5280@cadence.webstore.illinois.edu
 export OA_UNSUPPORTED_PLAT=linux_rhel50_gcc48x
 
-# BUILD:
-#gcc hello_vpi.c -m32 -fPIC -shared -I/software/cadence-Aug2016/INCISIVE152/tools.lnx86/include -o hello_vpi.so
-gcc interprocess.c -O0 -g -DWITH_VPI -std=c11 -D_XOPEN_SOURCE=500 -m32 -fPIC -shared -I/software/cadence-Aug2016/INCISIVE152/tools.lnx86/include -lpthread -o interprocess.so
-
 pushd /run_vsim
+ln -s $VERILOG_TB_PATH/interprocess.cpp ./interprocess.c
+ln -s $VERILOG_TB_PATH/interprocess.h .
 ln -s $VERILOG_TB_PATH/tb.vams .
-ln -s $VERILOG_TB_PATH/interprocess.so .
 ln -s $VERILOG_TB_PATH/scf.scs .
 
+# BUILD:
+#gcc hello_vpi.c -m32 -fPIC -shared -I/software/cadence-Aug2016/INCISIVE152/tools.lnx86/include -o hello_vpi.so
+gcc interprocess.c -O0 -g -DWITH_VPI -std=c11 -D_XOPEN_SOURCE=500 -m32 -fPIC -fpermissive -shared -I/software/cadence-Aug2016/INCISIVE152/tools.lnx86/include -lpthread -o interprocess.so
 
 # RUN:
 #irun tb.vams -top DAC6_TB +access+r -v ./hello_vpi.so -analogcontrol scf.scs
 ncverilog \
 	+define+SHM_NAME=\\\"${1}\\\" \
+  +define+STEP_SIZE=${2} \
   tb.vams \
   +access+r -loadvpi ./interprocess.so:register_create_shm \
   -loadvpi ./interprocess.so:register_destroy_shm \

@@ -22,7 +22,7 @@ endmodule
 module DAC6_TB;
   electrical Aout,Vdd,Vss; // analog pins
   real Vsup,Vgnd,Tr; // control variables to drive analog supplies
-	reg[31:0] v_setpoint, effective_load_resistance;
+	reg[31:0] v_setpoint, effective_load_resistance, term_sim;
   reg [5:0] Din; // digital input bus
   DAC6 DUT(Din,Aout, Vdd,Vss); // instanciate the digital to analog converter
   analog begin // analog drive description:
@@ -31,26 +31,20 @@ module DAC6_TB;
   end
   initial begin // This is the sequential test procedure
     $create_shm(1, `SHM_NAME);
-    $wait_driver_data;
-		v_setpoint =  $get_voltage_setpoint();
-		effective_load_resistance = $get_effective_resistance();
-    $display("%d, %d",  v_setpoint, effective_load_resistance);
-    $ack_driver_data;
-    $wait_driver_data;
-		v_setpoint =  $get_voltage_setpoint();
-		effective_load_resistance = $get_effective_resistance();
-    $display("%d, %d",  v_setpoint, effective_load_resistance);
-    $ack_driver_data;
-    $wait_driver_data;
-		v_setpoint =  $get_voltage_setpoint();
-		effective_load_resistance = $get_effective_resistance();
-    $display("%d, %d",  v_setpoint, effective_load_resistance);
-    $ack_driver_data;
-    $wait_driver_data;
-		v_setpoint =  $get_voltage_setpoint();
-		effective_load_resistance = $get_effective_resistance();
-    $display("%d, %d",  v_setpoint, effective_load_resistance);
-    $ack_driver_data;
+    while(1==1) begin
+      $wait_driver_data;
+      v_setpoint =  $get_voltage_setpoint();
+      effective_load_resistance = $get_effective_resistance();
+      term_sim =  $get_terminate_simulation();
+      $display("%d, %d",  v_setpoint, effective_load_resistance);
+      $ack_driver_data;
+      $send_voltage($time);
+      if(term_sim != 0) begin
+        $destroy_shm;
+        $finish;
+      end
+      #`STEP_SIZE;
+    end
     $destroy_shm;
     $finish;
     Din=0; // Initialize digital input bus to zero

@@ -17,10 +17,14 @@ int main(int argc, char** argv) {
   sa.sa_handler = int_handler;
   sigaction(SIGINT, &sa, NULL);
   
-  set_driver_signals(10, 10);
-  set_driver_signals(2, 40);
-  set_driver_signals(1000, 15);
-  set_driver_signals(3, 256);
+  set_driver_signals(10, 10, 0);
+  get_voltage();
+  set_driver_signals(2, 40, 0);
+  get_voltage();
+  set_driver_signals(1000, 15, 0);
+  get_voltage();
+  set_driver_signals(3, 256, 1);
+  get_voltage();
 
   destroy_shm();
   return 0;

@@ -56,7 +56,7 @@ typedef struct {
 // Returns:
 //   ptr to shared mem struct on success
 //   NULL on failure
-void create_shm(int process, char* name);
+int create_shm(int process, char* name);
 
 // shm_destroy
 //   Unmaps and Unlinks shared memory region
@@ -69,9 +69,9 @@ int get_voltage_setpoint();
 int get_effective_resistance();
 uint32_t get_terminate_simulation();
 void ack_driver_data();
-void send_voltage(uint32_t voltage);
+int send_voltage(int voltage);
 
-void set_driver_signals(uint32_t voltage_setpoint, uint32_t resistance);
+void set_driver_signals(uint32_t voltage_setpoint, uint32_t resistance, uint32_t terminate_sim);
 uint32_t get_voltage();
 
 #ifdef WITH_VPI
