@@ -10,7 +10,7 @@ static void int_handler(int signum) {
 }
 
 int main(int argc, char** argv) {
-  create_shm(1);
+  create_shm(1,"verilog_inter_python");
 
   // Install Signal Handler:
   struct sigaction sa;

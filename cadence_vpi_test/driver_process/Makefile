@@ -11,10 +11,13 @@ all:$(PROG)
 	@echo $(OBJS)
 
 $(PROG):$(OBJS)
-	$(CC) $^ $(LFLAGS) -o $@
+	g++ $^ $(LFLAGS) -o $@
 
 %.o:%.c
-	$(CC) -c $< $(CFLAGS) -o $@
+	g++ -c $< $(CFLAGS) -o $@
+
+%.o:%.cpp
+	g++ -c $< $(CFLAGS) -o $@
 
 clean:
 	rm -f *.o $(PROG)

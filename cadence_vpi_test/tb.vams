@@ -30,7 +30,7 @@ module DAC6_TB;
     V(Vss) <+ transition(Vgnd,0,Tr); // using the control variables
   end
   initial begin // This is the sequential test procedure
-    $create_shm(1);
+    $create_shm(1, `SHM_NAME);
     $wait_driver_data;
 		v_setpoint =  $get_voltage_setpoint();
 		effective_load_resistance = $get_effective_resistance();

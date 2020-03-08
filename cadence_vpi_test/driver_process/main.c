@@ -10,7 +10,7 @@ static void int_handler(int signum) {
 }
 
 int main(int argc, char** argv) {
-  create_shm(0);
+  create_shm(0, "a3lhsdflj234jf");
 
   // Install Signal Handler:
   struct sigaction sa;

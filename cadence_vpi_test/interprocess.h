@@ -1,6 +1,5 @@
 #ifndef INTERPROCESS_H
 #define INTERPROCESS_H
-
 #include <fcntl.h> 
 #include <stdint.h>
 #include <stdio.h>
@@ -16,19 +15,19 @@
 #define NO_NEW_DATA 0    // Also doubles as the data was already consumed
 
 #define SHM_LENGTH  sizeof(mapped)
-#define SHM_NAME    "shm_cadence"
+//#define SHM_NAME    "shm_cadence"
 
 #define INIT        1
 #define NINIT       0
 
 typedef struct {
-  uint64_t v_set;               // the next voltage setpoint
+  uint32_t v_set;               // the next voltage setpoint
   uint32_t curr_r_load;         // the current load of the system
   uint32_t sim_over;            // Terminate Simulation
 } v_incoming_signals;
 
 typedef struct {
-  uint64_t curr_v;      // Current Clock Count
+  uint32_t curr_v;      // Current Clock Count
   uint32_t sim_done;     // Terminate Simulation
 } p_incoming_signals;
 
@@ -57,7 +56,7 @@ typedef struct {
 // Returns:
 //   ptr to shared mem struct on success
 //   NULL on failure
-void create_shm(int process);
+void create_shm(int process, char* name);
 
 // shm_destroy
 //   Unmaps and Unlinks shared memory region
@@ -70,8 +69,10 @@ int get_voltage_setpoint();
 int get_effective_resistance();
 uint32_t get_terminate_simulation();
 void ack_driver_data();
-void send_powersupply_stats(uint32_t voltage);
+void send_voltage(uint32_t voltage);
+
 void set_driver_signals(uint32_t voltage_setpoint, uint32_t resistance);
+uint32_t get_voltage();
 
 #ifdef WITH_VPI
 void register_create_shm();

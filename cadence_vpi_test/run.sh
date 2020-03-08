@@ -15,7 +15,7 @@ ncverilog \
   -loadvpi ./interprocess.so:register_get_effective_resistance \
   -loadvpi ./interprocess.so:register_get_terminate_simulation \
   -loadvpi ./interprocess.so:register_ack_driver_data \
-  -loadvpi ./interprocess.so:register_send_powersupply_stats \
+  -loadvpi ./interprocess.so:register_send_voltage \
   -top DAC6_TB \
   -analogcontrol scf.scs
 

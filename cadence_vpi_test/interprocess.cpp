@@ -1,4 +1,10 @@
 #include <stdio.h>
+#include <sys/mman.h>
+#include <sys/shm.h> 
+#include <sys/stat.h>
+#include <unistd.h>
+#include <semaphore.h>
+
 #include "interprocess.h"
 #ifdef WITH_VPI
 #include "vpi_ams.h"
@@ -6,23 +12,29 @@
 #include "vpi_user_cds.h"
 #endif
 
+#ifdef INTERPROCESS_PYTHON
+#include <pybind11/pybind11.h>
+#endif
+
 int shm_fd = 0;
 
-static mapped* shm_ptr = NULL;
+mapped* shm_ptr = NULL;
+
+char name_buff[256] = "";
 
 // shm_init
 //   helper to initialize data/mutexes in mapped struct
 void init_shm(mapped* p) {
-	sem_init(&p->pv.sem, 1, 1);
-	p->pv.new_data = NO_NEW_DATA;
-	p->pv.data.v_set = 0;
-	p->pv.data.curr_r_load = 0;
+  sem_init(&p->pv.sem, 1, 1);
+  p->pv.new_data = NO_NEW_DATA;
+  p->pv.data.v_set = 0;
+  p->pv.data.curr_r_load = 0;
   p->pv.data.sim_over = 0;
   
-	sem_init(&p->vp.sem, 1, 1);
-	p->vp.new_data = NO_NEW_DATA;
-	p->vp.data.curr_v = 0;
-	p->vp.data.sim_done = 0;
+  sem_init(&p->vp.sem, 1, 1);
+  p->vp.new_data = NO_NEW_DATA;
+  p->vp.data.curr_v = 0;
+  p->vp.data.sim_done = 0;
 }
 
 // shm_create
@@ -31,51 +43,69 @@ void init_shm(mapped* p) {
 // Returns:
 //   ptr to shared mem struct on success
 //   NULL on failure
-void create_shm(int should_init) {
+void create_shm(int should_init, char* name) {
 #ifdef WITH_VPI
   vpiHandle systfref, argsiter, argh;
   struct t_vpi_value value;
   systfref = vpi_handle(vpiSysTfCall, NULL); /* get system function that invoked C routine */
   argsiter = vpi_iterate(vpiArgument, systfref);/* get iterator (list) of passed arguments */
   argh = vpi_scan(argsiter);/* get the one argument - add loop for more args */
-	if(!argh){
+  if(!argh){
     vpi_printf("$VPI missing parameter.\n");
     return 0;
   }
+
   value.format = vpiIntVal;
   vpi_get_value(argh, &value);
   should_init = value.value.integer;
+  
+  argh = vpi_scan(argsiter);/* get the one argument - add loop for more args */
+  if(!argh){
+    vpi_printf("$VPI missing parameter.\n");
+    return 0;
+  }
+
+  value.format = vpiStringVal;
+  vpi_get_value(argh, &value);
+  name = value.value.str;
   vpi_free_object(argsiter);
+  vpi_printf("$create_shm called with args %d %s\n", should_init, name);
 #endif
+
+  if(name == NULL) {
+    fprintf(stderr,"bad pointer to name\n");
+    exit(-1);
+  }
+  strncpy(name_buff, name, 256);
   if(should_init == INIT) {
-		shm_fd = shm_open(SHM_NAME, O_CREAT | O_RDWR, 0666);
-		if(shm_fd == -1) {
-			fprintf(stderr,"Failed to create & open /dev/shm/%s\n", SHM_NAME);
-			exit(-1);
-		}
-		ftruncate(shm_fd, SHM_LENGTH);
-		shm_ptr = (mapped*)mmap(NULL, SHM_LENGTH, PROT_WRITE | PROT_READ, MAP_SHARED, shm_fd, 0);
-		if(shm_ptr == NULL) {
-			fprintf(stderr,"mmap failed\n");
-			shm_unlink(SHM_NAME);
-			exit(-1);
-		}
-		// Initialize Data:
-		init_shm(shm_ptr);
-		printf("Shared memory region at: %p with size: %lu\n", shm_ptr, SHM_LENGTH); 
+    shm_fd = shm_open(name_buff, O_CREAT | O_RDWR, 0666);
+    if(shm_fd == -1) {
+      fprintf(stderr,"Failed to create & open /dev/shm/%s\n", name_buff);
+      exit(-1);
+    }
+    ftruncate(shm_fd, SHM_LENGTH);
+    shm_ptr = (mapped*)mmap(NULL, SHM_LENGTH, PROT_WRITE | PROT_READ, MAP_SHARED, shm_fd, 0);
+    if(shm_ptr == NULL) {
+      fprintf(stderr,"mmap failed\n");
+      shm_unlink(name_buff);
+      exit(-1);
+    }
+    // Initialize Data:
+    init_shm(shm_ptr);
+    printf("Shared memory region at: %p with size: %d\n", shm_ptr, SHM_LENGTH); 
   }
   else {
-		shm_fd = shm_open(SHM_NAME, O_RDWR, 0666);
-		if(shm_fd == -1) {
-			fprintf(stderr,"Failed to open /dev/shm/%s\n", SHM_NAME);
-			exit(-1);
-		}
-		shm_ptr = (mapped*)mmap(NULL, SHM_LENGTH, PROT_WRITE | PROT_READ, MAP_SHARED, shm_fd, 0);
-		if(shm_ptr == NULL) {
-			fprintf(stderr,"mmap failed\n");
-			shm_unlink(SHM_NAME);
-			exit(-1);
-		}
+    shm_fd = shm_open(name_buff, O_RDWR, 0666);
+    if(shm_fd == -1) {
+      fprintf(stderr,"Failed to open /dev/shm/%s\n", name_buff);
+      exit(-1);
+    }
+    shm_ptr = (mapped*)mmap(NULL, SHM_LENGTH, PROT_WRITE | PROT_READ, MAP_SHARED, shm_fd, 0);
+    if(shm_ptr == NULL) {
+      fprintf(stderr,"mmap failed\n");
+      shm_unlink(name_buff);
+      exit(-1);
+    }
   }
 }
 
@@ -85,7 +115,7 @@ void create_shm(int should_init) {
 //   ptr to shared mem region
 void destroy_shm() {
   munmap(shm_ptr, SHM_LENGTH);
-  shm_unlink(SHM_NAME);
+  shm_unlink(name_buff);
 }
 
 //*******************************************************************
@@ -96,11 +126,10 @@ void destroy_shm() {
 // driver_data_ready:
 //   Call to block simulation until data is sent to it:
 void wait_driver_data() {
-  printf("Shared memory region at: %p with size: %lu\n", shm_ptr, SHM_LENGTH); 
+  //printf("Shared memory region at: %p with size: %lu\n", shm_ptr, SHM_LENGTH); 
   while(1) {
-		usleep(1000);
     sem_wait(&shm_ptr->pv.sem);
-		//printf("pv.nd:%d, pv.vs:%d, pv.er:%d, pv.ts:%d\n", shm_ptr->pv.new_data, shm_ptr->pv.data.v_set, shm_ptr->pv.data.curr_r_load, shm_ptr->pv.data.sim_over);
+    //printf("pv.nd:%d, pv.vs:%d, pv.er:%d, pv.ts:%d\n", shm_ptr->pv.new_data, shm_ptr->pv.data.v_set, shm_ptr->pv.data.curr_r_load, shm_ptr->pv.data.sim_over);
     if(shm_ptr->pv.new_data == NEW_DATA) {
       sem_post(&shm_ptr->pv.sem);
       return;
@@ -120,12 +149,12 @@ int get_voltage_setpoint() {
   vpiHandle systfref, argsiter, argh;
   struct t_vpi_value value;
 #endif
-	int ret = 0;
+  int ret = 0;
 
   //systfref = vpi_handle(vpiSysTfCall, NULL); /* get system function that invoked C routine */
   //argsiter = vpi_iterate(vpiArgument, systfref);/* get iterator (list) of passed arguments */
   //argh = vpi_scan(argsiter);/* get the one argument - add loop for more args */
-	//if(!argh){
+  //if(!argh){
   //  vpi_printf("$VPI missing parameter.\n");
   //  return 0;
   //}
@@ -162,7 +191,7 @@ int get_effective_resistance() {
   vpiHandle systfref, argsiter, argh;
   struct t_vpi_value value;
 #endif
-	int ret = 0;
+  int ret = 0;
 
   sem_wait(&shm_ptr->pv.sem);
 #ifdef WITH_VPI
@@ -184,7 +213,7 @@ uint32_t get_terminate_simulation() {
   vpiHandle systfref, argsiter, argh;
   struct t_vpi_value value;
 #endif
-	int ret = 0;
+  int ret = 0;
 
   sem_wait(&shm_ptr->pv.sem);
 #ifdef WITH_VPI
@@ -206,7 +235,7 @@ void ack_driver_data() {
   sem_post(&shm_ptr->pv.sem);
 }
 
-void send_powersupply_stats(uint32_t voltage) {
+void send_voltage(uint32_t voltage) {
   sem_wait(&shm_ptr->vp.sem);
   shm_ptr->vp.data.curr_v = voltage;
   shm_ptr->vp.new_data = NEW_DATA;
@@ -223,13 +252,27 @@ void send_powersupply_stats(uint32_t voltage) {
   }
 }
 
+uint32_t get_voltage() {
+  uint32_t ret = 0;
+  while(1) {
+    sem_wait(&shm_ptr->vp.sem);
+    if(shm_ptr->vp.new_data == NEW_DATA) {
+      ret = shm_ptr->vp.data.curr_v;
+      shm_ptr->vp.new_data = NO_NEW_DATA;
+      sem_post(&shm_ptr->pv.sem);
+      return ret;
+    }
+    sem_post(&shm_ptr->pv.sem);
+  }
+  return ret;
+}
+
 void set_driver_signals(uint32_t voltage_setpoint, uint32_t resistance) {
   // Wait for the verilog simulation to consume the previous data:
   while(1) {
-		usleep(1000);
     sem_wait(&shm_ptr->pv.sem);
     if(shm_ptr->pv.new_data == NO_NEW_DATA) {
-			printf("Sending V:%d R:%d\n", voltage_setpoint, resistance);
+      printf("Sending V:%d R:%d\n", voltage_setpoint, resistance);
       shm_ptr->pv.data.v_set = voltage_setpoint;
       shm_ptr->pv.data.curr_r_load = resistance;
       shm_ptr->pv.new_data = NEW_DATA;
@@ -332,15 +375,24 @@ void register_ack_driver_data() {
     vpi_register_systf(&data);
 }
 
-void register_send_powersupply_stats() {
+void register_send_voltage() {
     s_vpi_systf_data data;
     data.type = vpiSysTask;
-    data.tfname ="$send_powersupply_stats";
-    data.calltf=send_powersupply_stats;
+    data.tfname ="$send_voltage";
+    data.calltf=send_voltage;
     data.compiletf=0;
     data.sizetf=0;
     data.user_data=0;
     vpi_register_systf(&data);
 }
-
 #endif // WITH_VPI
+
+#ifdef INTERPROCESS_PYTHON
+PYBIND11_MODULE(interprocess, m) {
+  m.doc() = "Interprocess Communication routines for interfacing with simulation"; // optional module docstring
+  m.def("create_shm", &create_shm, "Create/Open and Map a shared mem region");
+  m.def("destroy_shm", &destroy_shm, "Destroy and UnMap a shared mem region");
+  m.def("set_driver_signals", &set_driver_signals, "Send voltage and resistance to simulation");
+  m.def("get_voltage", &get_voltage, "Get the instantaneous voltage value from the sim");
+}
+#endif
