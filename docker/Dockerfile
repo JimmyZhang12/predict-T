@@ -15,6 +15,10 @@ RUN apt-get update && \
 
 # For building & Running Pybind for Verilog Sim:
 
+# Building McPat
+RUN apt-get update && \
+    apt-get install g++-multilib
+
 # Running Predict-T
 RUN apt-get update && \
     apt-get install -y python-tk
