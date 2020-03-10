@@ -1,6 +1,6 @@
 import vsim
 
-vsim.initialize("a3lhsdflj234jf", 100000)
+vsim.initialize("a3lhsdflj234jf", 1)
 vsim.set_driver_signals(100,10,0)
 print(vsim.get_voltage())
 vsim.set_driver_signals(100,0,0)
@@ -21,4 +21,5 @@ vsim.set_driver_signals(1387,10,0)
 print(vsim.get_voltage())
 vsim.set_driver_signals(13338,10,1)
 print(vsim.get_voltage())
+
 

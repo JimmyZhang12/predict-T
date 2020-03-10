@@ -1,0 +1,22 @@
+//Verilog-AMS HDL for "Silva_Buck", "load" "verilogams"
+
+`include "constants.vams"
+`include "disciplines.vams"
+
+`timescale 1ms/1ps
+
+module load (vdd, clk, rst, res);
+	input vdd, clk, rst, res;
+	electrical vdd, res;
+	real _res;
+	
+	//parameter real Vout = 1;
+	//parameter real I1 = 0.5;
+	//parameter real I2 = 5;
+	//parameter real tr = 100p;
+
+	analog begin
+    _res = V(res);
+		I(vdd) <+ V(vdd)/_res;
+	end
+endmodule

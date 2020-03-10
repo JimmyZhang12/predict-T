@@ -1,0 +1,59 @@
+//Verilog-AMS HDL for "Silva_Buck", "buck_model" "verilogams"
+
+`include "constants.vams"
+`include "disciplines.vams"
+`include "clk.vams"
+`include "buck.vams"
+`include "adc.vams"
+`include "dpwm.vams"
+`include "pid.vams"
+`include "load.vams"
+
+`timescale 1us/1ps
+
+module buck_model ();
+  // Top Level Signals
+  wire _l_clk, _l_rst, _l_pwm;
+  wire [7:0] _l_e, _l_d;
+  electrical _v_out;
+
+  // Gem5 Interface Signals
+  real _v_set, _r_last;
+  electrical _ve_set, _vr_last;
+  reg _term_sim;
+  real _v_next;
+
+  // Modules
+  clk _clk(.clk(_l_clk), .rst(_l_rst));
+  adc _adc(.clk(_l_clk), .rst(_l_rst), .e(_l_e), .in(_v_out), .vref(_ve_set));
+  pid _pid(.clk(_l_clk), .rst(_l_rst), .e(_l_e), .d(_l_d));
+  dpwm _dpwm(.clk(_l_clk), .rst(_l_rst), .d(_l_d), .pwm(_l_pwm));
+  buck _buck(.pwm(_l_pwm), .vout(_v_out));
+  load _load(.clk(_l_clk), .rst(_l_rst), .vdd(_v_out), .res(_vr_last));
+
+  analog begin
+    _v_next = V(_v_out);
+    V(_ve_set) <+ _v_set;
+    V(_vr_last) <+ _r_last;
+  end
+
+  initial begin
+    $create_shm(1, `SHM_NAME);
+    repeat(10000) begin
+      $wait_driver_data;
+      _v_set = $get_voltage_setpoint();
+      _r_last = $get_effective_resistance();
+      _term_sim = $get_terminate_simulation();
+      $display("%d,%f,%f,%f", $time, _v_set, _r_last, _v_next);
+      $ack_driver_data;
+      $send_voltage(_v_next);
+      if(_term_sim != 0) begin
+        $destroy_shm;
+        $finish;
+      end
+      #`STEP_SIZE;
+    end
+    $destroy_shm;
+    $finish;
+  end
+endmodule

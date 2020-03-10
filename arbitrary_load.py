@@ -7,13 +7,13 @@ import math
 
 peak_power = 5
 min_power = 0.5
-timestep = 100e-9
+timestep = 1
 time = 0
 
 power = min_power
 
-on_time = [10e-6, 100e-6, 1000e-6]
-off_time = [10e-6, 100e-6, 1000e-6]
+on_time = 10e-6
+off_time = 10e-6
 
 rise_time = 1000e-9
 fall_time = 1000e-9
