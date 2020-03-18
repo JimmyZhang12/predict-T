@@ -152,3 +152,4 @@ mcpat_out/
 gem5_out/
 text_out/
 *.tar.gz
+*.csv

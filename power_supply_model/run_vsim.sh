@@ -40,5 +40,4 @@ ncverilog \
   -loadvpi ./interprocess.so:register_ack_driver_data \
   -loadvpi ./interprocess.so:register_send_voltage \
   -top buck_model \
-  -analogcontrol scf.scs \
-  | tee "$VERILOG_TB_PATH/log/${1}_out.log"
+  -analogcontrol scf.scs > "$VERILOG_TB_PATH/log/${1}_out.log"

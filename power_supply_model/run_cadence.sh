@@ -14,5 +14,5 @@ docker run --rm -t -i --memory 16g --network=host \
   -v $VSIM_TOOLS:$VSIM_TOOLS \
   -v $SIM_ROOT:$SIM_ROOT \
   -e PREDICT_T_ROOT \
-  centos7:cadence
-#  ./run_vsim.sh $1 $2
+  centos7:cadence \
+  ./run_vsim.sh $1 $2
