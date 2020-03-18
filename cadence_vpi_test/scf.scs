@@ -1,3 +1,0 @@
-myopt options rawfmt=psfbin
-myinfo info what=oppoint where=rawfile
-mytran tran stop=1000u infoname=myinfo infotimes=[100u 200u 300u 400u 500u 600u 700u 800u 900u]

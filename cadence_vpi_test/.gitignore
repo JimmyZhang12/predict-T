@@ -1,7 +1,0 @@
-INCA_libs
-*.so
-irun*
-ncverilog*
-run.ahdl*
-scf.ahdl*
-scf.raw*
