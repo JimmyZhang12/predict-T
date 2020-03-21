@@ -5,7 +5,7 @@ import tempfile
 import shutil
 from contextlib import contextmanager
 
-from m5_to_mcpat import m5_to_mcpat
+#from m5_to_mcpat import m5_to_mcpat
 from gem5 import *
 from mcpat import *
 
@@ -37,9 +37,10 @@ parser.add_argument('--opt', type=str, default="", help="options")
 parser.add_argument('--template_xml', type=str, default="template.xml", help="path to template xml for McPAT input")
 args = parser.parse_args()
 
-mcpat_template = os.path.join("/home/andrew/research/predict-T", "mcpat-template.xml")
-mcpat_path = os.path.join("/home/andrew/research/predict-T", "mcpat")
-mcpat_out = os.path.join("/home/andrew/research/predict-T", "mcpat_out")
+predict_t_root = os.getenv('PREDICT_T_ROOT')
+mcpat_template = os.path.join(predict_t_root, "mcpat-template.xml")
+mcpat_path = os.path.join(predict_t_root, "mcpat")
+mcpat_out = os.path.join(predict_t_root, "mcpat_out")
 
 class Benchmark:
   def __init__(self, name, cmd, opt, text_out, gem5_out, mcpat_out):
@@ -85,7 +86,7 @@ def run(args):
   def m5_benchmark_thread(iq):
     while not iq.empty():
       test = iq.get()
-      run_gem5(test.cmd,test.opt,test.text_out,test.gem5_out,"1","DerivO3CPU","16kB","64kB","256kB", mcpat_template, mcpat_path, mcpat_out, test.name)
+      run_gem5(test.cmd,test.opt,test.text_out,test.gem5_out,"Simple",mcpat_template,mcpat_path,mcpat_out,test.name)
 
   # First run Gem5 for each benchmark:
   #for test in benchmarks:

@@ -1,7 +1,7 @@
 import vsim
 import sys
 
-vsim.initialize("a3lhsdflj234jf", 1)
+vsim.initialize("a3lhsdflj234jf", 100)
 with open("../test_load.csv", "r") as profile:
   data = profile.readlines()
   for point in data:

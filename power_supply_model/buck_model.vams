@@ -39,19 +39,21 @@ module buck_model ();
 
   initial begin
     $create_shm(1, `SHM_NAME);
-    repeat(10000) begin
-      $wait_driver_data;
-      _v_set = $get_voltage_setpoint();
-      _r_last = $get_effective_resistance();
-      _term_sim = $get_terminate_simulation();
-      $display("%d,%f,%f,%f", $time, _v_set, _r_last, _v_next);
-      $ack_driver_data;
-      $send_voltage(_v_next);
-      if(_term_sim != 0) begin
-        $destroy_shm;
-        $finish;
+    while(1) begin
+      if($time % `STEP_SIZE == 0) begin
+        $wait_driver_data;
+        _v_set = $get_voltage_setpoint();
+        _r_last = $get_effective_resistance();
+        _term_sim = $get_terminate_simulation();
+        $ack_driver_data;
+        $send_voltage(_v_next);
+        if(_term_sim != 0) begin
+          $destroy_shm;
+          $finish;
+        end
       end
-      #`STEP_SIZE;
+      $display("%d,%f,%f,%f", $time, _v_set, _r_last, _v_next);
+      #1;
     end
     $destroy_shm;
     $finish;
