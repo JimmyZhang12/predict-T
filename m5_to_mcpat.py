@@ -79,10 +79,13 @@ def replace(xml_line, stats, config):
     for i in range(len(keys)):
       for j in range(len(keys[i])):
         if keys[i][j] in stats:
+          #print(stats[keys[i][j]][1])
           keys[i][j] = stats[keys[i][j]][1]
         elif keys[i][j] in config:
+          #print(config[keys[i][j]])
           keys[i][j] = config[keys[i][j]]
         elif "stats" in keys[i][j] or "config" in keys[i][j]:
+          print(keys[i][j])
           keys[i][j] = "0"
     #print(keys)
     split_line[1] = ",".join([" ".join(y) for y in keys])
@@ -93,65 +96,76 @@ def replace(xml_line, stats, config):
 # m5_to_mcpat
 # Takes in the output files from gem5 run (config.ini, stats.txt) and converts to a 
 # McPat input xml file based on a template.
-def m5_to_mcpat(m5_stats_file, m5_config_file, mcpat_template_file, mcpat_output_path, testname):
-  if not os.path.isdir(mcpat_output_path):
-    os.mkdir(mcpat_output_path)
-
-  def mcpat_thread(config, iq, oq):
-    while not iq.empty():
-      work = iq.get()
-      t_f = "mcpat-template.xml"
-      i_f = os.path.join(mcpat_output_path,"mp_arm_"+str(work[0])+".xml")
-      o_f = os.path.join(mcpat_output_path,"mp_"+str(work[0])+".out")
-      e_f = os.path.join(mcpat_output_path,"mp_"+str(work[0])+".err")
-      with open(t_f, "r") as tf, open(i_f, "w") as inf:
-        in_xml = tf.readlines()
-        out_xml = []
-        for line in in_xml:
-          out_xml.append(replace(line, work[1], config))
-        inf.writelines(out_xml)
-      run_mcpat(i_f, "5", "1", o_f, e_f)
-      oq.put((work[0], parse_output(o_f)))
-
-  input_queue = Queue()
-  output_queue = Queue()
-  epochs = parse_stats(m5_stats_file)
+#def m5_to_mcpat(m5_stats_file, m5_config_file, mcpat_template_file, mcpat_output_path, testname):
+def m5_to_mcpat(m5_stats_file, m5_config_file, mcpat_template_file, mcpat_output_path):
+  stats = parse_stats(m5_stats_file)[-1]
+  #print_stats(stats)
   config = parse_config(m5_config_file)
-  mcpat_trees = [None]*len(epochs)
-  threads = []
+  #print_config(config)
+  with open(mcpat_template_file, "r") as tf, open(mcpat_output_path, "w") as inf:
+    in_xml = tf.readlines()
+    out_xml = []
+    for line in in_xml:
+      out_xml.append(replace(line, stats, config))
+    inf.writelines(out_xml)
+#  if not os.path.isdir(mcpat_output_path):
+#    os.mkdir(mcpat_output_path)
+#
+#  def mcpat_thread(config, iq, oq):
+#    while not iq.empty():
+#      work = iq.get()
+#      t_f = "mcpat-template.xml"
+#      i_f = os.path.join(mcpat_output_path,"mp_arm_"+str(work[0])+".xml")
+#      o_f = os.path.join(mcpat_output_path,"mp_"+str(work[0])+".out")
+#      e_f = os.path.join(mcpat_output_path,"mp_"+str(work[0])+".err")
+#      with open(t_f, "r") as tf, open(i_f, "w") as inf:
+#        in_xml = tf.readlines()
+#        out_xml = []
+#        for line in in_xml:
+#          out_xml.append(replace(line, work[1], config))
+#        inf.writelines(out_xml)
+#      run_mcpat(i_f, "5", "1", o_f, e_f)
+#      oq.put((work[0], parse_output(o_f)))
 
-  #""" Initialize Input Queue """
-  #for i, epoch in zip(range(len(epochs)), epochs):
-  #  input_queue.put((i, epoch))
-
-  #""" Launch Worker Threads """
-  #for i in range(16):
-  #  thr = Thread(target=mcpat_thread, args=[config, input_queue, output_queue])
-  #  thr.start()
-  #  threads.append(thr)
-
-  #bar = progressbar.ProgressBar(maxval=100, widgets=[progressbar.Bar('=', '[', ']'), ' ', progressbar.Percentage()]) #bar.start()
-  #while not input_queue.empty():
-  #  progress = int((len(epochs)-input_queue.qsize())*100/len(epochs))
-  #  bar.update(progress)
-  #  sleep(0.1)
-  #bar.finish()
-
-  #""" Dequeue from Output Queue """
-  #for thr in threads:
-  #  thr.join()
-
-  #while not output_queue.empty():
-  #  ret = output_queue.get()
-  #  mcpat_trees[ret[0]] = ret[1]
-
-  sfile = os.path.join(mcpat_output_path, testname+".pickle")
-
-  #with open(sfile, "w") as mpe:
-  #  pickle.dump(mcpat_trees, mpe)
-  with open(sfile, "r") as mpe:
-    mcpat_trees = pickle.load(mpe)
-  plot(mcpat_trees, testname, mcpat_output_path)
+#  input_queue = Queue()
+#  output_queue = Queue()
+#  epochs = parse_stats(m5_stats_file)
+#  config = parse_config(m5_config_file)
+#  mcpat_trees = [None]*len(epochs)
+#  threads = []
+#
+#  #""" Initialize Input Queue """
+#  #for i, epoch in zip(range(len(epochs)), epochs):
+#  #  input_queue.put((i, epoch))
+#
+#  #""" Launch Worker Threads """
+#  #for i in range(16):
+#  #  thr = Thread(target=mcpat_thread, args=[config, input_queue, output_queue])
+#  #  thr.start()
+#  #  threads.append(thr)
+#
+#  #bar = progressbar.ProgressBar(maxval=100, widgets=[progressbar.Bar('=', '[', ']'), ' ', progressbar.Percentage()]) #bar.start()
+#  #while not input_queue.empty():
+#  #  progress = int((len(epochs)-input_queue.qsize())*100/len(epochs))
+#  #  bar.update(progress)
+#  #  sleep(0.1)
+#  #bar.finish()
+#
+#  #""" Dequeue from Output Queue """
+#  #for thr in threads:
+#  #  thr.join()
+#
+#  #while not output_queue.empty():
+#  #  ret = output_queue.get()
+#  #  mcpat_trees[ret[0]] = ret[1]
+#
+#  sfile = os.path.join(mcpat_output_path, testname+".pickle")
+#
+#  #with open(sfile, "w") as mpe:
+#  #  pickle.dump(mcpat_trees, mpe)
+#  with open(sfile, "r") as mpe:
+#    mcpat_trees = pickle.load(mpe)
+#  plot(mcpat_trees, testname, mcpat_output_path)
 
 
   #print_stats(stats)
@@ -160,5 +174,4 @@ def m5_to_mcpat(m5_stats_file, m5_config_file, mcpat_template_file, mcpat_output
   #print("Num Configs: "+str(len(config)))
 
 # Test Code:
-#m5_to_mcpat("gem5/output/fft_small_x86/stats.txt", "gem5/output/fft_small_x86/config.ini", "mcpat_template.xml", "mcpat_x86.xml")
-#m5_to_mcpat("output/fft_small/stats.txt", "output/fft_small/config.ini", "mcpat-template.xml", "mcpat_arm.xml")
+m5_to_mcpat("gem5_out/qsort_small/stats.txt", "gem5_out/qsort_small/config.ini", "mcpat-template-x86.xml", "mcpat_xeon_mc.xml")

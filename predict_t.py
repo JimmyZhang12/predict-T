@@ -38,7 +38,7 @@ parser.add_argument('--template_xml', type=str, default="template.xml", help="pa
 args = parser.parse_args()
 
 predict_t_root = os.getenv('PREDICT_T_ROOT')
-mcpat_template = os.path.join(predict_t_root, "mcpat-template.xml")
+mcpat_template = os.path.join(predict_t_root, "mcpat-template-x86.xml")
 mcpat_path = os.path.join(predict_t_root, "mcpat")
 mcpat_out = os.path.join(predict_t_root, "mcpat_out")
 
@@ -86,7 +86,7 @@ def run(args):
   def m5_benchmark_thread(iq):
     while not iq.empty():
       test = iq.get()
-      run_gem5(test.cmd,test.opt,test.text_out,test.gem5_out,"Simple",mcpat_template,mcpat_path,mcpat_out,test.name)
+      run_gem5(test.cmd,test.opt,test.text_out,test.gem5_out,"XeonE7-8893",mcpat_template,mcpat_path,mcpat_out,test.name)
 
   # First run Gem5 for each benchmark:
   #for test in benchmarks:
