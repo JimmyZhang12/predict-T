@@ -147,10 +147,10 @@ void* test(void* arg) {
 void* test(void* arg) {
   // Perform random operations on a large vector to stress memory subsystem
 
-  std::vector<double> data(16*MB);
-  std::vector<int> keysa(2*MB);
-  std::vector<int> keysb(2*MB);
-  std::vector<int> keysc(2*MB);
+  std::vector<double> data(1*MB);
+  std::vector<int> keysa(MB/2);
+  std::vector<int> keysb(MB/2);
+  std::vector<int> keysc(MB/2);
   std::cout << "Finished Alloc" << "\n";
 
   // Init:
@@ -192,13 +192,12 @@ volatile void spinunlock(uint64_t * block) {
   __asm__ __volatile__( "movq %1,%0" : "=r" (value) : "m" (*block), "0" (value) : "memory");
 }
 
-
 void* test(void* arg) {
   // Perform random operations on a large vector to stress memory subsystem
 
-  std::vector<int> keysa(2*MB);
-  std::vector<int> keysb(2*MB);
-  std::vector<int> keysc(2*MB);
+  std::vector<int> keysa(MB/2);
+  std::vector<int> keysb(MB/2);
+  std::vector<int> keysc(MB/2);
   std::cout << "Finished Alloc" << "\n";
 
   // Init:
@@ -329,6 +328,7 @@ void* test(void* arg) {
 #endif
 
 int main() {
+#if (NTHREADS>1)
   pthread_t threads[NTHREADS];
   for(int i = 0; i < NTHREADS; i++) {
     pthread_create(&threads[i], NULL, test, NULL);
@@ -338,5 +338,8 @@ int main() {
   for(int i = 0; i < NTHREADS; i++) {
     pthread_join(threads[i], NULL);
   }
+#else
+  test(NULL);
+#endif
 	return 0;
 }

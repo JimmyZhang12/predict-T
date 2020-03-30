@@ -79,16 +79,25 @@ def replace(xml_line, stats, config):
     for i in range(len(keys)):
       for j in range(len(keys[i])):
         if keys[i][j] in stats:
-          #print(stats[keys[i][j]][1])
-          keys[i][j] = stats[keys[i][j]][1]
+          keys[i][j] = str(float(stats[keys[i][j]][1]))
         elif keys[i][j] in config:
-          #print(config[keys[i][j]])
-          keys[i][j] = config[keys[i][j]]
+          keys[i][j] = str(float(config[keys[i][j]]))
         elif "stats" in keys[i][j] or "config" in keys[i][j]:
-          print(keys[i][j])
           keys[i][j] = "0"
-    #print(keys)
+
     split_line[1] = ",".join([" ".join(y) for y in keys])
+    print(split_line[1])
+    # Evaluate
+    expr = split_line[1].split(",")
+    for i in range(len(expr)):
+      try:
+        expr[i] = str(int(max(math.ceil(eval(expr[i])),0)))
+      except:
+        expr[i] = "0"
+    split_line[1] = ",".join(expr)
+    print(split_line[1])
+
+    #print(keys)
     #print("".join(split_line))
     return "".join(split_line)
   return xml_line
@@ -174,4 +183,4 @@ def m5_to_mcpat(m5_stats_file, m5_config_file, mcpat_template_file, mcpat_output
   #print("Num Configs: "+str(len(config)))
 
 # Test Code:
-m5_to_mcpat("gem5_out/qsort_small/stats.txt", "gem5_out/qsort_small/config.ini", "mcpat-template-x86.xml", "mcpat_xeon_mc.xml")
+m5_to_mcpat("gem5_out/mb_double_add_10000_16kB_64kB_256kB_32MB/stats.txt", "gem5_out/mb_double_add_10000_16kB_64kB_256kB_32MB/config.ini", "mcpat-template-x86.xml", "mcpat_machine_bronk.xml")

@@ -147,9 +147,9 @@
       <stat name="ROB_writes" value="REPLACE{stats.system.cpu0.rob.rob_writes}"/>
       <!-- RAT accesses -->
       <stat name="rename_reads" value="REPLACE{stats.system.cpu0.rename.int_rename_lookups}"/> <!--lookup in renaming logic -->
-      <stat name="rename_writes" value="REPLACE{int ( stats.system.cpu0.rename.RenamedOperands * stats.system.cpu0.rename.int_rename_lookups / stats.system.cpu0.rename.RenameLookups )}"/><!--update dest regs. renaming logic -->
+      <stat name="rename_writes" value="REPLACE{( stats.system.cpu0.rename.RenamedOperands * stats.system.cpu0.rename.int_rename_lookups / stats.system.cpu0.rename.RenameLookups )}"/><!--update dest regs. renaming logic -->
       <stat name="fp_rename_reads" value="REPLACE{stats.system.cpu0.rename.fp_rename_lookups}"/>
-      <stat name="fp_rename_writes" value="REPLACE{int ( stats.system.cpu0.rename.RenamedOperands * stats.system.cpu0.rename.fp_rename_lookups / stats.system.cpu0.rename.RenameLookups )}"/>
+      <stat name="fp_rename_writes" value="REPLACE{( stats.system.cpu0.rename.RenamedOperands * stats.system.cpu0.rename.fp_rename_lookups / stats.system.cpu0.rename.RenameLookups )}"/>
       <!-- decode and rename stage use this, should be total ic - nop -->
       <!-- Inst window stats -->
       <stat name="inst_window_reads" value="REPLACE{stats.system.cpu0.iq.int_inst_queue_reads}"/>
@@ -1215,7 +1215,7 @@
       <!-- Links can route over other components or occupy whole area.
         by default, 50% of the NoC global links routes over other 
         components -->
-      <stat name="total_accesses" value="REPLACE{system.membus.pkt_count::total + system.tol3bus.pkt_count_system.l2.mem_side::system.l3.cpu_side + system.tol2bus.pkt_count::total}"/>
+      <stat name="total_accesses" value="REPLACE{stats.system.membus.pkt_count::total + stats.system.tol3bus.pkt_count_system.l2.mem_side::system.l3.cpu_side + stats.system.tol2bus.pkt_count::total}"/>
       <!-- This is the number of total accesses within the whole network not for each router -->
       <stat name="duty_cycle" value="1"/>
     </component>    

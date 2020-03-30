@@ -148,9 +148,9 @@
       <stat name="ROB_writes" value="REPLACE{stats.system.cpu.rob.rob_writes}"/>
       <!-- RAT accesses -->
       <stat name="rename_reads" value="REPLACE{stats.system.cpu.rename.int_rename_lookups}"/> <!--lookup in renaming logic -->
-      <stat name="rename_writes" value="REPLACE{int ( stats.system.cpu.rename.RenamedOperands * stats.system.cpu.rename.int_rename_lookups / stats.system.cpu.rename.RenameLookups )}"/><!--update dest regs. renaming logic -->
+      <stat name="rename_writes" value="REPLACE{( stats.system.cpu.rename.RenamedOperands * stats.system.cpu.rename.int_rename_lookups / stats.system.cpu.rename.RenameLookups )}"/><!--update dest regs. renaming logic -->
       <stat name="fp_rename_reads" value="REPLACE{stats.system.cpu.rename.fp_rename_lookups}"/>
-      <stat name="fp_rename_writes" value="REPLACE{int ( stats.system.cpu.rename.RenamedOperands * stats.system.cpu.rename.fp_rename_lookups / stats.system.cpu.rename.RenameLookups )}"/>
+      <stat name="fp_rename_writes" value="REPLACE{( stats.system.cpu.rename.RenamedOperands * stats.system.cpu.rename.fp_rename_lookups / stats.system.cpu.rename.RenameLookups )}"/>
       <!-- decode and rename stage use this, should be total ic - nop -->
       <!-- Inst window stats -->
       <stat name="inst_window_reads" value="REPLACE{stats.system.cpu.iq.int_inst_queue_reads}"/>
