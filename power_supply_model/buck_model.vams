@@ -9,7 +9,7 @@
 `include "pid.vams"
 `include "load.vams"
 
-`timescale 1us/1ps
+`timescale 1ns/1ps
 
 module buck_model ();
   // Top Level Signals
