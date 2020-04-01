@@ -5,9 +5,9 @@
 #MICRO_BENCHMARKS=("mb_cache_coherence"  "mb_double_add" "mb_double_mul" "mb_int_add" "mb_int_mul" "mb_mem"       "mb_phases"    "mb_sleep")
 #PROFILE_START=("1000000000"        "100000000"     "100000000"     "100000000"  "100000000"  "1000000000" "1000000000" "100000000")
 MICRO_BENCHMARKS=("mb_double_add" "mb_double_mul" "mb_int_add" "mb_int_mul")
-PROFILE_START=("1000000000"     "1000000000"     "1000000000"  "1000000000")
+PROFILE_START=("10000000"     "10000000"     "10000000"  "10000000")
 #DURATION=("5000" "10000" "50000" "100000" "500000" "1000000")
-DURATION=("50000")
+DURATION=("2500")
 INTERVAL=("500")
 #DURATION=("50000" "100000" "500000" "1000000" "5000000" "10000000")
 #INTERVAL=("500"   "1000"   "5000"   "10000"   "50000"   "100000")
@@ -35,10 +35,11 @@ for j in ${!MICRO_BENCHMARKS[@]}; do
 --power_profile_start=${PROFILE_START[$j]} \
 --power_profile_duration=${DURATION[$i]} \
 --power_profile_interval=${INTERVAL[$i]} \
+--ncverilog_path=${PREDICT_T_ROOT}/power_supply_model \
 ../gem5/configs/example/se.py \
 --cmd=mcpat_bench/${MICRO_BENCHMARKS[$j]} \
 --power_profile_interval=${INTERVAL[$i]} \
---num-cpus=4 \
+--num-cpus=1 \
 --cpu-type=DerivO3CPU \
 --l1i_size=${L1I[$k]} \
 --l1i-hwp-type=TaggedPrefetcher \
@@ -63,6 +64,7 @@ for j in ${!MICRO_BENCHMARKS[@]}; do
   --power_profile_start=${PROFILE_START[$j]} \
   --power_profile_duration=${DURATION[$i]} \
   --power_profile_interval=${INTERVAL[$i]} \
+  --ncverilog_path=${PREDICT_T_ROOT}/power_supply_model \
   ../gem5/configs/example/se.py \
   --cmd=mcpat_bench/${MICRO_BENCHMARKS[$j]} \
   --power_profile_interval=${INTERVAL[$i]} \
