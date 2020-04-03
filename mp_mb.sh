@@ -4,8 +4,10 @@
 #MICRO_BENCHMARKS=("mb_cache_coherence" "mb_double_add" "mb_double_mul" "mb_int_add" "mb_int_mul" "mb_mem" "mb_phases" "mb_sleep")
 #MICRO_BENCHMARKS=("mb_cache_coherence"  "mb_double_add" "mb_double_mul" "mb_int_add" "mb_int_mul" "mb_mem"       "mb_phases"    "mb_sleep")
 #PROFILE_START=("1000000000"        "100000000"     "100000000"     "100000000"  "100000000"  "1000000000" "1000000000" "100000000")
-MICRO_BENCHMARKS=("mb_double_add" "mb_double_mul" "mb_int_add" "mb_int_mul")
-PROFILE_START=("10000000"     "10000000"     "10000000"  "10000000")
+MICRO_BENCHMARKS=("mb_double_add")
+PROFILE_START=("10000000")
+#MICRO_BENCHMARKS=("mb_double_add" "mb_double_mul" "mb_int_add" "mb_int_mul")
+#PROFILE_START=("10000000"     "10000000"     "10000000"  "10000000")
 #DURATION=("5000" "10000" "50000" "100000" "500000" "1000000")
 DURATION=("2500")
 INTERVAL=("500")
@@ -28,9 +30,9 @@ for j in ${!MICRO_BENCHMARKS[@]}; do
       echo "
 ../gem5/build/X86/gem5.opt \
 --outdir=./gem5_out/$NAME \
---mcpat_template=/home/andrew/research/predict-T/mcpat-template-x86-sc.xml \
---mcpat_path=/home/andrew/research/predict-T/mcpat \
---mcpat_out=/home/andrew/research/predict-T/mcpat_short_trace_033020 \
+--mcpat_template=${PREDICT_T_ROOT}/mcpat-template-x86-sc.xml \
+--mcpat_path=${PREDICT_T_ROOT}/mcpat \
+--mcpat_out=${PREDICT_T_ROOT}/mcpat_out \
 --mcpat_testname=$NAME \
 --power_profile_start=${PROFILE_START[$j]} \
 --power_profile_duration=${DURATION[$i]} \
@@ -57,9 +59,9 @@ for j in ${!MICRO_BENCHMARKS[@]}; do
 --mem-size=8GB > text_out/$NAME.out &"
 ../gem5/build/X86/gem5.opt \
   --outdir=./gem5_out/$NAME \
-  --mcpat_template=/home/andrew/research/predict-T/mcpat-template-x86-sc.xml \
-  --mcpat_path=/home/andrew/research/predict-T/mcpat \
-  --mcpat_out=/home/andrew/research/predict-T/mcpat_short_trace_033020 \
+  --mcpat_template=${PREDICT_T_ROOT}/mcpat-template-x86-sc.xml \
+  --mcpat_path=${PREDICT_T_ROOT}/mcpat \
+  --mcpat_out=${PREDICT_T_ROOT}/mcpat_out \
   --mcpat_testname=$NAME \
   --power_profile_start=${PROFILE_START[$j]} \
   --power_profile_duration=${DURATION[$i]} \
@@ -83,7 +85,8 @@ for j in ${!MICRO_BENCHMARKS[@]}; do
   --l3-hwp-type=TaggedPrefetcher \
   --caches \
   --sys-clock=2GHz \
-  --mem-size=8GB > text_out/$NAME.out &
+  --mem-size=8GB
+#text_out/$NAME.out &
       while [ `jobs | wc -l` -ge 16 ]; do
         sleep 1
       done
