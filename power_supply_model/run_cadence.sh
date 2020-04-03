@@ -3,7 +3,7 @@
 SIM_ROOT="$PREDICT_T_ROOT/power_supply_model"
 
 if [[ -z $(docker images -q centos7:cadence) ]]; then
-  pushd docker && docker build --build-arg user=$(whoami) --build-arg wd=$SIM_ROOT -t centos7:cadence . && popd
+  pushd docker && docker build --build-arg gid=$(id -g $(whoami)) --build-arg uid=$(id -u $(whoami)) --build-arg user=$(whoami) --build-arg wd=$SIM_ROOT -t centos7:cadence . && popd
 fi
 
 docker run --rm --memory 16g --network=host \
