@@ -1,0 +1,78 @@
+//Verilog-AMS HDL
+//
+// Andrew Smith
+// 04092020
+//
+// This models the board capacitance, traces, and package impedence from the
+// intel EVSD 11.1 (2009)
+//
+
+`include "constants.vams"
+`include "disciplines.vams"
+`include "resistor.vams"
+
+`timescale 1ns/1ps
+
+module cap(p, n);
+  inout p, n;
+  electrical p, n;
+  parameter real C=0;
+
+  analog begin
+    I(p,n) <+ C * ddt(V(p,n));
+  end
+endmodule
+
+module ind(p, n);
+  inout p, n;
+  electrical p, n;
+  parameter real L=0;
+
+  analog begin
+    V(p,n) <+ L * ddt(I(p,n));
+  end
+endmodule
+
+
+module real_capacitor(p, n);
+  inout p, n;
+  electrical p, n;
+  electrical n1, n2;
+  parameter real C=1u;
+  parameter real ESL=0;
+  parameter real ESR=1u;
+  
+  cap#(.C(C)) C1(p, n1);
+  ind#(.L(ESL)) LESL(n1, n2);
+  res#(.R(ESR)) RESR(n2, n);
+endmodule
+
+module pcb_trace(p, n);
+  inout p, n;
+  electrical p, n;
+  electrical n1;
+  parameter real ESL=0;
+  parameter real ESR=1u;
+  
+  ind#(.L(ESL)) LESL(p, n1);
+  res#(.R(ESR)) RESR(n1, n);
+endmodule
+
+
+module board_package (vin, vout, gnd);
+	inout vin, vout, gnd;
+	electrical vin, vout, n1, gnd;
+
+  // Ceramic Bulk
+  real_capacitor#(.C(264u), .ESL(45p), .ESR(400u)) c_ceramic_bulk(vin, gnd);
+
+  // Ceramic Socket
+  real_capacitor#(.C(1222u), .ESL(20p), .ESR(150u)) c_ceramic_socket(n1, gnd);
+
+  // Motherboard traces
+  pcb_trace#(.ESL(90p), .ESR(200u)) trace(vin, n1);
+
+  // Package
+  pcb_trace#(.ESL(12p), .ESR(400u)) package(n1, vout);
+
+endmodule

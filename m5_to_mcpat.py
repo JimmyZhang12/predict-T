@@ -2,24 +2,22 @@ import os
 import sys
 import re
 import pickle
-from threading import Thread
-from Queue import Queue
-from time import sleep
-import progressbar
+
+from file_read_backwards import FileReadBackwards
 
 from mcpat import *
 
 def parse_stats(stat_file):
   epoch = []
   stats = {}
-  with open(stat_file, "r") as sf:
+  with FileReadBackwards(stat_file, encoding="utf-8") as sf:
     for line in sf:
       if line.strip() == "":
         continue
       elif "End Simulation Statistics" in line:
-        epoch.append(stats)
-      elif "Begin Simulation Statistics" in line:
         stats = {}
+      elif "Begin Simulation Statistics" in line:
+        epoch.append(stats)
       else:
         stat = []
         sstr = re.sub('\s+', ' ', line).strip()

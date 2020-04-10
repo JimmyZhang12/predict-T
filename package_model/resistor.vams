@@ -1,0 +1,22 @@
+//Verilog-AMS HDL
+//
+// Andrew Smith
+// 04092020
+//
+// This models the board capacitance, traces, and package impedence from the
+// intel EVSD 11.1 (2009)
+//
+
+`include "constants.vams"
+`include "disciplines.vams"
+
+`timescale 1ns/1ps
+module res(p, n);
+  inout p, n;
+  electrical p, n;
+  parameter real R=1;
+
+  analog begin
+    I(p,n) <+ V(p,n)/R;
+  end
+endmodule
