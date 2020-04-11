@@ -30,9 +30,11 @@ t = np.arange(0, (sample_freq)*len(x), sample_freq)
 p = 20*np.log10(np.abs(np.fft.rfft(y)))
 v = 20*np.log10(np.abs(np.fft.rfft(v)))
 f = np.linspace(0, rate/2, len(p))/1000000
-plt.plot(f[1:5000], v[1:5000], f[1:5000], p[1:5000])
+plt.plot(f[1:1000], v[1:1000], color="green", linewidth=1, label=args.data.split(",")[1])
+plt.plot(f[1:1000], p[1:1000], color="blue", linewidth=1, label=args.data.split(",")[0])
 #plt.plot(f[1:1000], p[1:1000], f[1:1000], v[1:1000])
 plt.ylabel("Magnitude (dB)")
 plt.xlabel("Freq (MHz)")
+plt.legend(loc='right')
 plt.show()
 
