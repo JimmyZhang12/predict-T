@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 import argparse
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--input', type=str, default="", help="input csv to take fft of")
+parser.add_argument('--input', type=str, default="", help="input csv")
 parser.add_argument('--title', type=str, default="", help="name of the plot")
 parser.add_argument('--warmup', type=int, default=0, help="time in nanoseconds of the warmup")
 parser.add_argument('--end', type=int, default=0, help="time in nanoseconds of end of the plot")
