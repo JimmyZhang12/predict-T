@@ -1,11 +1,12 @@
 import vsim
 import sys
 
-vsim.initialize("mb_double_mul_500_16kB_64kB_256kB_32MB", 250)
+mem = sys.argv[1].split(".")[0].split("/")[-1]
+vsim.initialize(mem, 1)
 # Warmup Period:
-with open("mb_mem_500_16kB_64kB_256kB_32MB.csv", "r") as profile:
+with open(sys.argv[1].split(".")[0]+".csv", "r") as profile:
   data = profile.readlines()
-  for i in range(400): # 100us Warmup
+  for i in range(0): # 0us Warmup
     vsim.set_driver_signals(1.0, float(data[0].split(",")[1].strip()), 0)
     vsim.get_voltage()
   for point in data:

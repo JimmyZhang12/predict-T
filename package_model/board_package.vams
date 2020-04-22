@@ -43,6 +43,7 @@ module real_capacitor(p, n);
   parameter real ESR=1u;
   
   cap#(.C(C)) C1(p, n1);
+  res#(.R(100k)) RESR1(n1, n2);
   ind#(.L(ESL)) LESL(n1, n2);
   res#(.R(ESR)) RESR(n2, n);
 endmodule
@@ -64,15 +65,24 @@ module board_package (vin, vout, gnd);
 	electrical vin, vout, n1, gnd;
 
   // Ceramic Bulk
+  real_capacitor#(.C(990u), .ESL(423p), .ESR(2m)) c_electrolytic_bulk(vin, gnd);
+
+  // Ceramic Bulk
   real_capacitor#(.C(264u), .ESL(45p), .ESR(400u)) c_ceramic_bulk(vin, gnd);
 
   // Ceramic Socket
   real_capacitor#(.C(1222u), .ESL(20p), .ESR(150u)) c_ceramic_socket(n1, gnd);
 
+  res#(.R(100k)) r1(n1, gnd);
+
   // Motherboard traces
   pcb_trace#(.ESL(90p), .ESR(200u)) trace(vin, n1);
 
+  res#(.R(100k)) ra(vin, gnd);
+
   // Package
   pcb_trace#(.ESL(12p), .ESR(400u)) package(n1, vout);
+
+  res#(.R(100k)) rb(vout, gnd);
 
 endmodule

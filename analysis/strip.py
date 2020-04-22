@@ -2,10 +2,14 @@
 import sys
 
 a = []
-with open(sys.argv[1], "r") as inf:
+
+infile = sys.argv[1]
+outfile = sys.argv[1].split(".")[0]+".csv"
+
+with open(infile, "r") as inf:
   a = inf.readlines()
 
-with open(sys.argv[2], "w") as outf:
+with open(outfile, "w") as outf:
   for line in a:
     sline = line.strip()
     try:

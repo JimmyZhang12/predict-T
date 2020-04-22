@@ -12,12 +12,12 @@ from progressbar import AnimatedMarker, Bar, BouncingBar, Counter, ETA, \
                         SimpleProgress, Timer
 
 
-period = [2e-9, 5e-9, 10e-9, 50e-9, 100e-9, 500e-9, 1e-6, 5e-6, 10e-6, 50e-6, 100e-6, 500e-6, 1e-3]
+period = [20e-9, 100e-9, 200e-9, 1e-6, 2e-6, 10e-6, 20e-6, 100e-6]
 slew_rate = list(np.arange(0.01, 0.3, 0.05))
-amplitude = range(5, 100, 4)
-duration=5e-3
+amplitude = range(5, 95, 5)
+duration=500e-6
 timestep=1e-9
-min_power = 1
+min_power = 5
 
 
 parser = argparse.ArgumentParser()
@@ -39,7 +39,13 @@ def arg_check(period, slew_rate, min_power, peak_power, timestep, duration, outp
   time = 0
   half_p = period/2;
   power = min_power
+  min_rr = 2e-5
+  max_rr = 5e-6
   if (((peak_power - min_power)/slew_rate)/1e9 > half_p):
+    return False
+  if(period < max_rr and (peak_power - min_power) > 25):
+    return False
+  if(period < min_rr and (peak_power - min_power) > (2e-5/period)*100):
     return False
   return True
 
@@ -47,7 +53,13 @@ def trace(period, slew_rate, min_power, peak_power, timestep, duration, outpath,
   time = 0
   half_p = period/2;
   power = min_power
+  min_rr = 2e-5
+  max_rr = 5e-6
   if (((peak_power - min_power)/slew_rate)/1e9 > half_p):
+    return False
+  if(period < max_rr and (peak_power - min_power) > 25):
+    return False
+  if(period < min_rr and (peak_power - min_power) > (2e-5/period)*100):
     return False
 
   outname = "trace_"+str(per_idx)+"_"+str(sl_idx)+"_"+str(amp_idx)+".csv"

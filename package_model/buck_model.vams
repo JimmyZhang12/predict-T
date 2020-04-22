@@ -39,8 +39,8 @@ module buck_model ();
   real v_vout, i_vout, v_vin, i_vin;
 
   // Modules
-  res#(.R(1u)) rsensea(.p(n1), .n(_v_in));
-  res#(.R(1u)) rsenseb(.p(_v_out), .n(n2));
+  res#(.R(500u)) rsensea(.p(n1), .n(_v_in));
+  res#(.R(10u)) rsenseb(.p(_v_out), .n(n2));
   variable_isrc load(.p(n2), .n(gnd), .i(_vr_last));
   variable_vsrc supply(.p(n1), .n(gnd), .v(_ve_set));
   board_package filter(.vin(_v_in), .vout(_v_out), .gnd(gnd));
