@@ -166,10 +166,12 @@ def plot_time_domain(time, ds, i, name, xtitle, ytitle):
   fig, ax = plt.subplots(1,1)
   fig.set_size_inches(20,7)
   fig.suptitle(name, fontsize=24)
+  range_low = 100000
+  range_high = range_low + int(period[i]*3*1e9)
   for j in range(len(amplitude)):
     for k in range(len(slew_rate)):
       if ds[i][j][k] != None:
-        ax.plot(time[100000:200000], ds[i][j][k][100000:200000], label=str(amplitude[j])+"_"+"{:.3f}".format(slew_rate[k]))
+        ax.plot(time[range_low:range_high], ds[i][j][k][range_low:range_high], label=str(amplitude[j])+"_"+"{:.3f}".format(slew_rate[k]))
   ax.set_title("Period "+str(period[i]))
   ax.set_ylabel(ytitle)
   ax.set_xlabel(xtitle)
@@ -214,8 +216,8 @@ for i in range(len(period)):
   plot_time_domain(time, i_in, i, "Supply Current", "Time [s]", "Current [A]")
 for i in range(len(period)):
   plot_time_domain(time, i_out, i, "Device Current", "Time [s]", "Current [A]")
-for i in range(len(period)):
-  plot_time_domain(time, v_in, i, "Supply Voltage", "Time [s]", "Voltage [V]")
+#for i in range(len(period)):
+#  plot_time_domain(time, v_in, i, "Supply Voltage", "Time [s]", "Voltage [V]")
 for i in range(len(period)):
   plot_time_domain(time, v_out, i, "Device Voltage", "Time [s]", "Voltage [V]")
 

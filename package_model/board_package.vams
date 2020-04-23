@@ -13,7 +13,7 @@
 
 `timescale 1ns/1ps
 
-module cap(p, n);
+module my_cap(p, n);
   inout p, n;
   electrical p, n;
   parameter real C=0;
@@ -23,7 +23,7 @@ module cap(p, n);
   end
 endmodule
 
-module ind(p, n);
+module my_ind(p, n);
   inout p, n;
   electrical p, n;
   parameter real L=0;
@@ -34,7 +34,7 @@ module ind(p, n);
 endmodule
 
 
-module real_capacitor(p, n);
+module my_real_capacitor(p, n);
   inout p, n;
   electrical p, n;
   electrical n1, n2;
@@ -42,10 +42,10 @@ module real_capacitor(p, n);
   parameter real ESL=0;
   parameter real ESR=1u;
   
-  cap#(.C(C)) C1(p, n1);
-  res#(.R(100k)) RESR1(n1, n2);
-  ind#(.L(ESL)) LESL(n1, n2);
-  res#(.R(ESR)) RESR(n2, n);
+  my_cap#(.C(C)) C1(p, n1);
+  my_res#(.R(100k)) RESR1(n1, n2);
+  my_ind#(.L(ESL)) LESL(n1, n2);
+  my_res#(.R(ESR)) RESR(n2, n);
 endmodule
 
 module pcb_trace(p, n);
@@ -55,34 +55,46 @@ module pcb_trace(p, n);
   parameter real ESL=0;
   parameter real ESR=1u;
   
-  ind#(.L(ESL)) LESL(p, n1);
-  res#(.R(ESR)) RESR(n1, n);
+  my_ind#(.L(ESL)) LESL(p, n1);
+  my_res#(.R(ESR)) RESR(n1, n);
 endmodule
 
 
-module board_package (vin, vout, gnd);
+module board_package (vin, vout, vsense_in, vsense_out, gnd);
 	inout vin, vout, gnd;
-	electrical vin, vout, n1, gnd;
+  output vsense_in, vsense_out;
+	electrical vin, vout, vsense_in, vsense_out, n1, n2, n3, gnd;
+
+  // Supply Load Resistor
+  my_res#(.R(500u)) rsupply(vin, n1);
 
   // Ceramic Bulk
-  real_capacitor#(.C(990u), .ESL(423p), .ESR(2m)) c_electrolytic_bulk(vin, gnd);
+  my_real_capacitor#(.C(990u), .ESL(423p), .ESR(2m)) c_electrolytic_bulk(n1, gnd);
 
   // Ceramic Bulk
-  real_capacitor#(.C(264u), .ESL(45p), .ESR(400u)) c_ceramic_bulk(vin, gnd);
+  my_real_capacitor#(.C(264u), .ESL(45p), .ESR(400u)) c_ceramic_bulk(n1, gnd);
 
   // Ceramic Socket
-  real_capacitor#(.C(1222u), .ESL(20p), .ESR(150u)) c_ceramic_socket(n1, gnd);
+  my_real_capacitor#(.C(1222u), .ESL(20p), .ESR(150u)) c_ceramic_socket(n2, gnd);
 
-  res#(.R(100k)) r1(n1, gnd);
+  my_res#(.R(100k)) r1(n2, gnd);
 
   // Motherboard traces
-  pcb_trace#(.ESL(90p), .ESR(200u)) trace(vin, n1);
+  pcb_trace#(.ESL(90p), .ESR(200u)) trace(n1, n2);
 
-  res#(.R(100k)) ra(vin, gnd);
+  my_res#(.R(100k)) ra(n1, gnd);
 
   // Package
-  pcb_trace#(.ESL(12p), .ESR(400u)) package(n1, vout);
+  pcb_trace#(.ESL(12p), .ESR(400u)) package(n2, n3);
 
-  res#(.R(100k)) rb(vout, gnd);
+  my_res#(.R(100k)) rb(n3, gnd);
+
+  // output sense resistor
+  my_res#(.R(1u)) rout(n3, vout);
+
+  analog begin
+    V(vsense_in, gnd) <+ V(n1, gnd);
+    V(vsense_out, gnd) <+ V(n3, gnd);
+  end
 
 endmodule

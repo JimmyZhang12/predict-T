@@ -27,7 +27,7 @@ module buck_model ();
   // Top Level Signals
   wire _l_clk, _l_rst, _l_pwm;
   wire [7:0] _l_e, _l_d;
-  electrical _v_out, gnd, _v_in, n2, n1;
+  electrical n4, gnd, n3, n2, n1, vsense_out, vsense_in;
 
   // Gem5 Interface Signals
   real _v_set, _r_last;
@@ -39,23 +39,23 @@ module buck_model ();
   real v_vout, i_vout, v_vin, i_vin;
 
   // Modules
-  res#(.R(500u)) rsensea(.p(n1), .n(_v_in));
-  res#(.R(10u)) rsenseb(.p(_v_out), .n(n2));
-  variable_isrc load(.p(n2), .n(gnd), .i(_vr_last));
   variable_vsrc supply(.p(n1), .n(gnd), .v(_ve_set));
-  board_package filter(.vin(_v_in), .vout(_v_out), .gnd(gnd));
+  my_res#(.R(1u)) rsensea(.p(n1), .n(n3));
+  board_package filter(.vin(n3), .vout(n4), .gnd(gnd), .vsense_in(vsense_in), .vsense_out(vsense_out));
+  my_res#(.R(1u)) rsenseb(.p(n4), .n(n2));
+  variable_isrc load(.p(n2), .n(gnd), .i(_vr_last));
 
 
   analog begin
     V(gnd) <+ 0.0;
-    _v_next = V(_v_out);
+    _v_next = V(n4);
     V(_vr_last) <+ _r_last;
     V(_ve_set) <+ _v_set;
 
-    v_vout = V(_v_out, gnd);
-    i_vout = I(_v_out, n2);
-    v_vin = V(_v_in, gnd);
-    i_vin = I(n1, _v_in);
+    v_vout = V(vsense_out, gnd);
+    i_vout = I(n4, n2);
+    v_vin = V(vsense_in, gnd);
+    i_vin = I(n1, n3);
   end
 
   initial begin

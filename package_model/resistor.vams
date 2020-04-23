@@ -11,7 +11,7 @@
 `include "disciplines.vams"
 
 `timescale 1ns/1ps
-module res(p, n);
+module my_res(p, n);
   inout p, n;
   electrical p, n;
   parameter real R=1;
