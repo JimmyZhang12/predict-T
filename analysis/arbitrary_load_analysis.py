@@ -65,47 +65,65 @@ def keys_to_vals(keys):
     vals.append([period[i[0]], amplitude[i[2]], slew_rate[i[1]]])
   return vals
 
-def max_pos_slew_rate(supply_current, headers):
-  prev = supply_current[10]
-  cmax = 0
-  for i in supply_current[10:]:
-    cmax = max(i-prev, cmax)
+def average_rising_slew(signal, headers, ts, trigger_l, trigger_h, period):
+  cmax = []
+  flag = False
+  ma = 0
+  start_time = 100000
+  end_time = start_time + int(period*3*1e9)
+  prev = start_time - 1
+  for i in range(start_time, end_time):
+    if(ts[i] > trigger_l and ts[prev] <= trigger_l and not flag):
+      flag = True
+    if(ts[i] > trigger_h and ts[prev] <= trigger_h and flag):
+      flag = False
+    if flag:
+      cmax.append(signal[i]-signal[prev])
     prev = i
+  cmax = sum(cmax)/len(cmax)
   return cmax
 
-def max_neg_slew_rate(supply_current, headers):
-  prev = supply_current[10]
-  cmin = 0
-  for i in supply_current[10:]:
-    cmin = min(i-prev, cmin)
+def average_falling_slew(signal, headers, ts, trigger_l, trigger_h, period):
+  cmin = []
+  flag = False
+  ma = 0
+  start_time = 100000
+  end_time = start_time + int(period*3*1e9)
+  prev = start_time - 1
+  for i in range(start_time, end_time):
+    if(ts[i] < trigger_h and ts[prev] >= trigger_h and not flag):
+      flag = True
+    if(ts[i] < trigger_l and ts[prev] >= trigger_l and flag):
+      flag = False
+    if flag:
+      cmin.append(abs(signal[i]-signal[prev]))
     prev = i
-  return abs(cmin)
+  cmin = sum(cmin)/len(cmin)
+  return cmin
 
-def average_phase_delay(time, supply_current, device_current, headers, trigger):
+def average_phase_delay(time, supply_current, device_current, headers, triggerA, triggerB, period):
   pdr = []
   pdf = []
   start_time = 0
+  start_range = 100000
+  end_range = start_range + int(period*3*1e9)
   prev = 0
   flag = False
-  for i in range(len(time)):
-    if len(pdf) > 30:
-      averagef = sum(pdf)/len(pdf)
-      averager = sum(pdr)/len(pdr)
-      return [averagef,averager]
+  for i in range(start_range, end_range):
     # Rising Edge
-    if(device_current[i] > trigger and device_current[prev] <= trigger and not flag):
+    if(device_current[i] > triggerA and device_current[prev] <= triggerA and not flag):
       start_time = time[i]
       flag = True
     # Falling Edge
-    if(device_current[i] < trigger and device_current[prev] >= trigger and not flag):
+    if(device_current[i] < triggerA and device_current[prev] >= triggerA and not flag):
       start_time = time[i]
       flag = True
     # Rising Edge
-    if(supply_current[i] > trigger and supply_current[prev] <= trigger and flag):
+    if(supply_current[i] > triggerB and supply_current[prev] <= triggerB and flag):
       pdr.append(time[i]-start_time)
       flag = False
     # Falling Edge
-    if(supply_current[i] < trigger and supply_current[prev] >= trigger and flag):
+    if(supply_current[i] < triggerB and supply_current[prev] >= triggerB and flag):
       pdf.append(time[i]-start_time)
       flag = False
     prev = i
@@ -113,42 +131,95 @@ def average_phase_delay(time, supply_current, device_current, headers, trigger):
   averager = sum(pdr)/len(pdr)
   return [averagef,averager]
 
-def p_p(time, signal, headers, ts, trigger):
+def p_p(time, signal, headers, ts, trigger, period):
   cmin = []
   cmax = []
   start_time = 0
   prev = 0
   flag = False
-  fp = not flag
+  fp = False
   ma = 0
-  mi = 0
-  for i in range(len(time)):
-    if len(cmin) > 30:
-      cmin = sum(cmin)/len(cmin)
-      cmax = sum(cmax)/len(cmax)
-      return cmax - cmin
+  mi = 100000
+  start_time = 100000
+  end_time = start_time + int(period*3*1e9)
+  prev = start_time - 1
+  for i in range(start_time, end_time):
     # Peak
     if(ts[i] > trigger and ts[prev] <= trigger and not flag):
-      ma = max(signal[i], ma)
-      if flag and not fp:
-        cmin.append(mi)
       flag = True
     # Min
     if(ts[i] < trigger and ts[prev] >= trigger and  flag):
-      mi = max(signal[i], mi)
-      if not flag and fp:
-        cmax.append(ma)
-      start_time = time[i]
       flag = False
+    if flag:
+      ma = max(signal[i], ma)
+      if not fp:
+        cmin.append(mi)
+        mi = 100000
+    if not flag:
+      mi = min(signal[i], mi)
+      if fp:
+        cmax.append(ma)
+        ma = 0
     fp = flag
     prev = i
+  cmin = sum(cmin)/len(cmin)
+  cmax = sum(cmax)/len(cmax)
+  return cmax - cmin
+
+def dc_offset(time, signal, headers, ts, trigger, period):
+  cmin = []
+  cmax = []
+  start_time = 0
+  prev = 0
+  flag = False
+  fp = False
+  ma = 0
+  mi = 100000
+  start_time = 100000
+  end_time = start_time + int(period*3*1e9)
+  prev = start_time - 1
+  for i in range(start_time, end_time):
+    # Peak
+    if(ts[i] > trigger and ts[prev] <= trigger and not flag):
+      flag = True
+    # Min
+    if(ts[i] < trigger and ts[prev] >= trigger and  flag):
+      flag = False
+    if flag:
+      ma = max(signal[i], ma)
+      if not fp:
+        cmin.append(mi)
+        mi = 100000
+    if not flag:
+      mi = min(signal[i], mi)
+      if fp:
+        cmax.append(ma)
+        ma = 0
+    fp = flag
+    prev = i
+  cmin = sum(cmin)/len(cmin)
+  cmax = sum(cmax)/len(cmax)
+  return (cmax + cmin)/2
 
 def plot_P_A(x, y, data_vector, super_title):
   """ Plots Period on X axis Amplitude on Y axis """
   fig, axs = plt.subplots(2,3)
   fig.set_size_inches(20,10)
   fig.suptitle(super_title, fontsize=24)
-  levels = np.linspace(data_vector[:,:,-1].min(), data_vector[:,:,-1].max(), 50)[1:]
+  mi = 10000000
+  ma = 0
+  for i in range(len(period)):
+    for j in range(len(amplitude)):
+      for k in range(len(slew_rate)):
+        print(data_vector[i,j,k])
+        if(data_vector[i,j,k] != 0.0):
+          mi = min(data_vector[i,j,k], mi)
+  for i in range(len(period)):
+    for j in range(len(amplitude)):
+      for k in range(len(slew_rate)):
+        ma = max(data_vector[i,j,k], ma)
+  levels = np.linspace(mi, ma, 100)[1:]
+  print(levels)
   for ax, i in zip(axs.ravel(), range(len(slew_rate))):
     print(data_vector[:,:,i].shape)
     print(len(x))
@@ -193,7 +264,7 @@ i_in = [[[None for x in range(len(slew_rate))] for x in range(len(amplitude))] f
 v_out = [[[None for x in range(len(slew_rate))] for x in range(len(amplitude))] for x in range(len(period))]
 i_out = [[[None for x in range(len(slew_rate))] for x in range(len(amplitude))] for x in range(len(period))]
 
-for file in files[:]:
+for file in files[0:]:
   i+=1
   key = get_key(file)
   csv = import_csv(file, headers)
@@ -203,26 +274,27 @@ for file in files[:]:
   v_out[key[0]][key[2]][key[1]] = [float(i) for i in csv[headers[3]]]
   device_current = i_out[key[0]][key[2]][key[1]] = [float(i) for i in csv[headers[4]]]
 
-  #max_supply_slew_rate_n[key[0]][key[2]][key[1]] = max_neg_slew_rate(supply_current, headers)
-  #max_supply_slew_rate_p[key[0]][key[2]][key[1]] = max_pos_slew_rate(supply_current, headers)
-  #a = average_phase_delay(time, supply_current, device_current, headers, 5+amplitude[key[2]]/2)
-  #supply_phase_delay_falling[key[0]][key[2]][key[1]] = a[0]
-  #supply_phase_delay_rising[key[0]][key[2]][key[1]] = a[1]
-  #supply_cpp[key[0]][key[2]][key[1]] = p_p(time, supply_current, headers, device_current, 5+amplitude[key[2]]/2)
+  supply_cpp[key[0]][key[2]][key[1]] = p_p(time, supply_current, headers, device_current, 5+amplitude[key[2]]/2, period[key[0]])
+  dc_o = dc_offset(time, supply_current, headers, device_current, 5+amplitude[key[2]]/2, period[key[0]])
+  max_supply_slew_rate_n[key[0]][key[2]][key[1]] = average_falling_slew(supply_current, headers, device_current, 5+3*amplitude[key[2]]/8, 5+5*amplitude[key[2]]/8, period[key[0]])
+  max_supply_slew_rate_p[key[0]][key[2]][key[1]] = average_rising_slew(supply_current, headers, device_current, 5+3*amplitude[key[2]]/8, 5+5*amplitude[key[2]]/8, period[key[0]])
+  a = average_phase_delay(time, supply_current, device_current, headers, 5+amplitude[key[2]]/2, 5+amplitude[key[2]]/2, period[key[0]])
+  supply_phase_delay_falling[key[0]][key[2]][key[1]] = a[0]
+  supply_phase_delay_rising[key[0]][key[2]][key[1]] = a[1]
   pbar.update(i)
 pbar.finish()
 
-for i in range(len(period)):
-  plot_time_domain(time, i_in, i, "Supply Current", "Time [s]", "Current [A]")
-for i in range(len(period)):
-  plot_time_domain(time, i_out, i, "Device Current", "Time [s]", "Current [A]")
+#for i in range(len(period)):
+#  plot_time_domain(time, i_in, i, "Supply Current", "Time [s]", "Current [A]")
+#for i in range(len(period)):
+#  plot_time_domain(time, i_out, i, "Device Current", "Time [s]", "Current [A]")
 #for i in range(len(period)):
 #  plot_time_domain(time, v_in, i, "Supply Voltage", "Time [s]", "Voltage [V]")
-for i in range(len(period)):
-  plot_time_domain(time, v_out, i, "Device Voltage", "Time [s]", "Voltage [V]")
+#for i in range(len(period)):
+#  plot_time_domain(time, v_out, i, "Device Voltage", "Time [s]", "Voltage [V]")
 
-#plot_P_A(amplitude, period, max_supply_slew_rate_n, "Max Negative Supply Slew Rate")
-#plot_P_A(amplitude, period, max_supply_slew_rate_p, "Max Positive Supply Slew Rate")
+plot_P_A(amplitude, period, max_supply_slew_rate_n, "Average Falling Supply Slew Rate")
+plot_P_A(amplitude, period, max_supply_slew_rate_p, "Average Rising Supply Slew Rate")
 #plot_P_A(amplitude, period, supply_phase_delay_rising, "Phase Delay Rising Edge")
 #plot_P_A(amplitude, period, supply_phase_delay_falling, "Phase Delay Falling Edge")
 #plot_P_A(amplitude, period, supply_cpp, "Supply Current Peak to Peak")

@@ -12,7 +12,7 @@ input=input
 DURATION=("1000000000")
 INTERVAL=("1000000")
 STEP=("1000")
-PROFILE_START=("0")
+PROFILE_START=("-1")
 
 L1D=("64kB")
 L1I=("32kB")
@@ -29,7 +29,7 @@ opt=("" "1000" "${input}/qsort_large.dat" "${input}/susan_large.pgm ${output}/su
 for j in ${!name[@]}; do 
   for i in ${!INTERVAL[@]}; do 
     for k in ${!L1D[@]}; do 
-      TN=${name[$j]}_${INTERVAL[$i]}
+      TN="${name[$j]}_${INTERVAL[$i]}_2500u"
 #--debug-flags=TestPowerPred,StatEvent \
   #--debug-flags=TestPowerPred,StatEvent \
       echo "

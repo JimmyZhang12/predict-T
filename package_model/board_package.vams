@@ -66,7 +66,7 @@ module board_package (vin, vout, vsense_in, vsense_out, gnd);
 	electrical vin, vout, vsense_in, vsense_out, n1, n2, n3, gnd;
 
   // Supply Load Resistor
-  my_res#(.R(500u)) rsupply(vin, n1);
+  my_res#(.R(2500u)) rsupply(vin, n1);
 
   // Ceramic Bulk
   my_real_capacitor#(.C(990u), .ESL(423p), .ESR(2m)) c_electrolytic_bulk(n1, gnd);
