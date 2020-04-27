@@ -41,7 +41,12 @@ module buck_model ();
   // Modules
   variable_vsrc supply(.p(n1), .n(gnd), .v(_ve_set));
   my_res#(.R(1u)) rsensea(.p(n1), .n(n3));
-  board_package filter(.vin(n3), .vout(n4), .gnd(gnd), .vsense_in(vsense_in), .vsense_out(vsense_out));
+  board_package_intel_server filter(.vin(n3), .vout(n4), .gnd(gnd), .vsense_in(vsense_in), .vsense_out(vsense_out));
+  //board_package_laptop filter(.vin(n3), .vout(n4), .gnd(gnd), .vsense_in(vsense_in), .vsense_out(vsense_out));
+  //board_package_mobile filter(.vin(n3), .vout(n4), .gnd(gnd), .vsense_in(vsense_in), .vsense_out(vsense_out));
+  //board_package_embedded filter(.vin(n3), .vout(n4), .gnd(gnd), .vsense_in(vsense_in), .vsense_out(vsense_out));
+  //board_package_perf_uc filter(.vin(n3), .vout(n4), .gnd(gnd), .vsense_in(vsense_in), .vsense_out(vsense_out));
+  //board_package_lp filter(.vin(n3), .vout(n4), .gnd(gnd), .vsense_in(vsense_in), .vsense_out(vsense_out));
   my_res#(.R(1u)) rsenseb(.p(n4), .n(n2));
   variable_isrc load(.p(n2), .n(gnd), .i(_vr_last));
 

@@ -34,6 +34,8 @@ supply_v_droop = np.zeros((len(period), len(amplitude), len(slew_rate)))
 supply_v_droop_len = np.zeros((len(period), len(amplitude), len(slew_rate)))
 supply_phase_delay_rising = np.zeros((len(period), len(amplitude), len(slew_rate)))
 supply_phase_delay_falling = np.zeros((len(period), len(amplitude), len(slew_rate)))
+supply_energy = np.zeros((len(period), len(amplitude), len(slew_rate)))
+device_energy = np.zeros((len(period), len(amplitude), len(slew_rate)))
 
 def get_files(path):
   return glob.glob(path+"/trace_*.csv")
@@ -131,6 +133,17 @@ def average_phase_delay(time, supply_current, device_current, headers, triggerA,
   averager = sum(pdr)/len(pdr)
   return [averagef,averager]
 
+def energy(voltage, current, period):
+  start_range = 100000
+  end_range = start_range + int(period*3*1e9)
+  energy = 0
+  for i in range(start_range, end_range):
+    energy += voltage[i]*current[i]*period
+  return energy/3*period
+
+def power(voltage, current):
+  return current*voltage
+
 def p_p(time, signal, headers, ts, trigger, period):
   cmin = []
   cmax = []
@@ -218,7 +231,7 @@ def plot_P_A(x, y, data_vector, super_title):
     for j in range(len(amplitude)):
       for k in range(len(slew_rate)):
         ma = max(data_vector[i,j,k], ma)
-  levels = np.linspace(mi, ma, 100)[1:]
+  levels = np.linspace(mi, ma, 1000)[:]
   print(levels)
   for ax, i in zip(axs.ravel(), range(len(slew_rate))):
     print(data_vector[:,:,i].shape)
@@ -263,6 +276,8 @@ v_in = [[[None for x in range(len(slew_rate))] for x in range(len(amplitude))] f
 i_in = [[[None for x in range(len(slew_rate))] for x in range(len(amplitude))] for x in range(len(period))]
 v_out = [[[None for x in range(len(slew_rate))] for x in range(len(amplitude))] for x in range(len(period))]
 i_out = [[[None for x in range(len(slew_rate))] for x in range(len(amplitude))] for x in range(len(period))]
+power_in = [[[None for x in range(len(slew_rate))] for x in range(len(amplitude))] for x in range(len(period))]
+power_out = [[[None for x in range(len(slew_rate))] for x in range(len(amplitude))] for x in range(len(period))]
 
 for file in files[0:]:
   i+=1
@@ -273,6 +288,13 @@ for file in files[0:]:
   supply_current = i_in[key[0]][key[2]][key[1]] = [float(i) for i in csv[headers[2]]]
   v_out[key[0]][key[2]][key[1]] = [float(i) for i in csv[headers[3]]]
   device_current = i_out[key[0]][key[2]][key[1]] = [float(i) for i in csv[headers[4]]]
+
+  # Generate Time Domain Power Traces
+  power_in[key[0]][key[2]][key[1]] = [power(i, j) for i, j in zip(v_in[key[0]][key[2]][key[1]], i_in[key[0]][key[2]][key[1]])]
+  power_out[key[0]][key[2]][key[1]] = [power(i, j) for i, j in zip(v_out[key[0]][key[2]][key[1]], i_out[key[0]][key[2]][key[1]])]
+
+  supply_energy[key[0]][key[2]][key[1]] = energy(v_in[key[0]][key[2]][key[1]], supply_current, period[key[0]])
+  device_energy[key[0]][key[2]][key[1]] = energy(v_out[key[0]][key[2]][key[1]], device_current, period[key[0]])
 
   supply_cpp[key[0]][key[2]][key[1]] = p_p(time, supply_current, headers, device_current, 5+amplitude[key[2]]/2, period[key[0]])
   dc_o = dc_offset(time, supply_current, headers, device_current, 5+amplitude[key[2]]/2, period[key[0]])
@@ -292,9 +314,15 @@ pbar.finish()
 #  plot_time_domain(time, v_in, i, "Supply Voltage", "Time [s]", "Voltage [V]")
 #for i in range(len(period)):
 #  plot_time_domain(time, v_out, i, "Device Voltage", "Time [s]", "Voltage [V]")
+#for i in range(len(period[2:])):
+#  plot_time_domain(time, power_in, i, "Supply Power", "Time [s]", "Power [V]")
+#for i in range(len(period[2:])):
+#  plot_time_domain(time, power_out, i, "Device Power", "Time [s]", "Power [V]")
 
-plot_P_A(amplitude, period, max_supply_slew_rate_n, "Average Falling Supply Slew Rate")
-plot_P_A(amplitude, period, max_supply_slew_rate_p, "Average Rising Supply Slew Rate")
+plot_P_A(amplitude, period, supply_energy, "Supply Energy")
+plot_P_A(amplitude, period, device_energy, "Device Energy")
+#plot_P_A(amplitude, period, max_supply_slew_rate_n, "Average Falling Supply Slew Rate")
+#plot_P_A(amplitude, period, max_supply_slew_rate_p, "Average Rising Supply Slew Rate")
 #plot_P_A(amplitude, period, supply_phase_delay_rising, "Phase Delay Rising Edge")
 #plot_P_A(amplitude, period, supply_phase_delay_falling, "Phase Delay Falling Edge")
 #plot_P_A(amplitude, period, supply_cpp, "Supply Current Peak to Peak")
