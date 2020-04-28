@@ -66,7 +66,12 @@ module board_package_intel_server (vin, vout, vsense_in, vsense_out, gnd);
 	electrical vin, vout, vsense_in, vsense_out, n1, n2, n3, n4, gnd;
 
   // Supply Load Resistor
-  my_res#(.R(500u)) rsupply(vin, n1);
+`ifdef IDEAL
+  my_res#(.R(-801u)) rsupply(vin, n1);
+`endif
+`ifdef AVP
+  my_res#(.R(1u)) rsupply(vin, n1);
+`endif
 
   my_res#(.R(200u)) rwire1(n1, n2);
 
@@ -104,7 +109,12 @@ module board_package_laptop (vin, vout, vsense_in, vsense_out, gnd);
 	electrical vin, vout, vsense_in, vsense_out, n1, n2, n3, n4, gnd;
 
   // Supply Load Resistor
-  my_res#(.R(2m)) rsupply(vin, n1);
+`ifdef IDEAL
+  my_res#(.R(-1601u)) rsupply(vin, n1);
+`endif
+`ifdef AVP
+  my_res#(.R(1u)) rsupply(vin, n1);
+`endif
 
   my_res#(.R(200u)) rwire_1(n1, n2);
 
@@ -122,7 +132,7 @@ module board_package_laptop (vin, vout, vsense_in, vsense_out, gnd);
   //my_res#(.R(100k)) rb(n3, gnd);
 
   // Motherboard traces
-  pcb_trace#(.ESL(270p), .ESR(600u)) trace(n2, n3);
+  pcb_trace#(.ESL(270p), .ESR(1000u)) trace(n2, n3);
 
   // Package
   pcb_trace#(.ESL(12p), .ESR(400u)) package(n3, n4);
@@ -142,7 +152,12 @@ module board_package_mobile (vin, vout, vsense_in, vsense_out, gnd);
 	electrical vin, vout, vsense_in, vsense_out, n1, n2, n3, n4, gnd;
 
   // Supply Load Resistor
-  my_res#(.R(25m)) rsupply(vin, n1);
+`ifdef IDEAL
+  my_res#(.R(-1601u)) rsupply(vin, n1);
+`endif
+`ifdef AVP
+  my_res#(.R(1u)) rsupply(vin, n1);
+`endif
 
   my_res#(.R(200u)) rwire(n1, n2);
 
@@ -180,7 +195,12 @@ module board_package_embedded (vin, vout, vsense_in, vsense_out, gnd);
 	electrical vin, vout, vsense_in, vsense_out, n1, n2, n3, n4, n5, gnd;
 
   // Supply Load Resistor
-  my_res#(.R(50m)) rsupply(vin, n1);
+`ifdef IDEAL
+  my_res#(.R(-11m)) rsupply(vin, n1);
+`endif
+`ifdef AVP
+  my_res#(.R(1u)) rsupply(vin, n1);
+`endif
 
   my_res#(.R(200u)) rwire(n1, n2);
 
@@ -217,7 +237,12 @@ module board_package_perf_uc (vin, vout, vsense_in, vsense_out, gnd);
 	electrical vin, vout, vsense_in, vsense_out, n1, n2, n3, n4,n5, gnd;
 
   // Supply Load Resistor
-  my_res#(.R(416m)) rsupply(vin, n1);
+`ifdef IDEAL
+  my_res#(.R(-11m)) rsupply(vin, n1);
+`endif
+`ifdef AVP
+  my_res#(.R(1u)) rsupply(vin, n1);
+`endif
 
   my_res#(.R(200u)) rwire(n1, n2);
 
@@ -231,10 +256,10 @@ module board_package_perf_uc (vin, vout, vsense_in, vsense_out, gnd);
   my_real_capacitor#(.C(1.5u), .ESL(34p), .ESR(267u)) c_ceramic_socket(n4, gnd);
 
   // Motherboard traces
-  pcb_trace#(.ESL(7.4n), .ESR(100m)) trace(n2, n3);
+  pcb_trace#(.ESL(740p), .ESR(10m)) trace(n2, n3);
 
   // Motherboard traces
-  pcb_trace#(.ESL(300p), .ESR(10m)) trace_2(n3, n4);
+  pcb_trace#(.ESL(30p), .ESR(1m)) trace_2(n3, n4);
 
   // Package
   pcb_trace#(.ESL(12p), .ESR(400u)) package(n4, n5);
@@ -254,7 +279,12 @@ module board_package_lp (vin, vout, vsense_in, vsense_out, gnd);
 	electrical vin, vout, vsense_in, vsense_out, n1, n2, n3, n4,n5, gnd;
 
   // Supply Load Resistor
-  my_res#(.R(2)) rsupply(vin, n1);
+`ifdef IDEAL
+  my_res#(.R(-2m)) rsupply(vin, n1);
+`endif
+`ifdef AVP
+  my_res#(.R(1u)) rsupply(vin, n1);
+`endif
 
   my_res#(.R(200u)) rwire(n1, n2);
 

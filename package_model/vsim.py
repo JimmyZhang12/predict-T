@@ -11,7 +11,7 @@ import interprocess
 
 thread = None
 
-def initialize(name, step):
+def initialize(name, step, pdn, supply):
   global thread
   """ This function will launch the docker container for the verilog
   simulation. """
@@ -28,7 +28,7 @@ def initialize(name, step):
 
   def verilog_thread(name, step):
     """ This is the thread function for executing the verilog sim """
-    run_command(["./run_cadence.sh", name, str(step)])
+    run_command(["./run_cadence.sh", name, str(step), pdn, supply])
 
 
   if os.path.exists(os.path.join("/dev/shm", name)):

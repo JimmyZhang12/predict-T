@@ -24,6 +24,8 @@ gcc interprocess.c -O0 -g -DWITH_VPI -std=c11 -D_XOPEN_SOURCE=500 -fPIC -fpermis
 ncverilog \
   +define+SHM_NAME=\\\"${1}\\\" \
   +define+STEP_SIZE=${2} \
+  +define+${3}=1 \
+  +define+${4}=1 \
   buck_model.vams \
   +access+r -loadvpi ./interprocess.so:register_create_shm \
   -loadvpi ./interprocess.so:register_destroy_shm \
