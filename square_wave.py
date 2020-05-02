@@ -11,59 +11,59 @@ from progressbar import AnimatedMarker, Bar, BouncingBar, Counter, ETA, \
                         ProgressBar, ReverseBar, RotatingMarker, \
                         SimpleProgress, Timer
 
-
-# PERFORMANCE_SERVER
-#period = [20e-9, 100e-9, 200e-9, 1e-6, 2e-6, 10e-6, 20e-6, 100e-6]
-#slew_rate = list(np.arange(0.01, 0.3, 0.05))
-#amplitude = range(5, 95, 5)
-#duration=500e-6
-#timestep=1e-9
-#min_power = 5
-
-# LAPTOP
-period = [200e-9, 1e-6, 2e-6, 10e-6, 20e-6, 100e-6]
-slew_rate = list(np.arange(0.01, 0.3, 0.05))
-amplitude = list(np.arange(1, 50, 5))
-duration=500e-6
-timestep=1e-9
-min_power = 1
-
-# MOBILE
-#period = [200e-9, 1e-6, 2e-6, 10e-6, 20e-6, 100e-6]
-#slew_rate = list(np.arange(0.01, 0.3, 0.05)/(2000/3000))
-#amplitude = list(np.arange(0.1, 5, 0.5))
-#duration=500e-6
-#timestep=1e-9
-#min_power = 0.1
-
-# EMBEDDED
-#period = [200e-9, 1e-6, 2e-6, 10e-6, 20e-6, 100e-6]
-#slew_rate = list(np.arange(0.01, 0.3, 0.05)/(1500/3000))
-#amplitude = list(np.arange(0.1, 2, 0.2))
-#duration=500e-6
-#timestep=1e-9
-#min_power = 0.1
-
-# PERFORMANCE_UC
-#period = [200e-9, 1e-6, 2e-6, 10e-6, 20e-6, 100e-6]
-#slew_rate = list(np.arange(0.01, 0.3, 0.05)/(120/3000))
-#amplitude = list(np.arange(0.01, 0.49, 0.04))
-#duration=500e-6
-#timestep=1e-9
-#min_power = 0.01
-
-# LP_UC
-#period = [200e-9, 1e-6, 2e-6, 10e-6, 20e-6, 100e-6]
-#slew_rate = list(np.arange(0.01, 0.3, 0.05)/(10/3000))
-#amplitude = list(np.arange(0.001, 0.01, 0.001))
-#duration=500e-6
-#timestep=1e-9
-#min_power = 0.001
-
 parser = argparse.ArgumentParser()
 parser.add_argument('--outpath', type=str, default="", help="output path")
 parser.add_argument('--duty', type=str, default="0.5", help="duty cycle")
+parser.add_argument('--device', type=str, default="server", help="")
 args = parser.parse_args()
+
+if(args.device == "server"):
+  period = [20e-9, 100e-9, 200e-9, 1e-6, 2e-6, 10e-6, 20e-6, 100e-6]
+  slew_rate = list(np.arange(0.01, 0.3, 0.05))
+  amplitude = [25,50,95]
+  duration=500e-6
+  timestep=1e-9
+  min_power = 5
+
+if(args.device == "laptop"):
+  period = [200e-9, 1e-6, 2e-6, 10e-6, 20e-6, 100e-6]
+  slew_rate = list(np.arange(0.01, 0.3, 0.05))
+  amplitude = [10,25,50]
+  duration=500e-6
+  timestep=1e-9
+  min_power = 1
+
+if(args.device == "mobile"):
+  period = [200e-9, 1e-6, 2e-6, 10e-6, 20e-6, 100e-6]
+  slew_rate = list(np.arange(0.01, 0.3, 0.05)/(2000/3000))
+  amplitude = [1,3,5]
+  duration=500e-6
+  timestep=1e-9
+  min_power = 0.1
+
+if(args.device == "embedded"):
+  period = [200e-9, 1e-6, 2e-6, 10e-6, 20e-6, 100e-6]
+  slew_rate = list(np.arange(0.01, 0.3, 0.05)/(1500/3000))
+  amplitude = [0.5,1,2]
+  duration=500e-6
+  timestep=1e-9
+  min_power = 0.1
+
+if(args.device == "perf_uc"):
+  period = [200e-9, 1e-6, 2e-6, 10e-6, 20e-6, 100e-6]
+  slew_rate = list(np.arange(0.01, 0.3, 0.05)/(120/3000))
+  amplitude = [0.05,0.1,0.15]
+  duration=500e-6
+  timestep=1e-9
+  min_power = 0.01
+
+if(args.device == "lp_uc"):
+  period = [200e-9, 1e-6, 2e-6, 10e-6, 20e-6, 100e-6]
+  slew_rate = list(np.arange(0.01, 0.3, 0.05)/(10/3000))
+  amplitude = [0.003,0.005,0.010]
+  duration=500e-6
+  timestep=1e-9
+  min_power = 0.001
 
 outpath = args.outpath
 

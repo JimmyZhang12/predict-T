@@ -66,12 +66,7 @@ module board_package_intel_server (vin, vout, vsense_in, vsense_out, gnd);
 	electrical vin, vout, vsense_in, vsense_out, n1, n2, n3, n4, gnd;
 
   // Supply Load Resistor
-`ifdef IDEAL
-  my_res#(.R(-801u)) rsupply(vin, n1);
-`endif
-`ifdef AVP
   my_res#(.R(1u)) rsupply(vin, n1);
-`endif
 
   my_res#(.R(200u)) rwire1(n1, n2);
 
@@ -109,12 +104,7 @@ module board_package_laptop (vin, vout, vsense_in, vsense_out, gnd);
 	electrical vin, vout, vsense_in, vsense_out, n1, n2, n3, n4, gnd;
 
   // Supply Load Resistor
-`ifdef IDEAL
-  my_res#(.R(-1601u)) rsupply(vin, n1);
-`endif
-`ifdef AVP
   my_res#(.R(1u)) rsupply(vin, n1);
-`endif
 
   my_res#(.R(200u)) rwire_1(n1, n2);
 
@@ -152,12 +142,7 @@ module board_package_mobile (vin, vout, vsense_in, vsense_out, gnd);
 	electrical vin, vout, vsense_in, vsense_out, n1, n2, n3, n4, gnd;
 
   // Supply Load Resistor
-`ifdef IDEAL
-  my_res#(.R(-1601u)) rsupply(vin, n1);
-`endif
-`ifdef AVP
   my_res#(.R(1u)) rsupply(vin, n1);
-`endif
 
   my_res#(.R(200u)) rwire(n1, n2);
 
@@ -195,12 +180,7 @@ module board_package_embedded (vin, vout, vsense_in, vsense_out, gnd);
 	electrical vin, vout, vsense_in, vsense_out, n1, n2, n3, n4, n5, gnd;
 
   // Supply Load Resistor
-`ifdef IDEAL
-  my_res#(.R(-11m)) rsupply(vin, n1);
-`endif
-`ifdef AVP
   my_res#(.R(1u)) rsupply(vin, n1);
-`endif
 
   my_res#(.R(200u)) rwire(n1, n2);
 
@@ -237,12 +217,7 @@ module board_package_perf_uc (vin, vout, vsense_in, vsense_out, gnd);
 	electrical vin, vout, vsense_in, vsense_out, n1, n2, n3, n4,n5, gnd;
 
   // Supply Load Resistor
-`ifdef IDEAL
-  my_res#(.R(-11m)) rsupply(vin, n1);
-`endif
-`ifdef AVP
   my_res#(.R(1u)) rsupply(vin, n1);
-`endif
 
   my_res#(.R(200u)) rwire(n1, n2);
 
@@ -279,12 +254,7 @@ module board_package_lp (vin, vout, vsense_in, vsense_out, gnd);
 	electrical vin, vout, vsense_in, vsense_out, n1, n2, n3, n4,n5, gnd;
 
   // Supply Load Resistor
-`ifdef IDEAL
-  my_res#(.R(-2m)) rsupply(vin, n1);
-`endif
-`ifdef AVP
   my_res#(.R(1u)) rsupply(vin, n1);
-`endif
 
   my_res#(.R(200u)) rwire(n1, n2);
 

@@ -17,4 +17,5 @@ docker run --rm --memory 16g --network=host \
   -e PREDICT_T_ROOT \
   -e OUTPUT_ROOT \
   centos7_test:cadence \
-  ./run_vsim.sh $1 $2 $3 $4
+  ./run_vsim.sh $1 $2
+  #./run_vsim.sh $1 $2 $3 $4

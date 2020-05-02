@@ -7,6 +7,9 @@
 
 `timescale 1ns/1ps
 
+`define SERVER
+`define AVP
+
 module variable_isrc(p,n,i);
   inout p,n,i;
   electrical p,n,i;
@@ -30,7 +33,7 @@ module buck_model ();
   electrical n4, gnd, n3, n2, n1, vsense_out, vsense_in;
 
   // Gem5 Interface Signals
-  real _v_set, _r_last;
+  real _v_set, _r_last, _prediction, _enable;
   electrical _ve_set, _vr_last;
   reg _term_sim;
   real _v_next;
@@ -67,7 +70,55 @@ module buck_model ();
     V(gnd) <+ 0.0;
     _v_next = V(n4);
     V(_vr_last) <+ _r_last;
+
+`ifdef SERVER
+`ifdef IDEAL
+    V(_ve_set) <+ _v_set + (1/_r_last)*801u;
+`endif
+`ifdef AVP
     V(_ve_set) <+ _v_set;
+`endif
+`endif
+`ifdef LAPTOP
+`ifdef IDEAL
+    V(_ve_set) <+ _v_set + (1/_r_last)*1601u;
+`endif
+`ifdef AVP
+    V(_ve_set) <+ _v_set;
+`endif
+`endif
+`ifdef MOBILE
+`ifdef IDEAL
+    V(_ve_set) <+ _v_set + (1/_r_last)*1601u;
+`endif
+`ifdef AVP
+    V(_ve_set) <+ _v_set;
+`endif
+`endif
+`ifdef EMBEDDED
+`ifdef IDEAL
+    V(_ve_set) <+ _v_set + (1/_r_last)*11m;
+`endif
+`ifdef AVP
+    V(_ve_set) <+ _v_set;
+`endif
+`endif
+`ifdef PERF_UC
+`ifdef IDEAL
+    V(_ve_set) <+ _v_set + (1/_r_last)*11m;
+`endif
+`ifdef AVP
+    V(_ve_set) <+ _v_set;
+`endif
+`endif
+`ifdef LP_UC
+`ifdef IDEAL
+    V(_ve_set) <+ _v_set + (1/_r_last)*2m;
+`endif
+`ifdef AVP
+    V(_ve_set) <+ _v_set;
+`endif
+`endif
 
     v_vout = V(vsense_out, gnd);
     i_vout = I(n4, n2);
@@ -82,9 +133,14 @@ module buck_model ();
         $wait_driver_data;
         _v_set = $get_voltage_setpoint();
         _r_last = $get_effective_resistance();
+        _prediction = $get_prediction();
+        _enable = $get_enable();
         _term_sim = $get_terminate_simulation();
+        //$display("%d,%f,%f,%f,%f", _v_set, _r_last, _prediction, _enable, _term_sim);
         $ack_driver_data;
-        $send_voltage(_v_next);
+        $send_voltage(v_vout);
+        $send_current(i_vout);
+        $ack_simulation;
         if(_term_sim != 0) begin
           $destroy_shm;
           $finish;

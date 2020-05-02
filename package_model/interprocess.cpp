@@ -29,11 +29,14 @@ void init_shm(mapped* p) {
   p->pv.new_data = NO_NEW_DATA;
   p->pv.data.v_set = 0;
   p->pv.data.curr_r_load = 0;
+  p->pv.data.prediction = 0;
+  p->pv.data.enable = 0;
   p->pv.data.sim_over = 0;
   
   sem_init(&p->vp.sem, 1, 1);
   p->vp.new_data = NO_NEW_DATA;
   p->vp.data.curr_v = 0;
+  p->vp.data.curr_i = 0;
   p->vp.data.sim_done = 0;
 }
 
@@ -185,8 +188,8 @@ double get_voltage_setpoint() {
   return ret;
 }
 
-// get_setpoint_voltage
-//   get the new voltage setpoint:
+// get_effective_resistance
+//   get the resistance of the load:
 double get_effective_resistance() {
 #ifdef WITH_VPI
   vpiHandle systfref, argsiter, argh;
@@ -202,6 +205,50 @@ double get_effective_resistance() {
   vpi_put_value(systfref, &value, NULL, vpiNoDelay);
 #else
   ret = shm_ptr->pv.data.curr_r_load;
+#endif
+  sem_post(&shm_ptr->pv.sem);
+  return ret;
+}
+
+// get_prediction
+//   get the new prediction value:
+double get_prediction() {
+#ifdef WITH_VPI
+  vpiHandle systfref, argsiter, argh;
+  struct t_vpi_value value;
+#endif
+  double ret = 0;
+
+  sem_wait(&shm_ptr->pv.sem);
+#ifdef WITH_VPI
+  systfref = vpi_handle(vpiSysTfCall, NULL); /* get system function that invoked C routine */
+  value.value.real = shm_ptr->pv.data.curr_r_load;
+  value.format = vpiRealVal;/* return the result */
+  vpi_put_value(systfref, &value, NULL, vpiNoDelay);
+#else
+  ret = shm_ptr->pv.data.prediction;
+#endif
+  sem_post(&shm_ptr->pv.sem);
+  return ret;
+}
+
+// get_enable()
+//   get the enable signal
+uint32_t get_enable() {
+#ifdef WITH_VPI
+  vpiHandle systfref, argsiter, argh;
+  struct t_vpi_value value;
+#endif
+  uint32_t ret = 0;
+
+  sem_wait(&shm_ptr->pv.sem);
+#ifdef WITH_VPI
+  systfref = vpi_handle(vpiSysTfCall, NULL); /* get system function that invoked C routine */
+  value.value.real = shm_ptr->pv.data.curr_r_load;
+  value.format = vpiRealVal;/* return the result */
+  vpi_put_value(systfref, &value, NULL, vpiNoDelay);
+#else
+  ret = shm_ptr->pv.data.enable;
 #endif
   sem_post(&shm_ptr->pv.sem);
   return ret;
@@ -232,7 +279,7 @@ uint32_t get_terminate_simulation() {
 // ack_driver_data
 void ack_driver_data() {
   sem_wait(&shm_ptr->pv.sem);
-  shm_ptr->pv.new_data = NO_NEW_DATA; 
+  shm_ptr->pv.new_data = NO_NEW_DATA;
   sem_post(&shm_ptr->pv.sem);
 }
 
@@ -253,9 +300,35 @@ int send_voltage(double voltage) {
 #endif
   sem_wait(&shm_ptr->vp.sem);
   shm_ptr->vp.data.curr_v = voltage;
+  sem_post(&shm_ptr->vp.sem);
+  return 0;
+}
+
+int send_current(double current) {
+#ifdef WITH_VPI
+  vpiHandle systfref, argsiter, argh;
+  struct t_vpi_value value;
+  systfref = vpi_handle(vpiSysTfCall, NULL); /* get system function that invoked C routine */
+  argsiter = vpi_iterate(vpiArgument, systfref);/* get iterator (list) of passed arguments */
+  argh = vpi_scan(argsiter);/* get the one argument - add loop for more args */
+  if(!argh){
+    vpi_printf("$VPI missing parameter.\n");
+    return 0;
+  }
+  value.format = vpiRealVal;
+  vpi_get_value(argh, &value);
+  current = value.value.real;
+#endif
+  sem_wait(&shm_ptr->vp.sem);
+  shm_ptr->vp.data.curr_i = current;
+  sem_post(&shm_ptr->vp.sem);
+  return 0;
+}
+
+int ack_simulation() {
+  sem_wait(&shm_ptr->vp.sem);
   shm_ptr->vp.new_data = NEW_DATA;
   sem_post(&shm_ptr->vp.sem);
-
   // Wait for ack:
   while(1) {
     sem_wait(&shm_ptr->vp.sem);
@@ -274,13 +347,39 @@ double get_voltage() {
     sem_wait(&shm_ptr->vp.sem);
     if(shm_ptr->vp.new_data == NEW_DATA) {
       ret = shm_ptr->vp.data.curr_v;
-      shm_ptr->vp.new_data = NO_NEW_DATA;
       sem_post(&shm_ptr->vp.sem);
       return ret;
     }
     sem_post(&shm_ptr->vp.sem);
   }
   return ret;
+}
+
+double get_current() {
+  double ret = 0;
+  while(1) {
+    sem_wait(&shm_ptr->vp.sem);
+    if(shm_ptr->vp.new_data == NEW_DATA) {
+      ret = shm_ptr->vp.data.curr_i;
+      sem_post(&shm_ptr->vp.sem);
+      return ret;
+    }
+    sem_post(&shm_ptr->vp.sem);
+  }
+  return ret;
+}
+
+void ack_supply() {
+  while(1) {
+    sem_wait(&shm_ptr->vp.sem);
+    if(shm_ptr->vp.new_data == NEW_DATA) {
+      shm_ptr->vp.new_data = NO_NEW_DATA;
+      sem_post(&shm_ptr->vp.sem);
+      return;
+    }
+    sem_post(&shm_ptr->vp.sem);
+  }
+  return;
 }
 
 void set_driver_signals(double voltage_setpoint, double resistance, uint32_t terminate_sim) {
@@ -368,6 +467,33 @@ void register_get_effective_resistance() {
 }
 
 // register_wait_driver_data
+void register_get_prediction() {
+    s_vpi_systf_data data;
+    data.type = vpiSysFunc;
+    data.sysfunctype = vpiRealFunc;
+    data.tfname ="$get_prediction";
+    data.user_data ="$get_prediction";
+    data.calltf=get_prediction;
+    data.compiletf=0;
+    data.sizetf=get_size;
+    data.user_data=0;
+    vpi_register_systf(&data);
+}
+
+// register_wait_driver_data
+void register_get_enable() {
+    s_vpi_systf_data data;
+    data.type = vpiSysFunc;
+    data.sysfunctype = vpiIntFunc;
+    data.tfname ="$get_enable";
+    data.calltf=get_enable;
+    data.compiletf=0;
+    data.sizetf=get_size;
+    data.user_data=0;
+    vpi_register_systf(&data);
+}
+
+// register_wait_driver_data
 void register_get_terminate_simulation() {
     s_vpi_systf_data data;
     data.type = vpiSysFunc;
@@ -398,6 +524,30 @@ void register_send_voltage() {
     data.sysfunctype = vpiIntFunc;
     data.tfname ="$send_voltage";
     data.calltf=send_voltage;
+    data.compiletf=0;
+    data.sizetf=0;
+    data.user_data=0;
+    vpi_register_systf(&data);
+}
+
+void register_send_current() {
+    s_vpi_systf_data data;
+    data.type = vpiSysFunc;
+    data.sysfunctype = vpiIntFunc;
+    data.tfname ="$send_current";
+    data.calltf=send_current;
+    data.compiletf=0;
+    data.sizetf=0;
+    data.user_data=0;
+    vpi_register_systf(&data);
+}
+
+// register_ack_driver_data
+void register_ack_simulation() {
+    s_vpi_systf_data data;
+    data.type = vpiSysTask;
+    data.tfname ="$ack_simulation";
+    data.calltf=ack_simulation;
     data.compiletf=0;
     data.sizetf=0;
     data.user_data=0;

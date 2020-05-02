@@ -21,19 +21,23 @@ gcc interprocess.c -O0 -g -DWITH_VPI -std=c11 -D_XOPEN_SOURCE=500 -fPIC -fpermis
 #gcc interprocess.c -O0 -g -DWITH_VPI -std=c11 -D_XOPEN_SOURCE=500 -m32 -fPIC -fpermissive -shared -I/software/cadence-Aug2016/INCISIVE152/tools.lnx86/include -lpthread -o interprocess.so
 
 # RUN 64 Bit:
+#+define+${3}=1 \
+#+define+${4}=1 \
 ncverilog \
   +define+SHM_NAME=\\\"${1}\\\" \
   +define+STEP_SIZE=${2} \
-  +define+${3}=1 \
-  +define+${4}=1 \
   buck_model.vams \
   +access+r -loadvpi ./interprocess.so:register_create_shm \
   -loadvpi ./interprocess.so:register_destroy_shm \
   -loadvpi ./interprocess.so:register_wait_driver_data \
   -loadvpi ./interprocess.so:register_get_voltage_setpoint \
   -loadvpi ./interprocess.so:register_get_effective_resistance \
+  -loadvpi ./interprocess.so:register_get_prediction \
+  -loadvpi ./interprocess.so:register_get_enable \
   -loadvpi ./interprocess.so:register_get_terminate_simulation \
   -loadvpi ./interprocess.so:register_ack_driver_data \
   -loadvpi ./interprocess.so:register_send_voltage \
+  -loadvpi ./interprocess.so:register_send_current \
+  -loadvpi ./interprocess.so:register_ack_simulation \
   -top buck_model \
   -analogcontrol scf.scs > "$OUTPUT_ROOT/package_model/log/${1}_out.log"

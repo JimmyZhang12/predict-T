@@ -15,14 +15,59 @@ import cProfile
 parser = argparse.ArgumentParser()
 parser.add_argument('--input', type=str, default="", help="input path where traces are located")
 parser.add_argument('--headers', type=str, default="", help="the headers for the CSV")
+parser.add_argument('--img_out', type=str, default="", help="")
+parser.add_argument('--csv_out', type=str, default="", help="")
+parser.add_argument('--name', type=str, default="", help="")
+parser.add_argument('--device', type=str, default="server", help="")
 args = parser.parse_args()
 
-period = [20e-9, 100e-9, 200e-9, 1e-6, 2e-6, 10e-6, 20e-6, 100e-6]
-slew_rate = list(np.arange(0.01, 0.3, 0.05))
-amplitude = range(5, 95, 5)
-duration=500e-6
-timestep=1e-9
-min_power = 5
+if(args.device == "server"):
+  period = [20e-9, 100e-9, 200e-9, 1e-6, 2e-6, 10e-6, 20e-6, 100e-6]
+  slew_rate = list(np.arange(0.01, 0.3, 0.05))
+  amplitude = [25,50,95]
+  duration=500e-6
+  timestep=1e-9
+  min_power = 5
+
+if(args.device == "laptop"):
+  period = [200e-9, 1e-6, 2e-6, 10e-6, 20e-6, 100e-6]
+  slew_rate = list(np.arange(0.01, 0.3, 0.05))
+  amplitude = [10,25,50]
+  duration=500e-6
+  timestep=1e-9
+  min_power = 1
+
+if(args.device == "mobile"):
+  period = [200e-9, 1e-6, 2e-6, 10e-6, 20e-6, 100e-6]
+  slew_rate = list(np.arange(0.01, 0.3, 0.05)/(2000/3000))
+  amplitude = [1,3,5]
+  duration=500e-6
+  timestep=1e-9
+  min_power = 0.1
+
+if(args.device == "embedded"):
+  period = [200e-9, 1e-6, 2e-6, 10e-6, 20e-6, 100e-6]
+  slew_rate = list(np.arange(0.01, 0.3, 0.05)/(1500/3000))
+  amplitude = [0.5,1,2]
+  duration=500e-6
+  timestep=1e-9
+  min_power = 0.1
+
+if(args.device == "perf_uc"):
+  period = [200e-9, 1e-6, 2e-6, 10e-6, 20e-6, 100e-6]
+  slew_rate = list(np.arange(0.01, 0.3, 0.05)/(120/3000))
+  amplitude = [0.05,0.1,0.15]
+  duration=500e-6
+  timestep=1e-9
+  min_power = 0.01
+
+if(args.device == "lp_uc"):
+  period = [200e-9, 1e-6, 2e-6, 10e-6, 20e-6, 100e-6]
+  slew_rate = list(np.arange(0.01, 0.3, 0.05)/(10/3000))
+  amplitude = [0.003,0.005,0.010]
+  duration=500e-6
+  timestep=1e-9
+  min_power = 0.001
 
 """3D Plots"""
 # Slew Rate for different combinations of period, input_slew, and amplitude
@@ -157,6 +202,7 @@ def p_p(time, signal, headers, ts, trigger, period):
   end_time = start_time + int(period*3*1e9)
   prev = start_time - 1
   for i in range(start_time, end_time):
+    #print(ts[i], trigger, period, signal[i])
     # Peak
     if(ts[i] > trigger and ts[prev] <= trigger and not flag):
       flag = True
@@ -214,7 +260,7 @@ def dc_offset(time, signal, headers, ts, trigger, period):
   cmax = sum(cmax)/len(cmax)
   return (cmax + cmin)/2
 
-def plot_P_A(x, y, data_vector, super_title):
+def plot_P_A(x, y, data_vector, super_title, outfile, title):
   """ Plots Period on X axis Amplitude on Y axis """
   fig, axs = plt.subplots(2,3)
   fig.set_size_inches(20,10)
@@ -244,9 +290,15 @@ def plot_P_A(x, y, data_vector, super_title):
     ax.set_title("Load Slew "+"{:.3f}".format(slew_rate[i])+" [A/ns]")
     ax.set_ylabel("log(Period) [s]")
     ax.set_xlabel("Amplitude [A]")
-  plt.show()
+  plt.savefig(outfile+title+".png")
 
-def plot_time_domain(time, ds, i, name, xtitle, ytitle):
+def csv_P_A(x, y, data_vector, super_title, outfile, title):
+  with open(outfile+title+".csv", "w") as out:
+    for i in range(len(period)):
+      for j in range(len(amplitude)):
+        out.write(",".join([str(period[i]), str(amplitude[j])]+[str(k) for k in data_vector[i,j,:]])+"\n")
+
+def plot_time_domain(time, ds, i, name, xtitle, ytitle, outfile):
   fig, ax = plt.subplots(1,1)
   fig.set_size_inches(20,7)
   fig.suptitle(name, fontsize=24)
@@ -260,7 +312,7 @@ def plot_time_domain(time, ds, i, name, xtitle, ytitle):
   ax.set_ylabel(ytitle)
   ax.set_xlabel(xtitle)
   plt.legend()
-  plt.show()
+  plt.savefig(outfile+"period_"+str(i)+".png")
 
 
 path=args.input
@@ -293,38 +345,107 @@ for file in files[0:]:
   power_in[key[0]][key[2]][key[1]] = [power(i, j) for i, j in zip(v_in[key[0]][key[2]][key[1]], i_in[key[0]][key[2]][key[1]])]
   power_out[key[0]][key[2]][key[1]] = [power(i, j) for i, j in zip(v_out[key[0]][key[2]][key[1]], i_out[key[0]][key[2]][key[1]])]
 
-  supply_energy[key[0]][key[2]][key[1]] = energy(v_in[key[0]][key[2]][key[1]], supply_current, period[key[0]])
-  device_energy[key[0]][key[2]][key[1]] = energy(v_out[key[0]][key[2]][key[1]], device_current, period[key[0]])
+  try:
+    supply_energy[key[0]][key[2]][key[1]] = energy(v_in[key[0]][key[2]][key[1]], supply_current, period[key[0]])
+  except:
+    print("FAILED: ", key)
+  try:
+    device_energy[key[0]][key[2]][key[1]] = energy(v_out[key[0]][key[2]][key[1]], device_current, period[key[0]])
+  except:
+    print("FAILED", key)
 
-  supply_cpp[key[0]][key[2]][key[1]] = p_p(time, supply_current, headers, device_current, 5+amplitude[key[2]]/2, period[key[0]])
-  dc_o = dc_offset(time, supply_current, headers, device_current, 5+amplitude[key[2]]/2, period[key[0]])
-  max_supply_slew_rate_n[key[0]][key[2]][key[1]] = average_falling_slew(supply_current, headers, device_current, 5+3*amplitude[key[2]]/8, 5+5*amplitude[key[2]]/8, period[key[0]])
-  max_supply_slew_rate_p[key[0]][key[2]][key[1]] = average_rising_slew(supply_current, headers, device_current, 5+3*amplitude[key[2]]/8, 5+5*amplitude[key[2]]/8, period[key[0]])
-  a = average_phase_delay(time, supply_current, device_current, headers, 5+amplitude[key[2]]/2, 5+amplitude[key[2]]/2, period[key[0]])
-  supply_phase_delay_falling[key[0]][key[2]][key[1]] = a[0]
-  supply_phase_delay_rising[key[0]][key[2]][key[1]] = a[1]
+  try:
+    supply_cpp[key[0]][key[2]][key[1]] = p_p(time, supply_current, headers, device_current, 5+amplitude[key[2]]/2, period[key[0]])
+  except:
+    print("P2P FAILED: ", key)
+  try:
+    dc_o = dc_offset(time, supply_current, headers, device_current, min_power+amplitude[key[2]]/2, period[key[0]])
+  except:
+    print("DC OFF FAILED: ", key)
+  try:
+    max_supply_slew_rate_n[key[0]][key[2]][key[1]] = average_falling_slew(supply_current, headers, device_current, min_power+3*amplitude[key[2]]/8, min_power+5*amplitude[key[2]]/8, period[key[0]])
+  except:
+    print("SUPPLY SLEW N FAILED: ", key)
+  try:
+    max_supply_slew_rate_p[key[0]][key[2]][key[1]] = average_rising_slew(supply_current, headers, device_current, min_power+3*amplitude[key[2]]/8, min_power+5*amplitude[key[2]]/8, period[key[0]])
+  except:
+    print("SUPPLY SLEWP FAILED: ", key)
+  try:
+    a = average_phase_delay(time, supply_current, device_current, headers, 5+amplitude[key[2]]/2, min_power+amplitude[key[2]]/2, period[key[0]])
+    supply_phase_delay_falling[key[0]][key[2]][key[1]] = a[0]
+    supply_phase_delay_rising[key[0]][key[2]][key[1]] = a[1]
+  except:
+    print("PHASE DELAY FAILED: ", key)
   pbar.update(i)
 pbar.finish()
 
-#for i in range(len(period)):
-#  plot_time_domain(time, i_in, i, "Supply Current", "Time [s]", "Current [A]")
-#for i in range(len(period)):
-#  plot_time_domain(time, i_out, i, "Device Current", "Time [s]", "Current [A]")
-#for i in range(len(period)):
-#  plot_time_domain(time, v_in, i, "Supply Voltage", "Time [s]", "Voltage [V]")
-#for i in range(len(period)):
-#  plot_time_domain(time, v_out, i, "Device Voltage", "Time [s]", "Voltage [V]")
-#for i in range(len(period[2:])):
-#  plot_time_domain(time, power_in, i, "Supply Power", "Time [s]", "Power [V]")
-#for i in range(len(period[2:])):
-#  plot_time_domain(time, power_out, i, "Device Power", "Time [s]", "Power [V]")
+outpath_img=args.img_out+"/"+args.name+"_"
+outpath_csv=args.csv_out+"/"+args.name+"_"
 
-plot_P_A(amplitude, period, supply_energy, "Supply Energy")
-plot_P_A(amplitude, period, device_energy, "Device Energy")
-#plot_P_A(amplitude, period, max_supply_slew_rate_n, "Average Falling Supply Slew Rate")
-#plot_P_A(amplitude, period, max_supply_slew_rate_p, "Average Rising Supply Slew Rate")
-#plot_P_A(amplitude, period, supply_phase_delay_rising, "Phase Delay Rising Edge")
-#plot_P_A(amplitude, period, supply_phase_delay_falling, "Phase Delay Falling Edge")
-#plot_P_A(amplitude, period, supply_cpp, "Supply Current Peak to Peak")
+for i in range(len(period)):
+  try:
+    plot_time_domain(time, i_in, i, "Supply Current", "Time [s]", "Current [A]", outpath_img+"supply_current_")
+  except:
+    print("TD PLOT FAILED: ", i)
+for i in range(len(period)):
+  try:
+    plot_time_domain(time, i_out, i, "Device Current", "Time [s]", "Current [A]", outpath_img+"device_current_")
+  except:
+    print("TD PLOT FAILED: ", i)
+for i in range(len(period)):
+  try:
+    plot_time_domain(time, v_in, i, "Supply Voltage", "Time [s]", "Voltage [V]", outpath_img+"supply_voltage_")
+  except:
+    print("TD PLOT FAILED: ", i)
+for i in range(len(period)):
+  try:
+    plot_time_domain(time, v_out, i, "Device Voltage", "Time [s]", "Voltage [V]", outpath_img+"device_voltage_")
+  except:
+    print("TD PLOT FAILED: ", i)
+for i in range(len(period[2:])):
+  try:
+    plot_time_domain(time, power_in, i, "Supply Power", "Time [s]", "Power [V]", outpath_img+"supply_power_")
+  except:
+    print("TD PLOT FAILED: ", i)
+for i in range(len(period[2:])):
+  try:
+    plot_time_domain(time, power_out, i, "Device Power", "Time [s]", "Power [V]", outpath_img+"device_power_")
+  except:
+    print("TD PLOT FAILED: ", i)
 
+try:
+  plot_P_A(amplitude, period, supply_energy, "Supply Energy", outpath_img, "supply_energy")
+except:
+  print("PLOT FAILED")
+try:
+  plot_P_A(amplitude, period, device_energy, "Device Energy", outpath_img, "supply_energy")
+except:
+  print("PLOT FAILED")
+try:
+  plot_P_A(amplitude, period, max_supply_slew_rate_n, "Average Falling Supply Slew Rate", outpath_img, "falling_slew")
+except:
+  print("PLOT FAILED")
+try:
+  plot_P_A(amplitude, period, max_supply_slew_rate_p, "Average Rising Supply Slew Rate", outpath_img, "rising_slew")
+except:
+  print("PLOT FAILED")
+try:
+  plot_P_A(amplitude, period, supply_phase_delay_rising, "Phase Delay Rising Edge", outpath_img, "phase_delay_rising")
+except:
+  print("PLOT FAILED")
+try:
+  plot_P_A(amplitude, period, supply_phase_delay_falling, "Phase Delay Falling Edge", outpath_img, "phase_delay_falling")
+except:
+  print("PLOT FAILED")
+try:
+  plot_P_A(amplitude, period, supply_cpp, "Supply Current Peak to Peak", outpath_img, "supply_current_p2p")
+except:
+  print("PLOT FAILED")
 
+csv_P_A(amplitude, period, supply_energy, "Supply Energy", outpath_csv, "supply_energy")
+csv_P_A(amplitude, period, device_energy, "Device Energy", outpath_csv, "supply_energy")
+csv_P_A(amplitude, period, max_supply_slew_rate_n, "Average Falling Supply Slew Rate", outpath_csv, "falling_slew")
+csv_P_A(amplitude, period, max_supply_slew_rate_p, "Average Rising Supply Slew Rate", outpath_csv, "rising_slew")
+csv_P_A(amplitude, period, supply_phase_delay_rising, "Phase Delay Rising Edge", outpath_csv, "phase_delay_rising")
+csv_P_A(amplitude, period, supply_phase_delay_falling, "Phase Delay Falling Edge", outpath_csv, "phase_delay_falling")
+csv_P_A(amplitude, period, supply_cpp, "Supply Current Peak to Peak", outpath_csv, "supply_current_p2p")
