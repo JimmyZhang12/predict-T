@@ -5,10 +5,11 @@
 `include "board_package.vams"
 `include "resistor.vams"
 
-`timescale 1ns/1ps
+`timescale 1ns/1ns
 
 `define SERVER
 `define AVP
+`define CYCLES 100
 
 module variable_isrc(p,n,i);
   inout p,n,i;
@@ -33,7 +34,7 @@ module buck_model ();
   electrical n4, gnd, n3, n2, n1, vsense_out, vsense_in;
 
   // Gem5 Interface Signals
-  real _v_set, _r_last, _prediction, _enable;
+  real _v_set, _dr, _r, _r_last, _r_new, _prediction, _enable;
   electrical _ve_set, _vr_last;
   reg _term_sim;
   real _v_next;
@@ -69,7 +70,7 @@ module buck_model ();
   analog begin
     V(gnd) <+ 0.0;
     _v_next = V(n4);
-    V(_vr_last) <+ _r_last;
+    V(_vr_last) <+ _r;
 
 `ifdef SERVER
 `ifdef IDEAL
@@ -128,11 +129,17 @@ module buck_model ();
 
   initial begin
     $create_shm(1, `SHM_NAME);
+    _r_last = 1;
+    _r_new = 1;
+    _r = 1;
+    _dr = 1;
     while(1) begin
       if($time % `STEP_SIZE == 0) begin
         $wait_driver_data;
         _v_set = $get_voltage_setpoint();
-        _r_last = $get_effective_resistance();
+        _r_last = _r_new;
+        _r_new = $get_effective_resistance();
+        _dr = abs(_r_last - _r_new)/`CYCLES;
         _prediction = $get_prediction();
         _enable = $get_enable();
         _term_sim = $get_terminate_simulation();
@@ -146,7 +153,16 @@ module buck_model ();
           $finish;
         end
       end
-      $display("%d,%f,%f,%f,%f", $time, v_vin, i_vin, v_vout, i_vout);
+      if($time % `STEP_SIZE == 10) begin
+        _enable = 0;
+      end
+      if(_r_last < _r_new) begin
+        _r = min(_r + _dr, _r_new);
+      end
+      else if(_r_last >= _r_new) begin
+        _r = max(_r - _dr, _r_new);
+      end 
+      $display("%d,%f,%f,%f,%f,%f,%f,%f,%f", $time, v_vin, i_vin, v_vout, i_vout, _r, _r_last, _r_new, _dr);
       #1;
     end
     $destroy_shm;
