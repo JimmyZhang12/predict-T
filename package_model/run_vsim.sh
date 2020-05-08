@@ -12,6 +12,7 @@ pushd /run_vsim
 ln -s $VERILOG_TB_PATH/interprocess.cpp ./interprocess.c
 ln -s $VERILOG_TB_PATH/interprocess.h .
 ln -s $VERILOG_TB_PATH/buck_model.vams .
+ln -s $VERILOG_TB_PATH/predictive_supply.vams .
 ln -s $VERILOG_TB_PATH/board_package.vams .
 ln -s $VERILOG_TB_PATH/resistor.vams .
 ln -s $VERILOG_TB_PATH/scf.scs .

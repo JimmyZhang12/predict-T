@@ -4,12 +4,13 @@
 `include "disciplines.vams"
 `include "board_package.vams"
 `include "resistor.vams"
+`include "predictive_supply.vams"
 
 `timescale 1ns/1ns
 
 `define SERVER
 `define AVP
-`define CYCLES 100
+`define CYCLES 200
 
 module variable_isrc(p,n,i);
   inout p,n,i;
@@ -31,10 +32,12 @@ module buck_model ();
   // Top Level Signals
   wire _l_clk, _l_rst, _l_pwm;
   wire [7:0] _l_e, _l_d;
-  electrical n4, gnd, n3, n2, n1, vsense_out, vsense_in;
+  electrical n4, gnd, n3, n2, n1, vsense_out, vsense_in, _i_step;
+  //electrical _en;
 
   // Gem5 Interface Signals
-  real _v_set, _dr, _r, _r_last, _r_new, _prediction, _enable;
+  real _v_set, _dr, _r, _r_last, _r_new, _prediction;
+  reg _enable;
   electrical _ve_set, _vr_last;
   reg _term_sim;
   real _v_next;
@@ -43,7 +46,11 @@ module buck_model ();
   real v_vout, i_vout, v_vin, i_vin;
 
   // Modules
-  variable_vsrc supply(.p(n1), .n(gnd), .v(_ve_set));
+  //variable_vsrc supply(.p(n1), .n(gnd), .v(_ve_set));
+  simple_buck_model supply(.vid(_ve_set),
+                           ._i_step(_i_step),
+                           .vout(n1),
+                           .en(_enable));
   my_res#(.R(1u)) rsensea(.p(n1), .n(n3));
 `ifdef SERVER
   board_package_intel_server filter(.vin(n3), .vout(n4), .gnd(gnd), .vsense_in(vsense_in), .vsense_out(vsense_out));
@@ -71,6 +78,8 @@ module buck_model ();
     V(gnd) <+ 0.0;
     _v_next = V(n4);
     V(_vr_last) <+ _r;
+    V(_i_step) <+ _prediction;
+    //V(_en) <+ _enable;
 
 `ifdef SERVER
 `ifdef IDEAL
@@ -141,7 +150,7 @@ module buck_model ();
         _r_new = $get_effective_resistance();
         _dr = abs(_r_last - _r_new)/`CYCLES;
         _prediction = $get_prediction();
-        _enable = $get_enable();
+        //_enable = $get_enable();
         _term_sim = $get_terminate_simulation();
         //$display("%d,%f,%f,%f,%f", _v_set, _r_last, _prediction, _enable, _term_sim);
         $ack_driver_data;
