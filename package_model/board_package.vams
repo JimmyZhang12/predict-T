@@ -65,36 +65,41 @@ module board_package_intel_server (vin, vout, vsense_in, vsense_out, gnd);
   output vsense_in, vsense_out;
 	electrical vin, vout, vsense_in, vsense_out, n1, n2, n3, n4, gnd;
 
-  // Supply Load Resistor
-  my_res#(.R(1u)) rsupply(vin, n1);
-
-  my_res#(.R(200u)) rwire1(n1, n2);
-
-  // Ceramic Bulk
-  my_real_capacitor#(.C(990u), .ESL(423p), .ESR(2m)) c_electrolytic_bulk(n2, gnd);
-
-  // Ceramic Bulk
-  my_real_capacitor#(.C(264u), .ESL(45p), .ESR(400u)) c_ceramic_bulk(n2, gnd);
-
-  // Ceramic Socket
-  my_real_capacitor#(.C(1222u), .ESL(20p), .ESR(150u)) c_ceramic_socket(n3, gnd);
-
-  //my_res#(.R(100k)) r1(n3, gnd);
-  //my_res#(.R(100k)) ra(n2, gnd);
-  //my_res#(.R(100k)) rb(n4, gnd);
-
-  // Motherboard traces
-  pcb_trace#(.ESL(90p), .ESR(200u)) trace(n2, n3);
-
-  // Package
-  pcb_trace#(.ESL(12p), .ESR(400u)) package(n3, n4);
+//  // Supply Load Resistor
+//  my_res#(.R(1u)) rsupply(vin, n1);
+//
+//  my_res#(.R(200u)) rwire1(n1, n2);
+//
+//  // Ceramic Bulk
+//  my_real_capacitor#(.C(990u), .ESL(423p), .ESR(2m)) c_electrolytic_bulk(n2, gnd);
+//
+//  // Ceramic Bulk
+//  my_real_capacitor#(.C(264u), .ESL(45p), .ESR(400u)) c_ceramic_bulk(n2, gnd);
+//
+//  // Ceramic Socket
+//  my_real_capacitor#(.C(1222u), .ESL(20p), .ESR(150u)) c_ceramic_socket(n3, gnd);
+//
+//  //my_res#(.R(100k)) r1(n3, gnd);
+//  //my_res#(.R(100k)) ra(n2, gnd);
+//  //my_res#(.R(100k)) rb(n4, gnd);
+//
+//  // Motherboard traces
+//  pcb_trace#(.ESL(90p), .ESR(200u)) trace(n2, n3);
+//
+//  // Package
+//  pcb_trace#(.ESL(12p), .ESR(400u)) package(n3, n4);
+//
+//  // output sense resistor
+//  my_res#(.R(1u)) rout(n4, vout);
 
   // output sense resistor
-  my_res#(.R(1u)) rout(n4, vout);
+  my_res#(.R(1u)) rout(vin, vout);
 
   analog begin
-    V(vsense_in, gnd) <+ V(n1, gnd);
-    V(vsense_out, gnd) <+ V(n4, gnd);
+//    V(vsense_in, gnd) <+ V(n1, gnd);
+//    V(vsense_out, gnd) <+ V(n4, gnd);
+    V(vsense_in, gnd) <+ V(vin, gnd);
+    V(vsense_out, gnd) <+ V(vout, gnd);
   end
 endmodule
 

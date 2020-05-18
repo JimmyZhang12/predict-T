@@ -44,25 +44,30 @@ parser.add_argument('--title', type=str, default="", help="name of the plot")
 args = parser.parse_args()
 
 stat_files = args.inputs.split(",")
-#print([",".join(i.split("_")[1:3]+[i.split("_")[4]]) for i in stat_files])
 #names = [",".join(i.split("_")[1:3]+[i.split("_")[4]]) for i in stat_files]
-print([",".join(i.split("_")[1:3]) for i in stat_files])
-names = [",".join(i.split("_")[1:3]) for i in stat_files]
+names = [i.split("_")[0] for i in stat_files]
+#names = [",".join(i.split("_")[1:3]) for i in stat_files]
+print(names)
 stats = []
 for i in range(len(stat_files)):
     epoch = parse_stats(stat_files[i])
     temp = []
     for e in epoch:
-        temp.append(int(e[args.stat][1]))
+        try:
+            temp.append(int(e[args.stat][1]))
+        except:
+            try:
+                temp.append(float(e[args.stat][1]))
+            except:
+                print("couldnt convert")
     stats.append(temp[::-1])
 
 print(stats)
-max_len = 0
-for i in range(len(stats)):
-    max_len = max(len(stats[i]), max_len)
 
-epoch = range(max_len)
-for i in range(len(stats)):
+
+plt.figure(figsize=(12,4))
+for i in statsnge(len(stats)):
+    epoch = statsnge(len(stats[i]))
     plt.plot(epoch, stats[i], linewidth=1, label=names[i])
 plt.ylabel("Error")
 plt.xlabel("Time (us)")

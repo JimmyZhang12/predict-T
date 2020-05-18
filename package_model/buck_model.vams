@@ -150,7 +150,7 @@ module buck_model ();
         _r_new = $get_effective_resistance();
         _dr = abs(_r_last - _r_new)/`CYCLES;
         _prediction = $get_prediction();
-        //_enable = $get_enable();
+        _enable = $get_enable();
         _term_sim = $get_terminate_simulation();
         //$display("%d,%f,%f,%f,%f", _v_set, _r_last, _prediction, _enable, _term_sim);
         $ack_driver_data;
@@ -171,7 +171,7 @@ module buck_model ();
       else if(_r_last >= _r_new) begin
         _r = max(_r - _dr, _r_new);
       end 
-      $display("%d,%f,%f,%f,%f,%f,%f,%f,%f", $time, v_vin, i_vin, v_vout, i_vout, _r, _r_last, _r_new, _dr);
+      $display("%d,%f,%f,%f,%f,%f,%f,%f,%f,%d,%f", $time, v_vin, i_vin, v_vout, i_vout, _r, _r_last, _r_new, _dr, _enable, _prediction);
       #1;
     end
     $destroy_shm;

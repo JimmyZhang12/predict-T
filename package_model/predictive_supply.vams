@@ -8,20 +8,20 @@ module simple_buck_model(vid, _i_step, vout, en);
   
   //parameter real VIN = 2.4;
   //parameter real VOUT = 1.2;
-  parameter real FSW = 300K;
-  parameter real L = 300n;
-  parameter real C = 5m; // Set to 0 if using impedance model
+  parameter real FSW = 1000K;
+  parameter real L = 100n;
+  parameter real C = 100u; // Set to 0 if using impedance model
   parameter real ESR = 2m;
   parameter real DCR = 0;
   parameter real tr = 100p;
-  parameter real slew_rate = 250/1u; // Change slew to match the slew at VR output
+  parameter real slew_rate = 250/1u;
   real switch;
 
   output vout;
   input en, vid, _i_step;
   electrical vout, vid, _i_step, vin, n1, n2, IL, IC;
 
-  real VIN, VOUT, i_step; // Change variable through MCPAT
+  real VIN, VOUT, i_step;
 
   reg pwm, hold, sel;
   real period, t_rise, t_fall, sign;

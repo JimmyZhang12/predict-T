@@ -222,7 +222,7 @@ double get_prediction() {
   sem_wait(&shm_ptr->pv.sem);
 #ifdef WITH_VPI
   systfref = vpi_handle(vpiSysTfCall, NULL); /* get system function that invoked C routine */
-  value.value.real = shm_ptr->pv.data.curr_r_load;
+  value.value.real = shm_ptr->pv.data.prediction;
   value.format = vpiRealVal;/* return the result */
   vpi_put_value(systfref, &value, NULL, vpiNoDelay);
 #else
@@ -244,8 +244,8 @@ uint32_t get_enable() {
   sem_wait(&shm_ptr->pv.sem);
 #ifdef WITH_VPI
   systfref = vpi_handle(vpiSysTfCall, NULL); /* get system function that invoked C routine */
-  value.value.real = shm_ptr->pv.data.curr_r_load;
-  value.format = vpiRealVal;/* return the result */
+  value.value.integer = (int)shm_ptr->pv.data.enable;
+  value.format = vpiIntVal;/* return the result */
   vpi_put_value(systfref, &value, NULL, vpiNoDelay);
 #else
   ret = shm_ptr->pv.data.enable;
