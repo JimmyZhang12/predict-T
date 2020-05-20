@@ -27,7 +27,7 @@
 from xml.etree import ElementTree
 from xml.dom import minidom
 
-class BranchPredictor:
+class Predictor:
   """ branch predictor; tournament predictor see Alpha implementation """
   name = "predictor"
   id = "predictor"
@@ -50,12 +50,12 @@ class BranchPredictor:
     self.id = component_id
 
     # Init the Cache Parameters and Stats:
-    parameters["local_predictor_size"][0]=
-    parameters["local_predictor_entries"][0]=
-    parameters["global_predictor_entries"][0]=
-    parameters["global_predictor_bits"][0]=
-    parameters["chooser_predictor_entries"][0]=
-    parameters["chooser_predictor_bits"][0]=
+    #parameters["local_predictor_size"][0]=
+    #parameters["local_predictor_entries"][0]=
+    #parameters["global_predictor_entries"][0]=
+    #parameters["global_predictor_bits"][0]=
+    #parameters["chooser_predictor_entries"][0]=
+    #parameters["chooser_predictor_bits"][0]=
 
   def xml(self):
     """ Build an XML Tree from the parameters, stats, and subcomponents """

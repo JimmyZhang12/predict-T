@@ -20,48 +20,56 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 #
-# niu.py
+# directory.py
 #
-# Network Interface Unit class definition
+# Directory Controller class definition
 
 from xml.etree import ElementTree
 from xml.dom import minidom
 
-class NIU:
-  """ On chip 10Gb Ethernet NIC, including XAUI Phy and
-  MAC controller. For a minimum IP packet size of 84B
-  at 10Gb/s, a new packet arrives every 67.2ns.  the
-  low bound of clock rate of a 10Gb MAC is 150Mhz Note:
-  McPAT does not track individual nic, instead, it
-  takes the total accesses and calculate the average
-  power per nic or per channel. This is sufficent for
-  most application. """
+class Directory:
+  """ Altough there are multiple access types,
+  Performance simulator needs to cast them into reads
+  or writes e.g. the invalidates can be considered as
+  writes """
 
-  name = "niu"
-  id = "niu"
+  name = "directory"
+  id = "directory"
 
   parameters = \
   {
-    "type" : ["0","1: low power; 0 high performance"],
-    "clockrate" : ["350","Clock Rate in MHz"],
-    "number_units" : ["0","unlike PCIe and memory controllers, each Ethernet controller only have one port"]
+    "Directory_type" : ["0",""],
+    "Dir_config" : ["512,4,0,1,1, 1","cam based shadowed tag. 1 directory cache"],
+    "buffer_sizes" : ["16, 16, 16, 16","the parameters are capacity,block_width, associativity,bank, throughput w.r.t. core clock, latency w.r.t. core clock, all the buffer related are optional"],
+    "clockrate" : ["1000","Clock rate in MHz"],
+    "ports" : ["1,1,1","number of r, w, and rw search ports"],
+    "device_type" : ["0",""]
   }
   stats = \
   {
-    "duty_cycle" : ["1.0","achievable max load lteq 1.0"],
-    "total_load_perc" : ["0.0","ratio of total achived load to total achivable bandwidth "]
+    "read_accesses" : ["0","Read Accesses to the directory controller"],
+    "write_accesses" : ["0","Write Accesses to the directory controller"],
+    "read_misses" : ["0","Read Misses"],
+    "write_misses" : ["0","Write Misses"],
+    "conflicts" : ["0","Conflicts"]
   }
 
   def __init__(self, component_id, component_name, stat_dict, config_dict):
     self.name = component_name
     self.id = component_id
 
-    # Init the NIU Parameters and Stats:
-    #parameters["type"][0]=
+    # Init the Directory Parameters and Stats:
+    #parameters["Directory_type"][0]=
+    #parameters["Dir_config"][0]=
+    #parameters["buffer_sizes"][0]=
     #parameters["clockrate"][0]=
-    #parameters["number_units"][0]=
-    #stats["duty_cycle"][0]=
-    #stats["total_load_perc"][0]=
+    #parameters["ports"][0]=
+    #parameters["device_type"][0]=
+    #stats["read_accesses"][0]=
+    #stats["write_accesses"][0]=
+    #stats["read_misses"][0]=
+    #stats["write_misses"][0]=
+    #stats["conflicts"][0]=
 
   def xml(self):
     """ Build an XML Tree from the parameters, stats, and subcomponents """
@@ -73,4 +81,5 @@ class NIU:
       top.append(ElementTree.Comment(", ".join(['stat', key, self.stats[key][1]])))
       top.append(ElementTree.Element('stat', name=key, value=self.stats[key][0]))
     return top
+
 

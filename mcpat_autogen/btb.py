@@ -20,48 +20,35 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 #
-# niu.py
+# btb.py
 #
-# Network Interface Unit class definition
+# BranchTargetBuffer class definition
 
 from xml.etree import ElementTree
 from xml.dom import minidom
 
-class NIU:
-  """ On chip 10Gb Ethernet NIC, including XAUI Phy and
-  MAC controller. For a minimum IP packet size of 84B
-  at 10Gb/s, a new packet arrives every 67.2ns.  the
-  low bound of clock rate of a 10Gb MAC is 150Mhz Note:
-  McPAT does not track individual nic, instead, it
-  takes the total accesses and calculate the average
-  power per nic or per channel. This is sufficent for
-  most application. """
-
-  name = "niu"
-  id = "niu"
+class BTB:
+  name = "BTB"
+  id = "BTB"
 
   parameters = \
   {
-    "type" : ["0","1: low power; 0 high performance"],
-    "clockrate" : ["350","Clock Rate in MHz"],
-    "number_units" : ["0","unlike PCIe and memory controllers, each Ethernet controller only have one port"]
+    "BTB_config" : ["5120,4,2,1, 1,3","Should be 4096 + 1024 all the buffer related are optional the parameters are capacity,block_width,associativity,bank, throughput w.r.t. core clock, latency w.r.t. core clock"],
   }
   stats = \
   {
-    "duty_cycle" : ["1.0","achievable max load lteq 1.0"],
-    "total_load_perc" : ["0.0","ratio of total achived load to total achivable bandwidth "]
+    "read_accesses" : ["0","Lookups into BTB; branchPred.BTBLookups"],
+    "write_accesses" : ["0","Number of Updates to the CAM; commit.branches"],
   }
 
   def __init__(self, component_id, component_name, stat_dict, config_dict):
     self.name = component_name
     self.id = component_id
 
-    # Init the NIU Parameters and Stats:
-    #parameters["type"][0]=
-    #parameters["clockrate"][0]=
-    #parameters["number_units"][0]=
-    #stats["duty_cycle"][0]=
-    #stats["total_load_perc"][0]=
+    # Init the Directory Parameters and Stats:
+    #parameters["BTB_config"][0]=
+    #stats["read_accesses"][0]=
+    #stats["write_accesses"][0]=
 
   def xml(self):
     """ Build an XML Tree from the parameters, stats, and subcomponents """
@@ -73,4 +60,5 @@ class NIU:
       top.append(ElementTree.Comment(", ".join(['stat', key, self.stats[key][1]])))
       top.append(ElementTree.Element('stat', name=key, value=self.stats[key][0]))
     return top
+
 

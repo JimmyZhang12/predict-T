@@ -20,48 +20,49 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 #
-# niu.py
+# tlb.py
 #
-# Network Interface Unit class definition
+# Translation Lookaside Buffer class definition
 
 from xml.etree import ElementTree
 from xml.dom import minidom
 
-class NIU:
-  """ On chip 10Gb Ethernet NIC, including XAUI Phy and
-  MAC controller. For a minimum IP packet size of 84B
-  at 10Gb/s, a new packet arrives every 67.2ns.  the
-  low bound of clock rate of a 10Gb MAC is 150Mhz Note:
-  McPAT does not track individual nic, instead, it
-  takes the total accesses and calculate the average
-  power per nic or per channel. This is sufficent for
-  most application. """
+from tlb import TLB
+from btb import BTB
+from cache import Cache
+from branchpred import Predictor
 
-  name = "niu"
-  id = "niu"
+class Core:
+  name = "core"
+  id = "core"
 
   parameters = \
   {
-    "type" : ["0","1: low power; 0 high performance"],
-    "clockrate" : ["350","Clock Rate in MHz"],
-    "number_units" : ["0","unlike PCIe and memory controllers, each Ethernet controller only have one port"]
   }
   stats = \
   {
-    "duty_cycle" : ["1.0","achievable max load lteq 1.0"],
-    "total_load_perc" : ["0.0","ratio of total achived load to total achivable bandwidth "]
   }
+
+  predictor = None
+  itlb = None
+  icache = None
+  dtlb = None
+  dcache = None
+  btb = None
+
 
   def __init__(self, component_id, component_name, stat_dict, config_dict):
     self.name = component_name
     self.id = component_id
 
-    # Init the NIU Parameters and Stats:
-    #parameters["type"][0]=
-    #parameters["clockrate"][0]=
-    #parameters["number_units"][0]=
-    #stats["duty_cycle"][0]=
-    #stats["total_load_perc"][0]=
+    # Init the Directory Parameters and Stats:
+
+    self.predictor = Predictor(self.id+".predictor","PBT",stat_dict,config_dict)
+    self.itlb = TLB(self.id+".itlb","itlb",stat_dict,config_dict)
+    self.icache = Cache(self.id+".icache","icache",stat_dict,config_dict)
+    self.dtlb = TLB(self.id+".dtlb","dtlb",stat_dict,config_dict)
+    self.dcache = Cache(self.id+".dcache","dcache",stat_dict,config_dict)
+    self.btb = BTB(self.id+".BTB","BTB",stat_dict,config_dict)
 
   def xml(self):
     """ Build an XML Tree from the parameters, stats, and subcomponents """
@@ -72,5 +73,11 @@ class NIU:
     for key in sorted(self.stats):
       top.append(ElementTree.Comment(", ".join(['stat', key, self.stats[key][1]])))
       top.append(ElementTree.Element('stat', name=key, value=self.stats[key][0]))
+    top.append(self.predictor.xml())
+    top.append(self.itlb.xml())
+    top.append(self.icache.xml())
+    top.append(self.dtlb.xml())
+    top.append(self.dcache.xml())
+    top.append(self.btb.xml())
     return top
 

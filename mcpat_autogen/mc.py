@@ -28,14 +28,47 @@ from xml.etree import ElementTree
 from xml.dom import minidom
 
 class MemoryController:
+  """ Memory controllers are for DDR(2,3...) DIMMs
+  current version of McPAT uses published values for
+  base parameters of memory controller improvements on
+  MC will be added in later versions. """
+
+  """ Current McPAT version only supports homogeneous
+  memory controllers """
+
+  """McPAT will add the control bus width to the
+  address bus width automatically. McPAT does not track
+  individual mc, instead, it takes the total accesses
+  and calculate the average power per MC or per
+  channel. This is sufficient for most application.
+  Further track down can be easily added in later
+  versions."""
+
   name = "mc"
   id = "mc"
 
   parameters = \
   {
+    "type" : ["0","1: low power; 0 high performance"],
+    "mc_clock" : ["2666","DIMM IO bus clock rate MHz"],
+    "vdd" : ["0","0 means using ITRS default vdd"],
+    "power_gating_vcc" : ["-1","\"-1\" means using default power gating virtual power supply voltage constrained by technology and computed automatically"],
+    "peak_transfer_rate" : ["20000","MB/S"],
+    "block_size" : ["64","B"],
+    "number_mcs" : ["4",""],
+    "memory_channels_per_mc" : ["1",""],
+    "number_ranks" : ["2",""],
+    "withPHY" : ["0",""],
+    "req_window_size_per_channel" : ["32",""],
+    "IO_buffer_size_per_channel" : ["32",""],
+    "databus_width" : ["128",""],
+    "addressbus_width" : ["52",""]
   }
   stats = \
   {
+    "memory_accesses" : ["0","mem_ctrls.writeReqs + mem_ctrls.readReqs"],
+    "memory_reads" : ["0","mem_ctrls.readReqs"],
+    "memory_writes" : ["0","mem_ctrls.writeReqs"]
   }
 
   def __init__(self, component_id, component_name, stat_dict, config_dict):
@@ -43,6 +76,23 @@ class MemoryController:
     self.id = component_id
 
     # Init the Memory Controller Parameters and Stats:
+    #parameters["type"][0]=
+    #parameters["mc_clock"][0]=
+    #parameters["vdd"][0]=
+    #parameters["power_gating_vcc"][0]=
+    #parameters["peak_transfer_rate"][0]=
+    #parameters["block_size"][0]=
+    #parameters["number_mcs"][0]=
+    #parameters["memory_channels_per_mc"][0]=
+    #parameters["number_ranks"][0]=
+    #parameters["withPHY"][0]=
+    #parameters["req_window_size_per_channel"][0]=
+    #parameters["IO_buffer_size_per_channel"][0]=
+    #parameters["databus_width"][0]=
+    #parameters["addressbus_width"][0]=
+    #stats["memory_accesses"][0]=
+    #stats["memory_reads"][0]=
+    #stats["memory_writes"][0]=
 
   def xml(self):
     """ Build an XML Tree from the parameters, stats, and subcomponents """

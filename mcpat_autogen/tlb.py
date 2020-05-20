@@ -20,48 +20,37 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 #
-# niu.py
+# tlb.py
 #
-# Network Interface Unit class definition
+# Translation Lookaside Buffer class definition
 
 from xml.etree import ElementTree
 from xml.dom import minidom
 
-class NIU:
-  """ On chip 10Gb Ethernet NIC, including XAUI Phy and
-  MAC controller. For a minimum IP packet size of 84B
-  at 10Gb/s, a new packet arrives every 67.2ns.  the
-  low bound of clock rate of a 10Gb MAC is 150Mhz Note:
-  McPAT does not track individual nic, instead, it
-  takes the total accesses and calculate the average
-  power per nic or per channel. This is sufficent for
-  most application. """
-
-  name = "niu"
-  id = "niu"
+class TLB:
+  name = "tlb"
+  id = "tlb"
 
   parameters = \
   {
-    "type" : ["0","1: low power; 0 high performance"],
-    "clockrate" : ["350","Clock Rate in MHz"],
-    "number_units" : ["0","unlike PCIe and memory controllers, each Ethernet controller only have one port"]
+    "number_entries" : ["64","TLB Size; tlb.size"],
   }
   stats = \
   {
-    "duty_cycle" : ["1.0","achievable max load lteq 1.0"],
-    "total_load_perc" : ["0.0","ratio of total achived load to total achivable bandwidth "]
+    "total_accesses" : ["","Total Acceses; dtb_walker_cache.tags.data_accesses"],
+    "total_misses" : ["","Total Misses; dtb_walker_cache.tags.data_accesses"],
+    "conflicts" : ["0","Conflicts to entries in the TLB"],
   }
 
   def __init__(self, component_id, component_name, stat_dict, config_dict):
     self.name = component_name
     self.id = component_id
 
-    # Init the NIU Parameters and Stats:
-    #parameters["type"][0]=
-    #parameters["clockrate"][0]=
-    #parameters["number_units"][0]=
-    #stats["duty_cycle"][0]=
-    #stats["total_load_perc"][0]=
+    # Init the Directory Parameters and Stats:
+    #parameters["number_entries"][0]=
+    #stats["total_accesses"][0]=
+    #stats["total_misses"][0]=
+    #stats["conflicts"][0]=
 
   def xml(self):
     """ Build an XML Tree from the parameters, stats, and subcomponents """

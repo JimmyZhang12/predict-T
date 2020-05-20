@@ -27,25 +27,29 @@
 from xml.etree import ElementTree
 from xml.dom import minidom
 
-#from core import Core
+from core import Core
 from cache import Cache
 from noc import NoC
 from mc import MemoryController
 from niu import NIU
 from pcie import PCIE
 from flash import FlashController
+from directory import Directory
 
 class System:
   name = "system"
   id = "system"
 
-  #cores = list()
+  cores = None
+  l2cache = None
+  l1directory = None
+  l2directory = None
   l3 = None
-  #noc = None
-  #mem = None
-  #niu = None
-  #pcie = None
-  #flash = None
+  noc = None
+  mem = None
+  niu = None
+  pcie = None
+  flash = None
 
   # Parameters are a dictionary with the key as the parameter name, and then a
   # value comment pair
@@ -126,13 +130,16 @@ class System:
     #self.stats["busy_cycles"][0] =
 
     # Intialize all the devices
-    #self.core = [Core(self.id+".core"+str(i),"core"+str(i), stat_dict, config_dict) for i in range(int(self.parameters["number_of_cores"][0]))]
+    self.core = [Core(self.id+".core"+str(i),"core"+str(i), stat_dict, config_dict) for i in range(int(self.parameters["number_of_cores"][0]))]
+    self.l2cache = [Cache(self.id+".L2"+str(i),"L2"+str(i),stat_dict,config_dict) for i in range(int(self.parameters["number_of_cores"][0]))]
+    self.l1directory = [Directory(self.id+".L1Directory"+str(i),"L1Directory"+str(i),stat_dict,config_dict) for i in range(int(self.parameters["number_of_cores"][0]))]
+    self.l2directory = [Directory(self.id+".L2Directory"+str(i),"L2Directory"+str(i),stat_dict,config_dict) for i in range(int(self.parameters["number_of_cores"][0]))]
     self.l3 = [Cache(self.id+".L3"+str(i), "L3"+str(i), stat_dict, config_dict) for i in range(int(self.parameters["number_of_L3s"][0]))]
-    #self.noc = [NoC(self.id+".NoC"+str(i), "noc"+str(i), stat_dict, config_dict) for i in range(int(self.parameters["number_of_NoCs"][0]))]
-    #self.mc = MemoryController(self.id+".mc", "mc", stat_dict, config_dict)
-    #self.niu = NIU(self.id+".niu", "niu", stat_dict, config_dict)
-    #self.pcie = PCIE(self.id+".pcie", "pcie", stat_dict, config_dict)
-    #self.flash = FlashController(self.id+".flashc", "flashc", stat_dict, config_dict)
+    self.noc = [NoC(self.id+".NoC"+str(i), "noc"+str(i), stat_dict, config_dict) for i in range(int(self.parameters["number_of_NoCs"][0]))]
+    self.mc = MemoryController(self.id+".mc", "mc", stat_dict, config_dict)
+    self.niu = NIU(self.id+".niu", "niu", stat_dict, config_dict)
+    self.pcie = PCIE(self.id+".pcie", "pcie", stat_dict, config_dict)
+    self.flash = FlashController(self.id+".flashc", "flashc", stat_dict, config_dict)
 
   def xml(self):
     """ Build an XML Tree from the parameters, stats, and subcomponents """
@@ -143,13 +150,21 @@ class System:
     for key in sorted(self.stats):
       top.append(ElementTree.Comment(", ".join(['stat', key, self.stats[key][1]])))
       top.append(ElementTree.Element('stat', name=key, value=self.stats[key][0]))
-    #for c in self.core:
-    #  top.append(c.xml())
+    for c in self.core:
+      top.append(c.xml())
+    for l in self.l1directory:
+      top.append(l.xml())
+    for l in self.l2directory:
+      top.append(l.xml())
+    for l in self.l2cache:
+      top.append(l.xml())
     for c in self.l3:
       top.append(c.xml())
-    #top.extend(self.mc.xml())
-    #top.extend(self.niu.xml())
-    #top.extend(self.pcie.xml())
-    #top.extend(self.flash.xml())
+    for n in self.noc:
+      top.append(n.xml())
+    top.append(self.mc.xml())
+    top.append(self.niu.xml())
+    top.append(self.pcie.xml())
+    top.append(self.flash.xml())
     return top
 

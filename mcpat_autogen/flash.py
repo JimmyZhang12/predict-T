@@ -28,21 +28,37 @@ from xml.etree import ElementTree
 from xml.dom import minidom
 
 class FlashController:
+  """ McPAT does not track individual flash controller,
+  instead, it takes the total accesses and calculate
+  the average power per fc or per channel. This is
+  sufficent for most application """
   name = "flashc"
   id = "flashc"
 
   parameters = \
   {
+    "number_flashcs" : ["0","Number of Flash Controllers"],
+    "type" : ["1","1: low power; 0 high performance"],
+    "withPHY" : ["1",""],
+    "peak_transfer_rate" : ["200","TODO: Find Units"],
   }
   stats = \
   {
+    "duty_cycle" : ["1.0","achievable max load <= 1.0"],
+    "total_load_perc" : ["0.0","Percentage of total achived load to total achivable bandwidth"]
   }
 
   def __init__(self, component_id, component_name, stat_dict, config_dict):
     self.name = component_name
     self.id = component_id
 
-    # Init the PCIE Parameters and Stats:
+    # Init the FlashController Parameters and Stats:
+    #parameters["number_flashcs"][0]=
+    #parameters["type"][0]=
+    #parameters["withPHY"][0]=
+    #parameters["peak_transfer_rate"][0]=
+    #stats["duty_cycle"][0]=
+    #stats["total_load_perc"][0]=
 
   def xml(self):
     """ Build an XML Tree from the parameters, stats, and subcomponents """
