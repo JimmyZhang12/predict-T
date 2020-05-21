@@ -29,8 +29,10 @@ from xml.dom import minidom
 
 from tlb import TLB
 from btb import BTB
-from cache import Cache
+from cache import *
 from branchpred import Predictor
+
+from util import *
 
 class Core:
   name = "core"
@@ -248,48 +250,48 @@ class Core:
     ( \
       self.id+".predictor", \
       "PBT", \
-      stat_dict, \
-      config_dict, \
+      prune_dict("branchPred.",stat_dict), \
+      prune_dict("branchPred.",config_dict), \
       sim_dict \
     )
     self.itlb = TLB \
     ( \
       self.id+".itlb", \
       "itlb", \
-      stat_dict, \
-      config_dict, \
+      prune_dict("itb_walker_cache.",stat_dict), \
+      prune_dict("itb.",config_dict), \
       sim_dict \
     )
-    self.icache = Cache \
+    self.icache = ICache \
     ( \
       self.id+".icache", \
       "icache", \
-      stat_dict, \
-      config_dict, \
+      prune_dict("icache.",stat_dict), \
+      prune_dict("icache.",config_dict), \
       sim_dict \
     )
     self.dtlb = TLB \
     ( \
       self.id+".dtlb", \
       "dtlb", \
-      stat_dict, \
-      config_dict, \
+      prune_dict("dtb_walker_cache.",stat_dict), \
+      prune_dict("dtb.",config_dict), \
       sim_dict \
     )
-    self.dcache = Cache \
+    self.dcache = DCache \
     ( \
       self.id+".dcache", \
       "dcache", \
-      stat_dict, \
-      config_dict, \
+      prune_dict("dcache.",stat_dict), \
+      prune_dict("dcache.",config_dict), \
       sim_dict \
     )
     self.btb = BTB \
     ( \
       self.id+".BTB", \
       "BTB", \
-      stat_dict, \
-      config_dict, \
+      prune_dict("branchPred.",stat_dict), \
+      prune_dict("branchPred.",config_dict), \
       sim_dict \
     )
 

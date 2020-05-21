@@ -46,9 +46,9 @@ class BTB:
     self.id = component_id
 
     # Init the BTB Parameters and Stats:
-    parameters["BTB_config"][0]=",".join([config_dict["BTBEntries"],config_dict["BTBTagSize"],"2","1","1","3"])
-    stats["read_accesses"][0]=str(int(stat_dict["indirectHits"][1]))
-    stats["write_accesses"][0]=str(int(stat_dict["indirectMisses"][1]))
+    self.parameters["BTB_config"][0]=",".join([config_dict["BTBEntries"],config_dict["BTBTagSize"],"2","1","1","3"])
+    self.stats["read_accesses"][0]=str(int(stat_dict["indirectHits"][1]))
+    self.stats["write_accesses"][0]=str(int(stat_dict["indirectMisses"][1]))
 
   def xml(self):
     """ Build an XML Tree from the parameters, stats, and subcomponents """

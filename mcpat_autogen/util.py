@@ -34,6 +34,7 @@ def build_gem5_stat_dict(file):
   stats = {}
   with FileReadBackwards(file, encoding="utf-8") as sf:
     for line in sf:
+      print(line)
       if line.strip() == "":
         continue
       elif "End Simulation Statistics" in line:

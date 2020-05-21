@@ -50,12 +50,12 @@ class Predictor:
     self.id = component_id
 
     # Init the Predictor Parameters and Stats:
-    parameters["local_predictor_size"][0]=str(int(config_dict["localHistoryTableSize"]))
-    parameters["local_predictor_entries"][0]=str(int(config_dict["localPredictorSize"]))
-    parameters["global_predictor_entries"][0]=str(int(config_dict["globalPredictorSize"]))
-    parameters["global_predictor_bits"][0]=str(int(config_dict["globalCtrBits"]))
-    parameters["chooser_predictor_entries"][0]=str(int(config_dict["choicePredictorSize"]))
-    parameters["chooser_predictor_bits"][0]=str(int(config_dict["choiceCtrBits"]))
+    self.parameters["local_predictor_size"][0]=str(int(config_dict["localHistoryTableSize"]))
+    self.parameters["local_predictor_entries"][0]=str(int(config_dict["localPredictorSize"]))
+    self.parameters["global_predictor_entries"][0]=str(int(config_dict["globalPredictorSize"]))
+    self.parameters["global_predictor_bits"][0]=str(int(config_dict["globalCtrBits"]))
+    self.parameters["chooser_predictor_entries"][0]=str(int(config_dict["choicePredictorSize"]))
+    self.parameters["chooser_predictor_bits"][0]=str(int(config_dict["choiceCtrBits"]))
 
   def xml(self):
     """ Build an XML Tree from the parameters, stats, and subcomponents """

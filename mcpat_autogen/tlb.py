@@ -47,10 +47,10 @@ class TLB:
     self.id = component_id
 
     # Init the TLB Parameters and Stats:
-    parameters["number_entries"][0]=str(int(config_dict["size"]))
-    stats["total_accesses"][0]=str(int(stat_dict["tags.tag_accesses"][1]))
-    stats["total_misses"][0]=str(int(stat_dict["replacements"][1]))
-    stats["conflicts"][0]=str(int(stat_dict["replacements"][1]))
+    self.parameters["number_entries"][0]=str(int(config_dict["size"]))
+    self.stats["total_accesses"][0]=str(int(stat_dict["tags.tag_accesses"][1]))
+    self.stats["total_misses"][0]=str(int(stat_dict["replacements"][1]))
+    self.stats["conflicts"][0]=str(int(stat_dict["replacements"][1]))
 
   def xml(self):
     """ Build an XML Tree from the parameters, stats, and subcomponents """
