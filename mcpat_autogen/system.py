@@ -36,6 +36,8 @@ from pcie import PCIE
 from flash import FlashController
 from directory import Directory
 
+from util import *
+
 class System:
   name = "system"
   id = "system"
@@ -92,54 +94,155 @@ class System:
     "busy_cycles" : ["0", "Total Busy Cycles (Total - Idle)"]
   }
 
-  def __init__(self, component_id, component_name, stat_dict, config_dict):
+  def __init__(self, component_id, component_name, stat_dict, config_dict, sim_dict):
     """ In the constructor, the parameters are populated from the config and
     the stats are populated from the stats. The subcomponents are also
     constructed and populated hierarchically """
 
-    # Intialize the Parameters based on the config
-    #self.parameters["number_of_cores"][0] =
-    #self.parameters["number_of_L1Directories"][0] =
-    #self.parameters["number_of_L2Directories"][0] =
-    #self.parameters["number_of_L2s"][0] =
-    #self.parameters["Private_L2"][0] =
-    #self.parameters["number_of_L3s"][0] =
-    #self.parameters["number_of_NoCs"][0] =
-    #self.parameters["homogeneous_cores"][0] =
-    #self.parameters["homogeneous_L2s"][0] =
-    #self.parameters["homogeneous_L1Directories"][0] =
-    #self.parameters["homogeneous_L2Directories"][0] =
-    #self.parameters["homogeneous_L3s"][0] =
-    #self.parameters["homogeneous_ccs"][0] =
-    #self.parameters["homogeneous_NoCs"][0] =
-    #self.parameters["core_tech_node"][0] =
-    #self.parameters["target_core_clockrate"][0] =
-    #self.parameters["temperature"][0] =
-    #self.parameters["number_cache_levels"][0] =
-    #self.parameters["device_type"][0] =
-    #self.parameters["longer_channel_device"][0] =
-    #self.parameters["power_gating"][0] =
-    #self.parameters["machine_bits"][0] =
-    #self.parameters["virtual_address_width"][0] =
-    #self.parameters["physical_address_width"][0] =
-    #self.parameters["virtual_memory_page_size"][0] =
+    num_cpu = 0
+    num_l3 = 0
+    for i in config_dict["system.children"].split(" "):
+      if "cpu" in i and "_" not in i:
+        num_cpu+=1
+      if "l3" in i and i != "tol3bus":
+        num_l3+=1
 
-    ## Intialize the Parameters based on the stats
-    #self.stats["total_cycles"][0] =
-    #self.stats["idle_cycles"][0] =
-    #self.stats["busy_cycles"][0] =
+    # Intialize the Parameters based on the config
+    self.parameters["number_of_cores"][0] = str(num_cpu)
+    self.parameters["number_of_L1Directories"][0] = str(num_cpu)
+    self.parameters["number_of_L2Directories"][0] = str(num_cpu)
+    self.parameters["number_of_L2s"][0] = str(num_cpu)
+    self.parameters["Private_L2"][0] = str(1)
+    self.parameters["number_of_L3s"][0] = str(num_l3)
+    self.parameters["number_of_NoCs"][0] = str(1)
+    self.parameters["homogeneous_cores"][0] = str(1) if num_cpu == 1 else str(0)
+    self.parameters["homogeneous_L2s"][0] = str(1) if num_cpu == 1 else str(0)
+    self.parameters["homogeneous_L1Directories"][0] = str(1) if num_cpu == 1 else str(0)
+    self.parameters["homogeneous_L2Directories"][0] = str(1) if num_cpu == 1 else str(0)
+    self.parameters["homogeneous_L3s"][0] = str(1)
+    self.parameters["homogeneous_ccs"][0] = str(1)
+    self.parameters["homogeneous_NoCs"][0] = str(1)
+    self.parameters["core_tech_node"][0] = config_dict["system.tech_node"] if "system.tech_node" in config_dict.keys() else "90"
+    self.parameters["target_core_clockrate"][0] = str((1.0e-6/float(config_dict["system.clk_domain.clock"]))*1.0e12)
+    self.parameters["temperature"][0] = str(sim_dict["temperature"])
+    self.parameters["number_cache_levels"][0] = str(3) if num_l3 != 0 else str(2)
+    self.parameters["device_type"][0] = str(0)
+    self.parameters["longer_channel_device"][0] = str(1)
+    self.parameters["power_gating"][0] = str(1)
+    self.parameters["machine_bits"][0] = str(64)
+    self.parameters["virtual_address_width"][0] = str(64)
+    self.parameters["physical_address_width"][0] = str(52)
+    self.parameters["virtual_memory_page_size"][0] = str(4096)
+
+    # Intialize the Parameters based on the stats
+    self.stats["total_cycles"][0] = str(int(stat_dict["system.cpu.numCycles"][1])) if(num_cpu==1) else str(int(stat_dict["system.cpu0.numCycles"][1]))
+    self.stats["idle_cycles"][0] = str(int(stat_dict["system.cpu.idleCycles"][1])) if(num_cpu==1) else str(int(stat_dict["system.cpu0.idleCycles"][1]))
+    self.stats["busy_cycles"][0] = str(int(stat_dict["system.cpu.numCycles"][1])-int(stat_dict["system.cpu.idleCycles"][1])) if(num_cpu==1) else str(int(stat_dict["system.cpu0.numCycles"][1])-int(stat_dict["system.cpu0.idleCycles"][1]))
+
+    assert(self.stats["total_cycles"] > 0)
 
     # Intialize all the devices
-    self.core = [Core(self.id+".core"+str(i),"core"+str(i), stat_dict, config_dict) for i in range(int(self.parameters["number_of_cores"][0]))]
-    self.l2cache = [Cache(self.id+".L2"+str(i),"L2"+str(i),stat_dict,config_dict) for i in range(int(self.parameters["number_of_cores"][0]))]
-    self.l1directory = [Directory(self.id+".L1Directory"+str(i),"L1Directory"+str(i),stat_dict,config_dict) for i in range(int(self.parameters["number_of_cores"][0]))]
-    self.l2directory = [Directory(self.id+".L2Directory"+str(i),"L2Directory"+str(i),stat_dict,config_dict) for i in range(int(self.parameters["number_of_cores"][0]))]
-    self.l3 = [Cache(self.id+".L3"+str(i), "L3"+str(i), stat_dict, config_dict) for i in range(int(self.parameters["number_of_L3s"][0]))]
-    self.noc = [NoC(self.id+".NoC"+str(i), "noc"+str(i), stat_dict, config_dict) for i in range(int(self.parameters["number_of_NoCs"][0]))]
-    self.mc = MemoryController(self.id+".mc", "mc", stat_dict, config_dict)
-    self.niu = NIU(self.id+".niu", "niu", stat_dict, config_dict)
-    self.pcie = PCIE(self.id+".pcie", "pcie", stat_dict, config_dict)
-    self.flash = FlashController(self.id+".flashc", "flashc", stat_dict, config_dict)
+    self.core = \
+    [ \
+      Core \
+      ( \
+        self.id+".core"+str(i), \
+        "core"+str(i), \
+        prune_dict("system.cpu." if num_cpu==1 else "system.cpu"+str(i)+".", stat_dict), \
+        prune_dict("system.cpu." if num_cpu==1 else "system.cpu"+str(i)+".", config_dict), \
+        sim_dict \
+      ) \
+      for i in range(int(self.parameters["number_of_cores"][0])) \
+    ]
+    self.l2cache = \
+    [ \
+      Cache \
+      ( \
+        self.id+".L2"+str(i), \
+        "L2"+str(i), \
+        prune_dict("system.l2." if num_cpu==1 else "system.l2"+str(i)+".", stat_dict), \
+        prune_dict("system.l2." if num_cpu==1 else "system.l2"+str(i)+".", config_dict), \
+        sim_dict \
+      ) \
+      for i in range(int(self.parameters["number_of_cores"][0])) \
+    ]
+    self.l1directory = \
+    [ \
+      Directory \
+      ( \
+        self.id+".L1Directory"+str(i), \
+        "L1Directory"+str(i), \
+        stat_dict, \
+        config_dict, \
+        sim_dict \
+      ) \
+      for i in range(int(self.parameters["number_of_cores"][0])) \
+    ]
+    self.l2directory = \
+    [ \
+      Directory \
+      ( \
+        self.id+".L2Directory"+str(i), \
+        "L2Directory"+str(i), \
+        stat_dict, \
+        config_dict, \
+        sim_dict \
+      ) \
+      for i in range(int(self.parameters["number_of_cores"][0])) \
+    ]
+    self.l3 = \
+    [ \
+      Cache \
+      ( \
+        self.id+".L3"+str(i), \
+        "L3"+str(i), \
+        prune_dict("system.l3." if num_cpu==1 else "system.l3"+str(i)+".", stat_dict), \
+        prune_dict("system.l3." if num_cpu==1 else "system.l3"+str(i)+".", config_dict), \
+        sim_dict \
+      ) \
+      for i in range(int(self.parameters["number_of_L3s"][0])) \
+    ]
+    self.noc = \
+    [ \
+      NoC \
+      ( \
+        self.id+".NoC"+str(i), \
+        "noc"+str(i), \
+        stat_dict, \
+        config_dict, \
+        sim_dict \
+      ) \
+      for i in range(int(self.parameters["number_of_NoCs"][0])) \
+    ]
+    self.mc = MemoryController \
+    ( \
+      self.id+".mc", \
+      "mc", \
+      stat_dict, \
+      config_dict, \
+      sim_dict \
+    )
+    self.niu = NIU \
+    ( \
+      self.id+".niu", \
+      "niu", \
+      stat_dict, \
+      config_dict \
+    )
+    self.pcie = PCIE \
+    ( \
+      self.id+".pcie", \
+      "pcie", \
+      stat_dict, \
+      config_dict \
+    )
+    self.flash = FlashController \
+    ( \
+      self.id+".flashc", \
+      "flashc", \
+      stat_dict, \
+      config_dict \
+    )
 
   def xml(self):
     """ Build an XML Tree from the parameters, stats, and subcomponents """

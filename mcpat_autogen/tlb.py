@@ -42,15 +42,15 @@ class TLB:
     "conflicts" : ["0","Conflicts to entries in the TLB"],
   }
 
-  def __init__(self, component_id, component_name, stat_dict, config_dict):
+  def __init__(self, component_id, component_name, stat_dict, config_dict, sim_dict):
     self.name = component_name
     self.id = component_id
 
-    # Init the Directory Parameters and Stats:
-    #parameters["number_entries"][0]=
-    #stats["total_accesses"][0]=
-    #stats["total_misses"][0]=
-    #stats["conflicts"][0]=
+    # Init the TLB Parameters and Stats:
+    parameters["number_entries"][0]=str(int(config_dict["size"]))
+    stats["total_accesses"][0]=str(int(stat_dict["tags.tag_accesses"][1]))
+    stats["total_misses"][0]=str(int(stat_dict["replacements"][1]))
+    stats["conflicts"][0]=str(int(stat_dict["replacements"][1]))
 
   def xml(self):
     """ Build an XML Tree from the parameters, stats, and subcomponents """

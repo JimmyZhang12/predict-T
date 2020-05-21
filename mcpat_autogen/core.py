@@ -142,18 +142,156 @@ class Core:
   btb = None
 
 
-  def __init__(self, component_id, component_name, stat_dict, config_dict):
+  def __init__(self, component_id, component_name, stat_dict, config_dict, sim_dict):
+    print(stat_dict)
+    print(config_dict)
+    print(sim_dict)
+
     self.name = component_name
     self.id = component_id
 
     # Init the Directory Parameters and Stats:
+    self.parameters["clock_rate"][0]=str((1.0e-6/float(config_dict["clock"]))*1.0e12)
+    self.parameters["vdd"][0]=str(float(sim_dict["voltage"]))
+    self.parameters["power_gating_vcc"][0]="-1"
+    self.parameters["opt_local"][0]="0"
+    self.parameters["instruction_length"][0]="32"
+    self.parameters["opcode_width"][0]="16"
+    self.parameters["x86"][0]="1"
+    self.parameters["micro_opcode_width"][0]="8"
+    self.parameters["machine_type"][0]="0"
+    self.parameters["number_hardware_threads"][0]=str(int(config_dict["numThreads"]))
+    self.parameters["fetch_width"][0]=str(int(config_dict["fetchWidth"]))
+    self.parameters["number_instruction_fetch_ports"][0]="1"
+    self.parameters["decode_width"][0]=str(int(config_dict["decodeWidth"]))
+    self.parameters["issue_width"][0]=str(int(config_dict["issueWidth"]))
+    self.parameters["peak_issue_width"][0]=str(int(config_dict["issueWidth"]))
+    self.parameters["commit_width"][0]=str(int(config_dict["commitWidth"]))
+    self.parameters["fp_issue_width"][0]=str(int(config_dict["fuPool.FUList2.count"]))
+    self.parameters["prediction_width"][0]=str(int(config_dict["branchPred.numThreads"]))
+    self.parameters["pipelines_per_core"][0]="1,1"
+    self.parameters["pipeline_depth"][0]="31,31"
+    self.parameters["ALU_per_core"][0]=str(int(config_dict["fuPool.FUList0.count"]))
+    self.parameters["MUL_per_core"][0]=str(int(config_dict["fuPool.FUList1.count"]))
+    self.parameters["FPU_per_core"][0]=str(int(config_dict["fuPool.FUList2.count"])+int(config_dict["fuPool.FUList3.count"]))
+    self.parameters["instruction_buffer_size"][0]=str(int(config_dict["fetchBufferSize"]))
+    self.parameters["decoded_stream_buffer_size"][0]="16"
+    self.parameters["instruction_window_scheme"][0]="0"
+    self.parameters["instruction_window_size"][0]=str(int(config_dict["numIQEntries"]))
+    self.parameters["fp_instruction_window_size"][0]=str(int(config_dict["numIQEntries"]))
+    self.parameters["ROB_size"][0]=str(int(config_dict["numROBEntries"]))
+    self.parameters["archi_Regs_IRF_size"][0]="16"
+    self.parameters["archi_Regs_FRF_size"][0]="32"
+    self.parameters["phy_Regs_IRF_size"][0]=str(int(config_dict["numPhysIntRegs"]))
+    self.parameters["phy_Regs_FRF_size"][0]=str(int(config_dict["numPhysFloatRegs"]))
+    self.parameters["rename_scheme"][0]="0"
+    self.parameters["checkpoint_depth"][0]="0"
+    self.parameters["register_windows_size"][0]="0"
+    self.parameters["LSU_order"][0]="inorder"
+    self.parameters["store_buffer_size"][0]=str(int(config_dict["SQEntries"]))
+    self.parameters["load_buffer_size"][0]=str(int(config_dict["SQEntries"]))
+    self.parameters["memory_ports"][0]="2"
+    self.parameters["RAS_size"][0]=str(int(config_dict["branchPred.RASSize"]))
+    self.parameters["number_of_BPT"][0]=str(int(config_dict["numThreads"]))
+    self.parameters["number_of_BTB"][0]=str(int(config_dict["numThreads"]))
 
-    self.predictor = Predictor(self.id+".predictor","PBT",stat_dict,config_dict)
-    self.itlb = TLB(self.id+".itlb","itlb",stat_dict,config_dict)
-    self.icache = Cache(self.id+".icache","icache",stat_dict,config_dict)
-    self.dtlb = TLB(self.id+".dtlb","dtlb",stat_dict,config_dict)
-    self.dcache = Cache(self.id+".dcache","dcache",stat_dict,config_dict)
-    self.btb = BTB(self.id+".BTB","BTB",stat_dict,config_dict)
+    self.stats["total_instructions"][0]=str(int(stat_dict["iq.iqInstsIssued"][1]))
+    self.stats["int_instructions"][0]=str(int(stat_dict["iq.FU_type_0::No_OpClass"][1])+int(stat_dict["iq.FU_type_0::IntAlu"][1])+int(stat_dict["iq.FU_type_0::IntMult"][1])+int(stat_dict["iq.FU_type_0::IntDiv"][1])+int(stat_dict["iq.FU_type_0::IprAccess"][1]))
+    self.stats["fp_instructions"][0]=str(int(stat_dict["iq.FU_type_0::FloatAdd"][1])+int(stat_dict["iq.FU_type_0::FloatCmp"][1])+int(stat_dict["iq.FU_type_0::FloatCvt"][1])+int(stat_dict["iq.FU_type_0::FloatMult"][1])+int(stat_dict["iq.FU_type_0::FloatDiv"][1])+int(stat_dict["iq.FU_type_0::FloatSqrt"][1]))
+    self.stats["branch_instructions"][0]=str(int(stat_dict["branchPred.condPredicted"][1]))
+    self.stats["branch_mispredictions"][0]=str(int(stat_dict["branchPred.condIncorrect"][1]))
+    self.stats["load_instructions"][0]=str(int(stat_dict["iq.FU_type_0::MemRead"][1])+int(stat_dict["iq.FU_type_0::InstPrefetch"][1]))
+    self.stats["store_instructions"][0]=str(int(stat_dict["iq.FU_type_0::MemWrite"][1]))
+    self.stats["committed_instructions"][0]=str(int(stat_dict["commit.committedOps"][1]))
+    self.stats["committed_int_instructions"][0]=str(int(stat_dict["commit.int_insts"][1]))
+    self.stats["committed_fp_instructions"][0]=str(int(stat_dict["commit.fp_insts"][1]))
+    self.stats["pipeline_duty_cycle"][0]=str(float(stat_dict["ipc_total"][1]))
+    self.stats["total_cycles"][0]=str(int(stat_dict["numCycles"][1]))
+    self.stats["idle_cycles"][0]=str(int(stat_dict["idleCycles"][1]))
+    self.stats["busy_cycles"][0]=str(int(stat_dict["numCycles"][1])-int(stat_dict["idleCycles"][1]))
+    self.stats["ROB_reads"][0]=str(int(stat_dict["rob.rob_reads"][1]))
+    self.stats["ROB_writes"][0]=str(int(stat_dict["rob.rob_writes"][1]))
+    self.stats["rename_reads"][0]=str(int(stat_dict["rename.int_rename_lookups"][1]))
+    self.stats["rename_writes"][0]=str(int(stat_dict["rename.RenamedOperands"][1])*int(stat_dict["rename.int_rename_lookups"][1])/(1+int(stat_dict["rename.RenameLookups"][1])))
+    self.stats["fp_rename_reads"][0]=str(int(stat_dict["rename.fp_rename_lookups"][1]))
+    self.stats["fp_rename_writes"][0]=str(int(stat_dict["rename.RenamedOperands"][1])*int(stat_dict["rename.fp_rename_lookups"][1])/(1+int(stat_dict["rename.RenameLookups"][1])))
+    self.stats["inst_window_reads"][0]=str(int(stat_dict["iq.int_inst_queue_reads"][1]))
+    self.stats["inst_window_writes"][0]=str(int(stat_dict["iq.int_inst_queue_writes"][1]))
+    self.stats["inst_window_wakeup_accesses"][0]=str(int(stat_dict["iq.int_inst_queue_wakeup_accesses"][1]))
+    self.stats["fp_inst_window_reads"][0]=str(int(stat_dict["iq.fp_inst_queue_reads"][1]))
+    self.stats["fp_inst_window_writes"][0]=str(int(stat_dict["iq.fp_inst_queue_writes"][1]))
+    self.stats["fp_inst_window_wakeup_accesses"][0]=str(int(stat_dict["iq.fp_inst_queue_wakeup_accesses"][1]))
+    self.stats["int_regfile_reads"][0]=str(int(stat_dict["int_regfile_reads"][1]))
+    self.stats["float_regfile_reads"][0]=str(int(stat_dict["fp_regfile_reads"][1]))
+    self.stats["int_regfile_writes"][0]=str(int(stat_dict["int_regfile_writes"][1]))
+    self.stats["float_regfile_writes"][0]=str(int(stat_dict["fp_regfile_writes"][1]))
+    self.stats["function_calls"][0]=str(int(stat_dict["commit.function_calls"][1]))
+    self.stats["context_switches"][0]=str(int(stat_dict["workload.numSyscalls"][1]))
+    self.stats["ialu_accesses"][0]=str(int(stat_dict["iq.int_alu_accesses"][1]))
+    self.stats["fpu_accesses"][0]=str(int(stat_dict["iq.fp_alu_accesses"][1]))
+    self.stats["mul_accesses"][0]=str(int(stat_dict["iq.fu_full::FloatMult"][1]))
+    self.stats["cdb_alu_accesses"][0]=str(int(stat_dict["iq.int_alu_accesses"][1]))
+    self.stats["cdb_mul_accesses"][0]=str(int(stat_dict["iq.fp_alu_accesses"][1]))
+    self.stats["cdb_fpu_accesses"][0]=str(int(stat_dict["iq.fp_alu_accesses"][1]))
+    self.stats["IFU_duty_cycle"][0]="0.25"
+    self.stats["LSU_duty_cycle"][0]="0.25"
+    self.stats["MemManU_I_duty_cycle"][0]="0.25"
+    self.stats["MemManU_D_duty_cycle"][0]="0.25"
+    self.stats["ALU_duty_cycle"][0]="1"
+    self.stats["MUL_duty_cycle"][0]="0.3"
+    self.stats["FPU_duty_cycle"][0]="0.3"
+    self.stats["ALU_cdb_duty_cycle"][0]="1"
+    self.stats["MUL_cdb_duty_cycle"][0]="0.3"
+    self.stats["FPU_cdb_duty_cycle"][0]="0.3"
+
+    self.predictor = Predictor \
+    ( \
+      self.id+".predictor", \
+      "PBT", \
+      stat_dict, \
+      config_dict, \
+      sim_dict \
+    )
+    self.itlb = TLB \
+    ( \
+      self.id+".itlb", \
+      "itlb", \
+      stat_dict, \
+      config_dict, \
+      sim_dict \
+    )
+    self.icache = Cache \
+    ( \
+      self.id+".icache", \
+      "icache", \
+      stat_dict, \
+      config_dict, \
+      sim_dict \
+    )
+    self.dtlb = TLB \
+    ( \
+      self.id+".dtlb", \
+      "dtlb", \
+      stat_dict, \
+      config_dict, \
+      sim_dict \
+    )
+    self.dcache = Cache \
+    ( \
+      self.id+".dcache", \
+      "dcache", \
+      stat_dict, \
+      config_dict, \
+      sim_dict \
+    )
+    self.btb = BTB \
+    ( \
+      self.id+".BTB", \
+      "BTB", \
+      stat_dict, \
+      config_dict, \
+      sim_dict \
+    )
 
   def xml(self):
     """ Build an XML Tree from the parameters, stats, and subcomponents """

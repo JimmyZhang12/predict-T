@@ -33,7 +33,7 @@ class BTB:
 
   parameters = \
   {
-    "BTB_config" : ["5120,4,2,1, 1,3","Should be 4096 + 1024 all the buffer related are optional the parameters are capacity,block_width,associativity,bank, throughput w.r.t. core clock, latency w.r.t. core clock"],
+    "BTB_config" : ["5120,4,2,1,1,3","Should be 4096 + 1024 all the buffer related are optional the parameters are capacity,block_width,associativity,bank, throughput w.r.t. core clock, latency w.r.t. core clock"],
   }
   stats = \
   {
@@ -41,14 +41,14 @@ class BTB:
     "write_accesses" : ["0","Number of Updates to the CAM; commit.branches"],
   }
 
-  def __init__(self, component_id, component_name, stat_dict, config_dict):
+  def __init__(self, component_id, component_name, stat_dict, config_dict, sim_dict):
     self.name = component_name
     self.id = component_id
 
-    # Init the Directory Parameters and Stats:
-    #parameters["BTB_config"][0]=
-    #stats["read_accesses"][0]=
-    #stats["write_accesses"][0]=
+    # Init the BTB Parameters and Stats:
+    parameters["BTB_config"][0]=",".join([config_dict["BTBEntries"],config_dict["BTBTagSize"],"2","1","1","3"])
+    stats["read_accesses"][0]=str(int(stat_dict["indirectHits"][1]))
+    stats["write_accesses"][0]=str(int(stat_dict["indirectMisses"][1]))
 
   def xml(self):
     """ Build an XML Tree from the parameters, stats, and subcomponents """

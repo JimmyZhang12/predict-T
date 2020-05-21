@@ -45,17 +45,17 @@ class Predictor:
   {
   }
 
-  def __init__(self, component_id, component_name, stat_dict, config_dict):
+  def __init__(self, component_id, component_name, stat_dict, config_dict, sim_dict):
     self.name = component_name
     self.id = component_id
 
-    # Init the Cache Parameters and Stats:
-    #parameters["local_predictor_size"][0]=
-    #parameters["local_predictor_entries"][0]=
-    #parameters["global_predictor_entries"][0]=
-    #parameters["global_predictor_bits"][0]=
-    #parameters["chooser_predictor_entries"][0]=
-    #parameters["chooser_predictor_bits"][0]=
+    # Init the Predictor Parameters and Stats:
+    parameters["local_predictor_size"][0]=str(int(config_dict["localHistoryTableSize"]))
+    parameters["local_predictor_entries"][0]=str(int(config_dict["localPredictorSize"]))
+    parameters["global_predictor_entries"][0]=str(int(config_dict["globalPredictorSize"]))
+    parameters["global_predictor_bits"][0]=str(int(config_dict["globalCtrBits"]))
+    parameters["chooser_predictor_entries"][0]=str(int(config_dict["choicePredictorSize"]))
+    parameters["chooser_predictor_bits"][0]=str(int(config_dict["choiceCtrBits"]))
 
   def xml(self):
     """ Build an XML Tree from the parameters, stats, and subcomponents """

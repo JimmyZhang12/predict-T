@@ -54,7 +54,7 @@ class Directory:
     "conflicts" : ["0","Conflicts"]
   }
 
-  def __init__(self, component_id, component_name, stat_dict, config_dict):
+  def __init__(self, component_id, component_name, stat_dict, config_dict, sim_dict):
     self.name = component_name
     self.id = component_id
 

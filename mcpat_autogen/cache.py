@@ -44,7 +44,10 @@ class Cache:
     "conflicts" : ["1", "Cache Replacements"]
   }
 
-  def __init__(self, component_id, component_name, stat_dict, config_dict):
+  def __init__(self, component_id, component_name, stat_dict, config_dict, sim_dict):
+    print(stat_dict)
+    print(config_dict)
+    print(sim_dict)
     self.name = component_name
     self.id = component_id
 
