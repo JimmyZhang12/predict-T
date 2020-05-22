@@ -145,10 +145,6 @@ class Core:
 
 
   def __init__(self, component_id, component_name, stat_dict, config_dict, sim_dict):
-    print(stat_dict)
-    print(config_dict)
-    print(sim_dict)
-
     self.name = component_name
     self.id = component_id
 
@@ -228,7 +224,7 @@ class Core:
     self.stats["int_regfile_writes"][0]=str(int(stat_dict["int_regfile_writes"][1]))
     self.stats["float_regfile_writes"][0]=str(int(stat_dict["fp_regfile_writes"][1]))
     self.stats["function_calls"][0]=str(int(stat_dict["commit.function_calls"][1]))
-    self.stats["context_switches"][0]=str(int(stat_dict["workload.numSyscalls"][1]))
+    self.stats["context_switches"][0]=str(int(stat_dict["workload.numSyscalls"][1]) if "workload.numSyscalls" in stat_dict.keys() else 0)
     self.stats["ialu_accesses"][0]=str(int(stat_dict["iq.int_alu_accesses"][1]))
     self.stats["fpu_accesses"][0]=str(int(stat_dict["iq.fp_alu_accesses"][1]))
     self.stats["mul_accesses"][0]=str(int(stat_dict["iq.fu_full::FloatMult"][1]))

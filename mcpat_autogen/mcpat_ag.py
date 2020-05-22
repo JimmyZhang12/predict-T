@@ -40,19 +40,15 @@ def prettify(elem):
 
 def testbench():
   """ Testbench code """
-  stat_file = "/scratch/atsmith3/predict-T/gem5_out/bitcnts_256_10_1000000_SimplePredictorEnableBuck1MHz/stats.txt"
-  config_file = "/scratch/atsmith3/predict-T/gem5_out/bitcnts_256_10_1000000_SimplePredictorEnableBuck1MHz/config.ini"
+  #stat_file = "/scratch/atsmith3/predict-T/gem5_out/bitcnts_256_10_1000000_SimplePredictorEnableBuck1MHz/stats.txt"
+  stat_file = "/scratch/atsmith3/predict-T/gem5_out/basicmath_256_10_1000000_mcSimplePredictorEnableBuck1MHz/stats.txt"
+  #config_file = "/scratch/atsmith3/predict-T/gem5_out/bitcnts_256_10_1000000_SimplePredictorEnableBuck1MHz/config.ini"
+  config_file = "/scratch/atsmith3/predict-T/gem5_out/basicmath_256_10_1000000_mcSimplePredictorEnableBuck1MHz/config.ini"
 
   # Parse & build the context dictionaries:
   stat_dict = build_gem5_stat_dict(stat_file)
   config_dict = build_gem5_config_dict(config_file)
   sim_dict = build_gem5_sim_dict(voltage="1.2", temperature="300")
-  print(stat_dict)
-  print("\n\n-----------------------------\n\n")
-  print(config_dict)
-  print("\n\n-----------------------------\n\n")
-  print(sim_dict)
-  print("\n\n-----------------------------\n\n")
 
   # Build the system
   s = System("system", "system", stat_dict, config_dict, sim_dict)
