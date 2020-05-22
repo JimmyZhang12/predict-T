@@ -28,32 +28,29 @@ from xml.etree import ElementTree
 from xml.dom import minidom
 
 class Cache:
-  name = "cache"
-  id = "cache"
-  LLC = False
-
-  parameters = \
-  {
-    "config" : ["0,1,2,3,4,5,6,7","Cache Capacity, Block Width, Associativity, Bank, Throughput w.r.t. core clock, Latency w.r.t. core clock, Output Width, Cache Policy: 0 no write or write-though with non-write allocate; 1 write-back with write-allocate"],
-    "buffer_sizes" : ["0,1,2,3","Cache controller buffer sizes: miss_buffer_size(MSHR), fill_buffer_size, prefetch_buffer_size, wb_buffer_size"],
-    "clockrate" : ["1000","Clock rate in MHz"],
-    "vdd" : ["1.2","Voltage"],
-    "power_gating_vcc" : ["-1","-1 means default power gating"],
-    "ports" : ["1,1,1","Number of R, W, RW ports"],
-    "device_type" : ["0","0: HP, 1: LP"]
-  }
-  stats = \
-  {
-    "duty_cycle" : ["1.0",""],
-    "read_accesses" : ["0", "Cache Read Accesses Total"],
-    "read_misses" : ["0", "Cache Read Req Misses Total"],
-    "write_accesses" : ["0", "Cache Write Accesses Total"],
-    "write_misses" : ["0", "Cache Write Req Misses Total"],
-    "conflicts" : ["0", "Cache Replacements"]
-  }
-
   def __init__(self, component_id, component_name, stat_dict, config_dict, sim_dict):
-    print(stat_dict)
+    self.name = "cache"
+    self.id = "cache"
+
+    self.parameters = \
+    {
+      "config" : ["0,1,2,3,4,5,6,7","Cache Capacity, Block Width, Associativity, Bank, Throughput w.r.t. core clock, Latency w.r.t. core clock, Output Width, Cache Policy: 0 no write or write-though with non-write allocate; 1 write-back with write-allocate"],
+      "buffer_sizes" : ["0,1,2,3","Cache controller buffer sizes: miss_buffer_size(MSHR), fill_buffer_size, prefetch_buffer_size, wb_buffer_size"],
+      "clockrate" : ["1000","Clock rate in MHz"],
+      "vdd" : ["1.2","Voltage"],
+      "power_gating_vcc" : ["-1","-1 means default power gating"],
+      "ports" : ["1,1,1","Number of R, W, RW ports"],
+      "device_type" : ["0","0: HP, 1: LP"]
+    }
+    self.stats = \
+    {
+      "duty_cycle" : ["1.0",""],
+      "read_accesses" : ["0", "Cache Read Accesses Total"],
+      "read_misses" : ["0", "Cache Read Req Misses Total"],
+      "write_accesses" : ["0", "Cache Write Accesses Total"],
+      "write_misses" : ["0", "Cache Write Req Misses Total"],
+      "conflicts" : ["0", "Cache Replacements"]
+    }
     self.name = component_name
     self.id = component_id
 
@@ -80,22 +77,22 @@ class Cache:
     return top
 
 class ICache:
-  name = "icache"
-  id = "icache"
-
-  parameters = \
-  {
-    "icache_config" : ["0,1,2,3,4,5,6,7","Cache Capacity, Block Width, Associativity, Bank, Throughput w.r.t. core clock, Latency w.r.t. core clock, Output Width, Cache Policy: 0 no write or write-though with non-write allocate; 1 write-back with write-allocate"],
-    "buffer_sizes" : ["0,1,2,3","Cache controller buffer sizes: miss_buffer_size(MSHR), fill_buffer_size, prefetch_buffer_size, wb_buffer_size"]
-  }
-  stats = \
-  {
-    "read_accesses" : ["0", "Cache Read Accesses Total"],
-    "read_misses" : ["0", "Cache Read Req Misses Total"],
-    "conflicts" : ["0", "Cache Replacements"]
-  }
-
   def __init__(self, component_id, component_name, stat_dict, config_dict, sim_dict):
+    self.name = "icache"
+    self.id = "icache"
+
+    self.parameters = \
+    {
+      "icache_config" : ["0,1,2,3,4,5,6,7","Cache Capacity, Block Width, Associativity, Bank, Throughput w.r.t. core clock, Latency w.r.t. core clock, Output Width, Cache Policy: 0 no write or write-though with non-write allocate; 1 write-back with write-allocate"],
+      "buffer_sizes" : ["0,1,2,3","Cache controller buffer sizes: miss_buffer_size(MSHR), fill_buffer_size, prefetch_buffer_size, wb_buffer_size"]
+    }
+    self.stats = \
+    {
+      "read_accesses" : ["0", "Cache Read Accesses Total"],
+      "read_misses" : ["0", "Cache Read Req Misses Total"],
+      "conflicts" : ["0", "Cache Replacements"]
+    }
+
     self.name = component_name
     self.id = component_id
 
@@ -118,24 +115,24 @@ class ICache:
     return top
 
 class DCache:
-  name = "dcache"
-  id = "dcache"
-
-  parameters = \
-  {
-    "dcache_config" : ["0,1,2,3,4,5,6,7","Cache Capacity, Block Width, Associativity, Bank, Throughput w.r.t. core clock, Latency w.r.t. core clock, Output Width, Cache Policy: 0 no write or write-though with non-write allocate; 1 write-back with write-allocate"],
-    "buffer_sizes" : ["0,1,2,3","Cache controller buffer sizes: miss_buffer_size(MSHR), fill_buffer_size, prefetch_buffer_size, wb_buffer_size"]
-  }
-  stats = \
-  {
-    "read_accesses" : ["0", "Cache Read Accesses Total"],
-    "read_misses" : ["0", "Cache Read Req Misses Total"],
-    "write_accesses" : ["0", "Cache Write Accesses Total"],
-    "write_misses" : ["0", "Cache Write Req Misses Total"],
-    "conflicts" : ["0", "Cache Replacements"]
-  }
-
   def __init__(self, component_id, component_name, stat_dict, config_dict, sim_dict):
+    self.name = "dcache"
+    self.id = "dcache"
+
+    self.parameters = \
+    {
+      "dcache_config" : ["0,1,2,3,4,5,6,7","Cache Capacity, Block Width, Associativity, Bank, Throughput w.r.t. core clock, Latency w.r.t. core clock, Output Width, Cache Policy: 0 no write or write-though with non-write allocate; 1 write-back with write-allocate"],
+      "buffer_sizes" : ["0,1,2,3","Cache controller buffer sizes: miss_buffer_size(MSHR), fill_buffer_size, prefetch_buffer_size, wb_buffer_size"]
+    }
+    self.stats = \
+    {
+      "read_accesses" : ["0", "Cache Read Accesses Total"],
+      "read_misses" : ["0", "Cache Read Req Misses Total"],
+      "write_accesses" : ["0", "Cache Write Accesses Total"],
+      "write_misses" : ["0", "Cache Write Req Misses Total"],
+      "conflicts" : ["0", "Cache Replacements"]
+    }
+
     self.name = component_name
     self.id = component_id
 

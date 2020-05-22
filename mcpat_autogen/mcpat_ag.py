@@ -41,9 +41,9 @@ def prettify(elem):
 def testbench():
   """ Testbench code """
   #stat_file = "/scratch/atsmith3/predict-T/gem5_out/bitcnts_256_10_1000000_SimplePredictorEnableBuck1MHz/stats.txt"
-  stat_file = "/scratch/atsmith3/predict-T/gem5_out/basicmath_256_10_1000000_mcSimplePredictorEnableBuck1MHz/stats.txt"
+  stat_file = "/scratch/atsmith3/predict-T/gem5_out/dijkstra_256_10_1000000_mcSimplePredictorEnableBuck1MHz/stats.txt"
   #config_file = "/scratch/atsmith3/predict-T/gem5_out/bitcnts_256_10_1000000_SimplePredictorEnableBuck1MHz/config.ini"
-  config_file = "/scratch/atsmith3/predict-T/gem5_out/basicmath_256_10_1000000_mcSimplePredictorEnableBuck1MHz/config.ini"
+  config_file = "/scratch/atsmith3/predict-T/gem5_out/dijkstra_256_10_1000000_mcSimplePredictorEnableBuck1MHz/config.ini"
 
   # Parse & build the context dictionaries:
   stat_dict = build_gem5_stat_dict(stat_file)

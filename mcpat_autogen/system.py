@@ -154,6 +154,9 @@ class System:
       ) \
       for i in range(int(self.parameters["number_of_cores"][0])) \
     ]
+    print(self.core)
+    for i in range(len(self.core)):
+      print(self.core[i], self.core[i].get_stats())
     self.l2cache = \
     [ \
       Cache \
@@ -196,8 +199,8 @@ class System:
       ( \
         self.id+".L3"+str(i), \
         "L3"+str(i), \
-        prune_dict("system.l3." if num_cpu==1 else "system.l3"+str(i)+".", stat_dict), \
-        prune_dict("system.l3." if num_cpu==1 else "system.l3"+str(i)+".", config_dict), \
+        prune_dict("system.l3." if num_l3==1 else "system.l3"+str(i)+".", stat_dict), \
+        prune_dict("system.l3." if num_l3==1 else "system.l3"+str(i)+".", config_dict), \
         sim_dict \
       ) \
       for i in range(int(self.parameters["number_of_L3s"][0])) \
@@ -253,8 +256,8 @@ class System:
     for key in sorted(self.stats):
       top.append(ElementTree.Comment(", ".join(['stat', key, self.stats[key][1]])))
       top.append(ElementTree.Element('stat', name=key, value=self.stats[key][0]))
-    for c in self.core:
-      top.append(c.xml())
+    for i in range(len(self.core)):
+      top.append(self.core[i].xml())
     for l in self.l1directory:
       top.append(l.xml())
     for l in self.l2directory:
