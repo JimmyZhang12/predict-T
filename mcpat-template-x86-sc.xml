@@ -18,7 +18,7 @@
     <param name="homogeneous_NoCs" value="1"/>
     <param name="core_tech_node" value="22"/><!-- nm -->
     <param name="target_core_clockrate" value="REPLACE{1e-6 / config.system.clk_domain.clock * 1e12}"/><!--MHz -->
-    <param name="temperature" value="380"/> <!-- Kelvin -->
+    <param name="temperature" value="REPLACE{sim.temperature}"/> <!-- Kelvin -->
     <param name="number_cache_levels" value="3"/>
     <param name="interconnect_projection_type" value="0"/><!--0: aggressive wire technology; 1: conservative wire technology -->
     <param name="device_type" value="0"/><!--0: HP(High Performance Type); 1: LSTP(Low standby power) 2: LOP (Low Operating Power)  -->
@@ -39,7 +39,7 @@
     <component id="system.core0" name="core0">
       <!-- Core property -->
       <param name="clock_rate" value="REPLACE{1e-6 / config.system.clk_domain.clock * 1e12}"/>
-      <param name="vdd" value="1.25"/><!-- 0 means using ITRS default vdd -->
+      <param name="vdd" value="REPLACE{sim.voltage}"/><!-- 0 means using ITRS default vdd -->
       <param name="power_gating_vcc" value="-1"/><!-- "-1" means using default power gating virtual power supply voltage constrained by technology and computed automatically -->
       <param name="opt_local" value="0"/> <!-- for cores with unknown timing, set to 0 to force off the opt flag -->
       <param name="instruction_length" value="32"/>
@@ -306,7 +306,7 @@
         <param name="L2_config" value="REPLACE{config.system.l2.size,config.system.l2.tags.block_size,config.system.l2.assoc,1,1,config.system.l2.response_latency,config.system.l2.tags.block_size,0}"/>
         <param name="buffer_sizes" value="REPLACE{config.system.l2.mshrs,config.system.l2.mshrs,config.system.l2.mshrs,config.system.l2.mshrs}"/>
         <param name="clockrate" value="REPLACE{1e-6 / config.system.clk_domain.clock * 1e12}"/>
-        <param name="vdd" value="0"/><!-- 0 means using ITRS default vdd -->
+        <param name="vdd" value="REPLACE{sim.voltage}"/><!-- 0 means using ITRS default vdd -->
         <param name="power_gating_vcc" value="-1"/><!-- "-1" means using default power gating virtual power supply voltage constrained by technology and computed automatically -->
         <param name="ports" value="1,1,1"/>
         <!-- number of r, w, and rw ports -->
@@ -328,7 +328,7 @@
         <param name="ports" value="1,1,1"/>
         <!-- number of r, w, and rw ports -->
         <param name="device_type" value="0"/>
-        <param name="vdd" value="0"/><!-- 0 means using ITRS default vdd -->
+        <param name="vdd" value="REPLACE{sim.voltage}"/><!-- 0 means using ITRS default vdd -->
         <param name="power_gating_vcc" value="-1"/><!-- "-1" means using default power gating virtual power supply voltage constrained by technology and computed automatically -->
         <param name="buffer_sizes" value="REPLACE{config.system.l3.mshrs,config.system.l3.mshrs,config.system.l3.mshrs,config.system.l3.mshrs}"/>
         <!-- cache controller buffer sizes: miss_buffer_size(MSHR),fill_buffer_size,prefetch_buffer_size,wb_buffer_size-->  
@@ -343,7 +343,7 @@
 <!--**********************************************************************-->
     <component id="system.NoC0" name="noc0">
       <param name="clockrate" value="REPLACE{1e-6 / config.system.clk_domain.clock * 1e12}"/>
-      <param name="vdd" value="0"/><!-- 0 means using ITRS default vdd -->
+      <param name="vdd" value="REPLACE{sim.voltage}"/><!-- 0 means using ITRS default vdd -->
       <param name="power_gating_vcc" value="-1"/><!-- "-1" means using default power gating virtual power supply voltage constrained by technology and computed automatically -->
       <param name="type" value="0"/>
       <!--0:bus, 1:NoC , for bus no matter how many nodes sharing the bus
@@ -379,7 +379,7 @@
       improvements on MC will be added in later versions. -->
       <param name="type" value="0"/> <!-- 1: low power; 0 high performance -->
       <param name="mc_clock" value="2666"/><!--DIMM IO bus clock rate MHz--> 
-      <param name="vdd" value="0"/><!-- 0 means using ITRS default vdd -->
+      <param name="vdd" value="REPLACE{sim.voltage}"/><!-- 0 means using ITRS default vdd -->
       <param name="power_gating_vcc" value="-1"/><!-- "-1" means using default power gating virtual power supply voltage constrained by technology and computed automatically -->
       <param name="peak_transfer_rate" value="20000"/><!--MB/S-->
       <param name="block_size" value="64"/><!--B-->

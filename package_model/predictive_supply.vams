@@ -1,0 +1,95 @@
+//Verilog-AMS HDL for "Silva_AVP", "model" "verilogams"
+
+`include "constants.vams"
+`include "disciplines.vams"
+
+`timescale 1s/1ps 
+module simple_buck_model(vid, _i_step, vout, en);
+  
+  //parameter real VIN = 2.4;
+  //parameter real VOUT = 1.2;
+  parameter real FSW = 1000K;
+  parameter real L = 100n;
+  parameter real C = 100u; // Set to 0 if using impedance model
+  parameter real ESR = 2m;
+  parameter real DCR = 0;
+  parameter real tr = 100p;
+  parameter real slew_rate = 250/1u;
+  real switch;
+
+  output vout;
+  input en, vid, _i_step;
+  electrical vout, vid, _i_step, vin, n1, n2, IL, IC;
+
+  real VIN, VOUT, i_step;
+
+  reg pwm, hold, sel;
+  real period, t_rise, t_fall, sign;
+
+  initial begin
+    pwm = 1;
+    period = 1/FSW;
+    
+    sel = 0;
+    hold = 0;
+  end
+
+  always #(period/2) pwm = ~pwm;
+
+  always @(pwm) begin
+    if (hold == 1) switch = 1;
+    else if (hold == 2) switch = 0;
+    else if (pwm == 1'b1) switch = 1;
+    else switch = 0;
+  end
+
+
+//---------------------------------------------
+  always @ (posedge en) begin
+    t_rise = abs(i_step)/slew_rate;
+  
+    if (i_step >= 0) begin
+      t_fall = i_step*L/(VIN-VOUT);
+      sign = -1;
+      hold = 1;
+    end
+    else begin
+      t_fall = abs(i_step)*L/VIN;
+      sign = 1;
+      hold = 2;
+    end
+
+    sel = 1;
+    sel = #(t_rise) 0;
+    hold = #(t_fall) 0;
+  end
+//---------------------------------------------
+
+
+  analog begin
+    i_step = V(_i_step);
+    VIN = 2*V(vid);
+    VOUT = V(vid);
+
+    if (analysis("ic"))
+      I(n1,vout) <+ 0;
+    else
+      V(n1,vout) <+ L*ddt(I(n1,vout));
+
+    if (analysis("ic"))
+      V(n2) <+ 0;
+    else
+      I(n2) <+ C*ddt(V(n2));
+
+    V(vin) <+ transition(VIN*switch,0,tr,tr);
+    V(vin,n1) <+ DCR*I(vin,n1);
+    V(vout,n2) <+ ESR*I(vout,n2);
+
+    V(IL) <+ I(n1,vout);
+    V(IC) <+ I(vout,n2);
+
+
+    I(vout) <+ sign*transition((sel==0)? 0 : abs(i_step), 0, t_rise, t_fall);
+  end
+
+endmodule

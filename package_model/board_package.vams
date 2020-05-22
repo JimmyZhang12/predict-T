@@ -1,0 +1,291 @@
+//Verilog-AMS HDL
+//
+// Andrew Smith
+// 04092020
+//
+// This models the board capacitance, traces, and package impedence from the
+// intel EVSD 11.1 (2009)
+//
+
+`include "constants.vams"
+`include "disciplines.vams"
+`include "resistor.vams"
+
+`timescale 1ns/1ps
+
+module my_cap(p, n);
+  inout p, n;
+  electrical p, n;
+  parameter real C=0;
+
+  analog begin
+    I(p,n) <+ C * ddt(V(p,n));
+  end
+endmodule
+
+module my_ind(p, n);
+  inout p, n;
+  electrical p, n;
+  parameter real L=0;
+
+  analog begin
+    V(p,n) <+ L * ddt(I(p,n));
+  end
+endmodule
+
+
+module my_real_capacitor(p, n);
+  inout p, n;
+  electrical p, n;
+  electrical n1, n2;
+  parameter real C=1u;
+  parameter real ESL=0;
+  parameter real ESR=1u;
+  
+  my_cap#(.C(C)) C1(p, n1);
+  my_res#(.R(100k)) RESR1(n1, n2);
+  my_ind#(.L(ESL)) LESL(n1, n2);
+  my_res#(.R(ESR)) RESR(n2, n);
+endmodule
+
+module pcb_trace(p, n);
+  inout p, n;
+  electrical p, n;
+  electrical n1;
+  parameter real ESL=0;
+  parameter real ESR=1u;
+  
+  my_ind#(.L(ESL)) LESL(p, n1);
+  my_res#(.R(ESR)) RESR(n1, n);
+endmodule
+
+
+module board_package_intel_server (vin, vout, vsense_in, vsense_out, gnd);
+	inout vin, vout, gnd;
+  output vsense_in, vsense_out;
+	electrical vin, vout, vsense_in, vsense_out, n1, n2, n3, n4, gnd;
+
+//  // Supply Load Resistor
+//  my_res#(.R(1u)) rsupply(vin, n1);
+//
+//  my_res#(.R(200u)) rwire1(n1, n2);
+//
+//  // Ceramic Bulk
+//  my_real_capacitor#(.C(990u), .ESL(423p), .ESR(2m)) c_electrolytic_bulk(n2, gnd);
+//
+//  // Ceramic Bulk
+//  my_real_capacitor#(.C(264u), .ESL(45p), .ESR(400u)) c_ceramic_bulk(n2, gnd);
+//
+//  // Ceramic Socket
+//  my_real_capacitor#(.C(1222u), .ESL(20p), .ESR(150u)) c_ceramic_socket(n3, gnd);
+//
+//  //my_res#(.R(100k)) r1(n3, gnd);
+//  //my_res#(.R(100k)) ra(n2, gnd);
+//  //my_res#(.R(100k)) rb(n4, gnd);
+//
+//  // Motherboard traces
+//  pcb_trace#(.ESL(90p), .ESR(200u)) trace(n2, n3);
+//
+//  // Package
+//  pcb_trace#(.ESL(12p), .ESR(400u)) package(n3, n4);
+//
+//  // output sense resistor
+//  my_res#(.R(1u)) rout(n4, vout);
+
+  // output sense resistor
+  my_res#(.R(1u)) rout(vin, vout);
+
+  analog begin
+//    V(vsense_in, gnd) <+ V(n1, gnd);
+//    V(vsense_out, gnd) <+ V(n4, gnd);
+    V(vsense_in, gnd) <+ V(vin, gnd);
+    V(vsense_out, gnd) <+ V(vout, gnd);
+  end
+endmodule
+
+module board_package_laptop (vin, vout, vsense_in, vsense_out, gnd);
+	inout vin, vout, gnd;
+  output vsense_in, vsense_out;
+	electrical vin, vout, vsense_in, vsense_out, n1, n2, n3, n4, gnd;
+
+  // Supply Load Resistor
+  my_res#(.R(1u)) rsupply(vin, n1);
+
+  my_res#(.R(200u)) rwire_1(n1, n2);
+
+  // Ceramic Bulk
+  my_real_capacitor#(.C(330u), .ESL(200p), .ESR(2m)) c_electrolytic_bulk(n2, gnd);
+
+  // Ceramic Bulk
+  my_real_capacitor#(.C(88u), .ESL(135p), .ESR(1200u)) c_ceramic_bulk(n2, gnd);
+
+  // Ceramic Socket
+  my_real_capacitor#(.C(611u), .ESL(40p), .ESR(300u)) c_ceramic_socket(n3, gnd);
+
+  //my_res#(.R(100k)) r1(n2, gnd);
+  //my_res#(.R(100k)) ra(n1, gnd);
+  //my_res#(.R(100k)) rb(n3, gnd);
+
+  // Motherboard traces
+  pcb_trace#(.ESL(270p), .ESR(1000u)) trace(n2, n3);
+
+  // Package
+  pcb_trace#(.ESL(12p), .ESR(400u)) package(n3, n4);
+
+  // output sense resistor
+  my_res#(.R(1u)) rout(n4, vout);
+
+  analog begin
+    V(vsense_in, gnd) <+ V(n1, gnd);
+    V(vsense_out, gnd) <+ V(n4, gnd);
+  end
+endmodule
+
+module board_package_mobile (vin, vout, vsense_in, vsense_out, gnd);
+	inout vin, vout, gnd;
+  output vsense_in, vsense_out;
+	electrical vin, vout, vsense_in, vsense_out, n1, n2, n3, n4, gnd;
+
+  // Supply Load Resistor
+  my_res#(.R(1u)) rsupply(vin, n1);
+
+  my_res#(.R(200u)) rwire(n1, n2);
+
+  // Ceramic Bulk
+  my_real_capacitor#(.C(100u), .ESL(200p), .ESR(2m)) c_electrolytic_bulk(n2, gnd);
+
+  // Ceramic Bulk
+  my_real_capacitor#(.C(60u), .ESL(135p), .ESR(1200u)) c_ceramic_bulk(n2, gnd);
+
+  // Ceramic Socket
+  my_real_capacitor#(.C(10u), .ESL(40p), .ESR(300u)) c_ceramic_socket(n3, gnd);
+
+  //my_res#(.R(100k)) r1(n2, gnd);
+  //my_res#(.R(100k)) ra(n1, gnd);
+  //my_res#(.R(100k)) rb(n3, gnd);
+
+  // Motherboard traces
+  pcb_trace#(.ESL(90p), .ESR(1m)) trace(n2, n3);
+
+  // Package
+  pcb_trace#(.ESL(12p), .ESR(400u)) package(n3, n4);
+
+  // output sense resistor
+  my_res#(.R(1u)) rout(n4, vout);
+
+  analog begin
+    V(vsense_in, gnd) <+ V(n1, gnd);
+    V(vsense_out, gnd) <+ V(n4, gnd);
+  end
+endmodule
+
+module board_package_embedded (vin, vout, vsense_in, vsense_out, gnd);
+	inout vin, vout, gnd;
+  output vsense_in, vsense_out;
+	electrical vin, vout, vsense_in, vsense_out, n1, n2, n3, n4, n5, gnd;
+
+  // Supply Load Resistor
+  my_res#(.R(1u)) rsupply(vin, n1);
+
+  my_res#(.R(200u)) rwire(n1, n2);
+
+  // Supply Bulk Ceramic Caps
+  my_real_capacitor#(.C(20u), .ESL(275p), .ESR(2.5m)) c_ceramic_supply_bulk(n2, gnd);
+
+  // Ceramic Bulk
+  my_real_capacitor#(.C(4.7u), .ESL(550p), .ESR(5m)) c_device_bulk(n2, gnd);
+
+  // Ceramic Socket
+  my_real_capacitor#(.C(1.5u), .ESL(34p), .ESR(267u)) c_ceramic_socket(n3, gnd);
+
+  // Motherboard traces
+  pcb_trace#(.ESL(740p), .ESR(10m)) trace(n2, n3);
+
+  // Motherboard traces
+  pcb_trace#(.ESL(30p), .ESR(1m)) trace_2(n3, n4);
+
+  // Package
+  pcb_trace#(.ESL(12p), .ESR(400u)) package(n4, n5);
+
+  // output sense resistor
+  my_res#(.R(1u)) rout(n5, vout);
+
+  analog begin
+    V(vsense_in, gnd) <+ V(n1, gnd);
+    V(vsense_out, gnd) <+ V(n5, gnd);
+  end
+endmodule
+
+module board_package_perf_uc (vin, vout, vsense_in, vsense_out, gnd);
+	inout vin, vout, gnd;
+  output vsense_in, vsense_out;
+	electrical vin, vout, vsense_in, vsense_out, n1, n2, n3, n4,n5, gnd;
+
+  // Supply Load Resistor
+  my_res#(.R(1u)) rsupply(vin, n1);
+
+  my_res#(.R(200u)) rwire(n1, n2);
+
+  // Supply Bulk Ceramic Caps
+  my_real_capacitor#(.C(20u), .ESL(275p), .ESR(2.5m)) c_ceramic_supply_bulk(n2, gnd);
+
+  // Ceramic Bulk
+  my_real_capacitor#(.C(4.7u), .ESL(550p), .ESR(5m)) c_device_bulk(n3, gnd);
+
+  // Ceramic Socket
+  my_real_capacitor#(.C(1.5u), .ESL(34p), .ESR(267u)) c_ceramic_socket(n4, gnd);
+
+  // Motherboard traces
+  pcb_trace#(.ESL(740p), .ESR(10m)) trace(n2, n3);
+
+  // Motherboard traces
+  pcb_trace#(.ESL(30p), .ESR(1m)) trace_2(n3, n4);
+
+  // Package
+  pcb_trace#(.ESL(12p), .ESR(400u)) package(n4, n5);
+
+  // output sense resistor
+  my_res#(.R(1u)) rout(n5, vout);
+
+  analog begin
+    V(vsense_in, gnd) <+ V(n1, gnd);
+    V(vsense_out, gnd) <+ V(n5, gnd);
+  end
+endmodule
+
+module board_package_lp (vin, vout, vsense_in, vsense_out, gnd);
+	inout vin, vout, gnd;
+  output vsense_in, vsense_out;
+	electrical vin, vout, vsense_in, vsense_out, n1, n2, n3, n4,n5, gnd;
+
+  // Supply Load Resistor
+  my_res#(.R(1u)) rsupply(vin, n1);
+
+  my_res#(.R(200u)) rwire(n1, n2);
+
+  // Supply Bulk Ceramic Caps
+  my_real_capacitor#(.C(10u), .ESL(275p), .ESR(2.5m)) c_ceramic_supply_bulk(n2, gnd);
+
+  // Ceramic Bulk
+  my_real_capacitor#(.C(4.7u), .ESL(550p), .ESR(5m)) c_device_bulk(n3, gnd);
+
+  // Ceramic Socket
+  my_real_capacitor#(.C(800n), .ESL(63p), .ESR(500u)) c_ceramic_socket(n4, gnd);
+
+  // Motherboard traces
+  pcb_trace#(.ESL(12p), .ESR(1m)) trace(n2, n3);
+
+  // Motherboard traces
+  pcb_trace#(.ESL(12p), .ESR(1m)) trace_2(n3, n4);
+
+  // Package
+  pcb_trace#(.ESL(12p), .ESR(400u)) package(n4, n5);
+
+  // output sense resistor
+  my_res#(.R(1u)) rout(n5, vout);
+
+  analog begin
+    V(vsense_in, gnd) <+ V(n1, gnd);
+    V(vsense_out, gnd) <+ V(n5, gnd);
+  end
+endmodule

@@ -38,9 +38,10 @@ parser.add_argument('--template_xml', type=str, default="template.xml", help="pa
 args = parser.parse_args()
 
 predict_t_root = os.getenv('PREDICT_T_ROOT')
-mcpat_template = os.path.join(predict_t_root, "mcpat-template-x86.xml")
+mcpat_template = os.path.join(predict_t_root, "mcpat-template-x86-sc.xml")
 mcpat_path = os.path.join(predict_t_root, "mcpat")
 mcpat_out = os.path.join(predict_t_root, "mcpat_out")
+ps_model = os.path.join(predict_t_root, "power_supply_model")
 
 class Benchmark:
   def __init__(self, name, cmd, opt, text_out, gem5_out, mcpat_out):
@@ -86,7 +87,16 @@ def run(args):
   def m5_benchmark_thread(iq):
     while not iq.empty():
       test = iq.get()
-      run_gem5(test.cmd,test.opt,test.text_out,test.gem5_out,"XeonE7-8893",mcpat_template,mcpat_path,mcpat_out,test.name)
+      run_gem5(test.cmd,
+               test.opt,
+               test.text_out,
+               test.gem5_out,
+               "XeonE7-8893",
+               mcpat_template,
+               mcpat_path,
+               mcpat_out,
+               test.name,
+               ps_model)
 
   # First run Gem5 for each benchmark:
   #for test in benchmarks:
@@ -108,7 +118,7 @@ def run(args):
 
   # Convert Output to McPat:
   #for test in benchmarks:
-  #  m5_to_mcpat(get_stats_file(test.gem5_out), get_config_file(test.gem5_out), "mcpat-template.xml", test.mcpat_out, test.name)
+  #    print(test.name)
 
   # Run McPat:
 
