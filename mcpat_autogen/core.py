@@ -192,8 +192,8 @@ class Core:
     self.parameters["number_of_BPT"][0]=str(int(config_dict["numThreads"]))
     self.parameters["number_of_BTB"][0]=str(int(config_dict["numThreads"]))
 
-    self.stats["total_instructions"][0]=str(int(stat_dict["iq.iqInstsIssued"][1]))
-    self.stats["int_instructions"][0]=str(int(stat_dict["iq.FU_type_0::No_OpClass"][1])+int(stat_dict["iq.FU_type_0::IntAlu"][1])+int(stat_dict["iq.FU_type_0::IntMult"][1])+int(stat_dict["iq.FU_type_0::IntDiv"][1])+int(stat_dict["iq.FU_type_0::IprAccess"][1]))
+    self.stats["total_instructions"][0]=str(int(stat_dict["iq.iqInstsIssued"][1])+1)
+    self.stats["int_instructions"][0]=str(int(stat_dict["iq.FU_type_0::No_OpClass"][1])+int(stat_dict["iq.FU_type_0::IntAlu"][1])+int(stat_dict["iq.FU_type_0::IntMult"][1])+int(stat_dict["iq.FU_type_0::IntDiv"][1])+int(stat_dict["iq.FU_type_0::IprAccess"][1])+1)
     self.stats["fp_instructions"][0]=str(int(stat_dict["iq.FU_type_0::FloatAdd"][1])+int(stat_dict["iq.FU_type_0::FloatCmp"][1])+int(stat_dict["iq.FU_type_0::FloatCvt"][1])+int(stat_dict["iq.FU_type_0::FloatMult"][1])+int(stat_dict["iq.FU_type_0::FloatDiv"][1])+int(stat_dict["iq.FU_type_0::FloatSqrt"][1]))
     self.stats["branch_instructions"][0]=str(int(stat_dict["branchPred.condPredicted"][1]))
     self.stats["branch_mispredictions"][0]=str(int(stat_dict["branchPred.condIncorrect"][1]))

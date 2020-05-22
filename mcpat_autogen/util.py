@@ -28,6 +28,7 @@ import os
 import sys
 import re
 from file_read_backwards import FileReadBackwards
+from functools import reduce
 
 def build_gem5_stat_dict(file):
   """ Build a dict of stats from the Gem5 stats.txt """
@@ -95,3 +96,25 @@ def prune_dict(path, d):
     if "system.clk_domain.clock" in key:
       new[key.replace("system.clk_domain.","")]=val
   return new
+
+def get_noc_dimensions(nc):
+  def factors(n):
+    return set(reduce(list.__add__, ([i, n//i] for i in range(1, int(n**0.5) + 1) if n % i == 0)))
+  def build_pairs(n, l):
+    f_pairs = []
+    for i in range(len(l)):
+      for j in range(len(l)):
+        if l[i]*l[j] == n:
+          f_pairs.append([l[i], l[j]])
+    return f_pairs
+  f = build_pairs(nc,list(factors(nc)))
+  min_sum = 100000
+  min_x = 0
+  min_y = 0
+  for elem in f:
+    if(sum(elem) < min_sum):
+      min_sum = sum(elem)
+      min_x = elem[0]
+      min_y = elem[1]
+  return min_x, min_y
+

@@ -154,9 +154,6 @@ class System:
       ) \
       for i in range(int(self.parameters["number_of_cores"][0])) \
     ]
-    print(self.core)
-    for i in range(len(self.core)):
-      print(self.core[i], self.core[i].get_stats())
     self.l2cache = \
     [ \
       Cache \
@@ -213,7 +210,8 @@ class System:
         "noc"+str(i), \
         stat_dict, \
         config_dict, \
-        sim_dict \
+        sim_dict, \
+        num_cores=num_cpu \
       ) \
       for i in range(int(self.parameters["number_of_NoCs"][0])) \
     ]
@@ -221,8 +219,8 @@ class System:
     ( \
       self.id+".mc", \
       "mc", \
-      stat_dict, \
-      config_dict, \
+      prune_dict("system.mem_ctrls.",stat_dict), \
+      prune_dict("system.mem_ctrls.",config_dict), \
       sim_dict \
     )
     self.niu = NIU \

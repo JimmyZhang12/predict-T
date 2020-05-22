@@ -28,24 +28,24 @@ from xml.etree import ElementTree
 from xml.dom import minidom
 
 class Predictor:
-  """ branch predictor; tournament predictor see Alpha implementation """
-  name = "predictor"
-  id = "predictor"
-
-  parameters = \
-  {
-    "local_predictor_size" : ["10,3","Local Predictor Size"],
-    "local_predictor_entries" : ["1024","Number of Entries in Local Predictor"],
-    "global_predictor_entries" : ["4096","Global Predictor Entries"],
-    "global_predictor_bits" : ["2","Bits per entry in Global Predictor"],
-    "chooser_predictor_entries" : ["4096","Number of entries in the Chooser"],
-    "chooser_predictor_bits" : ["2","Bits per entry in the chooser"]
-  }
-  stats = \
-  {
-  }
-
   def __init__(self, component_id, component_name, stat_dict, config_dict, sim_dict):
+    """ branch predictor; tournament predictor see Alpha implementation """
+    self.name = "predictor"
+    self.id = "predictor"
+
+    self.parameters = \
+    {
+      "local_predictor_size" : ["10,3","Local Predictor Size"],
+      "local_predictor_entries" : ["1024","Number of Entries in Local Predictor"],
+      "global_predictor_entries" : ["4096","Global Predictor Entries"],
+      "global_predictor_bits" : ["2","Bits per entry in Global Predictor"],
+      "chooser_predictor_entries" : ["4096","Number of entries in the Chooser"],
+      "chooser_predictor_bits" : ["2","Bits per entry in the chooser"]
+    }
+    self.stats = \
+    {
+    }
+
     self.name = component_name
     self.id = component_id
 

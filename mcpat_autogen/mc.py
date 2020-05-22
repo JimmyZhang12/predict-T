@@ -43,56 +43,55 @@ class MemoryController:
   channel. This is sufficient for most application.
   Further track down can be easily added in later
   versions."""
-
-  name = "mc"
-  id = "mc"
-
-  parameters = \
-  {
-    "type" : ["0","1: low power; 0 high performance"],
-    "mc_clock" : ["2666","DIMM IO bus clock rate MHz"],
-    "vdd" : ["0","0 means using ITRS default vdd"],
-    "power_gating_vcc" : ["-1","\"-1\" means using default power gating virtual power supply voltage constrained by technology and computed automatically"],
-    "peak_transfer_rate" : ["20000","MB/S"],
-    "block_size" : ["64","B"],
-    "number_mcs" : ["4",""],
-    "memory_channels_per_mc" : ["1",""],
-    "number_ranks" : ["2",""],
-    "withPHY" : ["0",""],
-    "req_window_size_per_channel" : ["32",""],
-    "IO_buffer_size_per_channel" : ["32",""],
-    "databus_width" : ["128",""],
-    "addressbus_width" : ["52",""]
-  }
-  stats = \
-  {
-    "memory_accesses" : ["0","mem_ctrls.writeReqs + mem_ctrls.readReqs"],
-    "memory_reads" : ["0","mem_ctrls.readReqs"],
-    "memory_writes" : ["0","mem_ctrls.writeReqs"]
-  }
-
   def __init__(self, component_id, component_name, stat_dict, config_dict, sim_dict):
+    self.name = "mc"
+    self.id = "mc"
+
+    self.parameters = \
+    {
+      "type" : ["0","1: low power; 0 high performance"],
+      "mc_clock" : ["2666","DIMM IO bus clock rate MHz"],
+      "vdd" : ["0","0 means using ITRS default vdd"],
+      "power_gating_vcc" : ["-1","\"-1\" means using default power gating virtual power supply voltage constrained by technology and computed automatically"],
+      "peak_transfer_rate" : ["20000","MB/S"],
+      "block_size" : ["64","B"],
+      "number_mcs" : ["4",""],
+      "memory_channels_per_mc" : ["1",""],
+      "number_ranks" : ["2",""],
+      "withPHY" : ["0",""],
+      "req_window_size_per_channel" : ["32",""],
+      "IO_buffer_size_per_channel" : ["32",""],
+      "databus_width" : ["128",""],
+      "addressbus_width" : ["52",""]
+    }
+    self.stats = \
+    {
+      "memory_accesses" : ["0","mem_ctrls.writeReqs + mem_ctrls.readReqs"],
+      "memory_reads" : ["0","mem_ctrls.readReqs"],
+      "memory_writes" : ["0","mem_ctrls.writeReqs"]
+    }
+
     self.name = component_name
     self.id = component_id
 
     # Init the Memory Controller Parameters and Stats:
-    #parameters["type"][0]=
-    #parameters["mc_clock"][0]=
-    #parameters["vdd"][0]=
-    #parameters["power_gating_vcc"][0]=
-    #parameters["peak_transfer_rate"][0]=
-    #parameters["block_size"][0]=
-    #parameters["number_mcs"][0]=
-    #parameters["memory_channels_per_mc"][0]=
-    #parameters["number_ranks"][0]=
-    #parameters["withPHY"][0]=
-    #parameters["req_window_size_per_channel"][0]=
-    #parameters["IO_buffer_size_per_channel"][0]=
-    #parameters["databus_width"][0]=
-    #parameters["addressbus_width"][0]=
-    #stats["memory_accesses"][0]=
-    #stats["memory_reads"][0]=
-    #stats["memory_writes"][0]=
+    self.parameters["type"][0]="0"
+    self.parameters["mc_clock"][0]=str(int(config_dict["tCK"])*2)
+    self.parameters["vdd"][0]=str(float(config_dict["VDD"]))
+    self.parameters["power_gating_vcc"][0]="-1"
+    self.parameters["peak_transfer_rate"][0]=str(int(stat_dict["bw_total::total"][1])/1e6)
+    self.parameters["block_size"][0]="64"
+    self.parameters["number_mcs"][0]="4"
+    self.parameters["memory_channels_per_mc"][0]="2"
+    self.parameters["number_ranks"][0]="2"
+    self.parameters["withPHY"][0]="0"
+    self.parameters["req_window_size_per_channel"][0]="32"
+    self.parameters["IO_buffer_size_per_channel"][0]="64"
+    self.parameters["databus_width"][0]="128"
+    self.parameters["addressbus_width"][0]="52"
+    self.stats["memory_accesses"][0]=str(int(stat_dict["readReqs"][1])+int(stat_dict["writeReqs"][1]))
+    self.stats["memory_reads"][0]=str(int(stat_dict["readReqs"][1]))
+    self.stats["memory_writes"][0]=str(int(stat_dict["writeReqs"][1]))
 
   def xml(self):
     """ Build an XML Tree from the parameters, stats, and subcomponents """

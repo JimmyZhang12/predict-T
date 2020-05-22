@@ -28,20 +28,20 @@ from xml.etree import ElementTree
 from xml.dom import minidom
 
 class BTB:
-  name = "BTB"
-  id = "BTB"
-
-  parameters = \
-  {
-    "BTB_config" : ["5120,4,2,1,1,3","Should be 4096 + 1024 all the buffer related are optional the parameters are capacity,block_width,associativity,bank, throughput w.r.t. core clock, latency w.r.t. core clock"],
-  }
-  stats = \
-  {
-    "read_accesses" : ["0","Lookups into BTB; branchPred.BTBLookups"],
-    "write_accesses" : ["0","Number of Updates to the CAM; commit.branches"],
-  }
-
   def __init__(self, component_id, component_name, stat_dict, config_dict, sim_dict):
+    self.name = "BTB"
+    self.id = "BTB"
+
+    self.parameters = \
+    {
+      "BTB_config" : ["5120,4,2,1,1,3","Should be 4096 + 1024 all the buffer related are optional the parameters are capacity,block_width,associativity,bank, throughput w.r.t. core clock, latency w.r.t. core clock"],
+    }
+    self.stats = \
+    {
+      "read_accesses" : ["0","Lookups into BTB; branchPred.BTBLookups"],
+      "write_accesses" : ["0","Number of Updates to the CAM; commit.branches"],
+    }
+
     self.name = component_name
     self.id = component_id
 

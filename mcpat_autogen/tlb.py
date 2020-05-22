@@ -28,21 +28,21 @@ from xml.etree import ElementTree
 from xml.dom import minidom
 
 class TLB:
-  name = "tlb"
-  id = "tlb"
-
-  parameters = \
-  {
-    "number_entries" : ["64","TLB Size; tlb.size"],
-  }
-  stats = \
-  {
-    "total_accesses" : ["","Total Acceses; dtb_walker_cache.tags.data_accesses"],
-    "total_misses" : ["","Total Misses; dtb_walker_cache.tags.data_accesses"],
-    "conflicts" : ["0","Conflicts to entries in the TLB"],
-  }
-
   def __init__(self, component_id, component_name, stat_dict, config_dict, sim_dict):
+    self.name = "tlb"
+    self.id = "tlb"
+
+    self.parameters = \
+    {
+      "number_entries" : ["64","TLB Size; tlb.size"],
+    }
+    self.stats = \
+    {
+      "total_accesses" : ["","Total Acceses; dtb_walker_cache.tags.data_accesses"],
+      "total_misses" : ["","Total Misses; dtb_walker_cache.tags.data_accesses"],
+      "conflicts" : ["0","Conflicts to entries in the TLB"],
+    }
+
     self.name = component_name
     self.id = component_id
 
