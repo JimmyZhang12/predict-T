@@ -147,11 +147,9 @@ dmypy.json
 # Project Dir:
 tests/
 testbin/
-input/
-output/
-mcpat_io/
 mcpat_out/
 gem5_out/
 text_out/
 *.tar.gz
 *.csv
+.fuse*
