@@ -1,6 +1,0 @@
-*.o
-*.d
-*.*.swp
-*.*.swo
-producer
-consumer
