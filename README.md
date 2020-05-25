@@ -15,8 +15,6 @@ The repository contains the following directories:
 - *circuit\_model* - Verilog AMS code and Scripts to run the Cadence
 VerilogAMS circuit simulation.
 - *git_util* - Git hooks and other scripts for managing the repository
-- *mcpat* - [McPAT Fork](https://github.com/atsmith3/mcpat)
-- *gem5* - [GEM5 Fork](https://github.com/atsmith3/gem5)
 - *python* - Python utilities 
   - *mcpat_autogen* - Python code for converting the Gem5 stats to McPAT XML
   - *analysis* - Python utilities for plotting and generating test data
