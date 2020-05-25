@@ -33,7 +33,7 @@ export VSIM_TOOLS="$HOME/cadence"
 export PREDICT_T_ROOT="$HOME/predict-T"
 export GEM5_ROOT="$HOME/gem5"
 export OUTPUT_ROOT="$HOME/scratch/predict-T"
-export MCPAT_ROOT="$HOME/predict-T/mcpat"
+export MCPAT_ROOT="$HOME/mcpat"
 export SIM_ROOT="$PREDICT_T_ROOT/circuit_model"
 
 echo "[ setup.sh ] export VSIM_TOOLS $VSIM_TOOLS"
