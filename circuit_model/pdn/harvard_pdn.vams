@@ -1,0 +1,96 @@
+/*
+ * Copyright (c) 2020 Andrew Smith
+ * 
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+
+/*
+ * Verilog-AMS HDL
+ *
+ * harvard_pdn.vams
+ */
+
+`ifndef HARVARD_PDN_VAMS
+`define HARVARD_PDN_VAMS
+
+`include "constants.vams"
+`include "disciplines.vams"
+`include "resistor.vams"
+`include "inductor.vams"
+`include "capacitor.vams"
+
+`timescale 1ps/1ps
+
+`define PI 3.14159265359
+
+/*
+ * Module harvard_power_distribution_network
+ *
+ *  Using the second order lumped model from the 3 harvard papers and Chip−
+ *  Package Resonance in Core Power Supply Structures for a High Power
+ *  Microprocessor. The C is the chip capacitance, the R is dependent on the
+ *  Q and the L is the parasitic inductance on the path from VRM Bulk
+ *  capacitance to the Die. Modeled for a Intel Pentium 4 Processor.
+ *
+ *    vin - Input Voltage (From ideal supply)
+ *    vout - Output Voltage (To Load Model)
+ *    vvrm - Voltage at the output of the vrm model
+ *    vdie - voltage at the output of the die model
+ *    gnd - ground net
+ *
+ *    Parameter LPATH - Parasitic inductance on path from VRM to Die (H)
+ *    Parameter F0 - Resonant Frequency (Hz)
+ *    Parameter QUALITY - Quality factor determines the ammount of resistive
+ *      damping (Q)
+ */
+module harvard_power_distribution_network(vin, vout, vvrm, vpcb, vpack, vdie, iin, iout, gnd);
+	inout vin, vout, gnd;
+  output vvrm, vpcb, vpack, vdie, iin, iout;
+	electrical vin, vout, iin, iout, vvrm, vpcb, vpack, vdie, n1, n2, n3, n4, n5, gnd;
+
+  parameter real LPATH=40p; // Intel Pentium 4
+  parameter real F0=100M;
+  parameter real QUALITY=2.657;
+
+  parameter real C_LUMPED=(1/pow(2*`PI*F0, 2)*LPATH);
+  parameter real R_LUMPED=(sqrt(LPATH/C_LUMPED)/QUALITY);
+
+  // Essential for getting a valid voltage read for some reason...
+  my_res#(.R(1n)) ri(vin, n1);
+
+  // Second Order RLC model of the PDN from Chip−Package Resonance in "Core
+  // Power Supply Structures for a High Power Microprocessor"
+  my_res#(.R(R_LUMPED)) r_lumped(n1, n2);
+  my_ind#(.L(LPATH)) l_lumped(n2, n3);
+  my_cap#(.C(C_LUMPED)) c_lumped(n3, n4);
+
+  // Essential for getting a valid voltage read for some reason...
+  my_res#(.R(1n)) ro(n4, vout);
+
+  analog begin
+    V(vvrm, gnd) <+ V(n1, gnd);
+    V(vpcb, gnd) <+ 0.0;
+    V(vpack, gnd) <+ 0.0;
+    V(vdie, gnd) <+ V(n4, gnd);
+    V(iin, gnd) <+ I(vin, n1);
+    V(iout, gnd) <+ I(n4, vout);
+  end
+endmodule
+
+`endif // HARVARD_PDN_VAMS

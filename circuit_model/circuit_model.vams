@@ -36,6 +36,7 @@
 `include "disciplines.vams"
 `include "intel_pdn.vams"
 `include "arm_pdn.vams"
+`include "harvard_pdn.vams"
 `include "sources.vams"
 `include "capacitor.vams"
 `include "inductor.vams"
@@ -45,8 +46,10 @@
 `timescale 1ps/1ps
 
 //`define INTEL_SERVER_PDN
-`define ARM_PDN
+//`define ARM_PDN
+`define HARVARD_PDN
 `define CYCLES 200
+
 
 /*
  * Module circuit_model
@@ -58,23 +61,29 @@ module circuit_model();
   // Top Level Signals
   wire _l_clk, _l_rst, _l_pwm;
   wire [7:0] _l_e, _l_d;
-  electrical vin, iin, gnd, vout, iout, vvrm, vpcb, vpackage, vdie, _i_step;
+  electrical vin, iin, gnd, vout, iout, vvrm, vpcb, vpackage, vdie, _i_step, vset;
 
   // Gem5 Interface Signals
   real _v_set, _dr, _r, _r_last, _r_new, _prediction;
   reg _enable;
-  electrical _ve_set, _vr_last;
+  electrical _vr_last;
   reg _term_sim;
   reg retval;
 
-  // logging:
+  // Logging
   real _vvrm, _vpcb, _vpackage, _vdie, _iin, _iout;
 
-  //
-  my_vcvs supply(.p(vin), .n(gnd), .vp(_ve_set), .vn(gnd));
+  // Supply Model
+  my_vcvs supply(.p(vin), .n(gnd), .vp(vset), .vn(gnd));
+
 `ifdef ARM_PDN
-  arm_power_distribution_network pdn(.vin(vin), .vout(vout), .gnd(gnd), .vvrm(), .vpcb(vpcb), .vpack(vpackage), .vdie(vdie), .iin(iin), .iout(iout));
+  arm_power_distribution_network pdn(.vin(vin), .vout(vout), .gnd(gnd), .vvrm(vvrm), .vpcb(vpcb), .vpack(vpackage), .vdie(vdie), .iin(iin), .iout(iout));
 `endif
+`ifdef HARVARD_PDN
+  harvard_power_distribution_network pdn(.vin(vin), .vout(vout), .gnd(gnd), .vvrm(vvrm), .vpcb(vpcb), .vpack(vpackage), .vdie(vdie), .iin(iin), .iout(iout));
+`endif
+
+  // Processor Load
   processor proc(.p(vout), .n(gnd), .r(_vr_last));
 
   analog begin
@@ -82,7 +91,7 @@ module circuit_model();
     V(_vr_last) <+ _r;
     V(_i_step) <+ _prediction;
 
-    V(_ve_set) <+ _v_set;
+    V(vset) <+ _v_set;
 
     _vvrm = V(vvrm, gnd);
     _vpcb = V(vpcb, gnd);
