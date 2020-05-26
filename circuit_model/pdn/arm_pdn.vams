@@ -1,0 +1,239 @@
+/*
+ * Copyright (c) 2020 Andrew Smith
+ * 
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+
+/*
+ * Verilog-AMS HDL
+ *
+ * This models the board capacitance, traces, and package impedence from the
+ * ARM Quad Core A Class CPUs.
+ *
+ * 1) CDIE = 35nF-100nF (2-cores A-Class will be around 35nF, Quad-core A-Class will be near the 100nF range)
+ * 2) Ldi/dt voltage droop - 120mV-150mV for a nominal 1V supply.
+ * 3) LPKG (lumped) - 40pH. This is including the traces and the ESL of the package decaps.
+ * 4) CPKG - 220nFx5.
+ * 5) LPCB (lumped) - ~100pH. This is including traces and ESL of the PCB decaps
+ * 6) CPCB = 8x10uF (Murata Caps).
+ * 7) LVRM - (Inductance in series with the PMIC) - 2.2uH.
+ * 8) Tantalum Filter Cap (filter cap for the PMIC) - 400uF.
+ * 
+ * Ldie can be neglected for most parts - 1-5pH.
+ */
+
+`ifndef ARM_PDN_VAMS
+`define ARM_PDN_VAMS
+
+`include "constants.vams"
+`include "disciplines.vams"
+`include "resistor.vams"
+`include "inductor.vams"
+`include "capacitor.vams"
+
+`timescale 1ps/1ps
+
+
+/*
+ * Module arm_smps
+ *
+ *  Switched Mode Power Supply impedence model, it is noted that R can be
+ *  ignored because the real supply would regulate to keep the voltage at the
+ *  device constant.
+ *
+ *    vin - Input Voltage (From ideal supply)
+ *    vout - Output Voltage (To PCB Model)
+ *    gnd - ground net
+ *
+ *    Parameter CBULK - Bulk Capacitance Value
+ *    Parameter LVRM - VRM Inductor Value
+ *    Parameter RVRM - VRM R Value (optional)
+ */
+module arm_smps(vin, vout, gnd);
+  inout vin, vout, gnd;
+  electrical vin, n1, vout, gnd;
+
+  parameter real CBULK=400u;
+  parameter real LVRM=2.2u;
+  parameter real RVRM=0;
+
+  my_ind#(.L(LVRM)) l_vrm(vin, n1);
+  my_res#(.R(RVRM)) r_vrm(n1, vout);
+  my_cap#(.C(CBULK)) c_bulk(vout, gnd);
+endmodule
+
+
+/*
+ * Module arm_pcb
+ *
+ *  Models the PCB inducances and ceramic PCB Capacitors.
+ *
+ *    vin - Input Voltage (From VRM)
+ *    vout - Output Voltage (To Package Model)
+ *    gnd - ground net
+ *
+ *    Parameter C - Ceramic Capacitor Val
+ *    Parameter CESR - ESR of Ceramic Capacitor
+ *    Parameter CESL - ESL of Ceramic Capacitor
+ *    Parameter N - Number of Ceramic Capacitors
+ *    Parameter LPCB - PCB Inductor Value
+ *    Parameter RPCB - PCB R Value (optional)
+ */
+module arm_pcb(vin, vout, gnd);
+  inout vin, vout, gnd;
+  electrical vin, n1, vout, gnd;
+  genvar i;
+
+  parameter real C=10u;
+  parameter real CESR=0;
+  parameter real CESL=0; // L is lumped into LPCB
+  parameter integer N=8;
+  parameter real LPCB=100p;
+  parameter real RPCB=0;
+
+  my_ind#(.L(LPCB)) l_pcb(vin, n1);
+  my_res#(.R(RPCB)) r_pcb(n1,vout);
+
+  generate
+    for(i = 0; i < N; i=i+1) begin
+      my_real_cap#(.C(C), .ESR(CESR), .ESL(CESL)) c_pcb(vin, gnd);
+    end
+  endgenerate
+endmodule
+
+
+/*
+ * Module arm_package
+ *
+ *  Models the package inductance, capacitance, and resistance
+ *
+ *    vin - Input Voltage (From PCB)
+ *    vout - Output Voltage (To DIE Model)
+ *    gnd - ground net
+ *
+ *    Parameter C - Package Capacitor Val
+ *    Parameter CESR - ESR of Package Capacitor
+ *    Parameter CESL - ESL of Package Capacitor
+ *    Parameter N - Number of Package Capacitors
+ *    Parameter LPAK - Package Inductor Value
+ *    Parameter RPAK - Package R Value (optional)
+ */
+module arm_package(vin, vout, gnd);
+  inout vin, vout, gnd;
+  electrical vin, n1, vout, gnd;
+  genvar i;
+
+  parameter real C=220n;
+  parameter real CESR=0;
+  parameter real CESL=0; // L is lumped into LPCB
+  parameter integer N=5;
+  parameter real LPAK=40p;
+  parameter real RPAK=5m;
+
+  my_ind#(.L(LPAK)) l_package(vin, n1);
+  my_res#(.R(RPAK)) r_package(n1,vout);
+
+  generate
+    for(i = 0; i < N; i=i+1) begin
+      my_real_cap#(.C(C), .ESR(CESR), .ESL(CESL)) c_package(vin, gnd);
+    end
+  endgenerate
+endmodule
+
+
+/*
+ * Module arm_die
+ *
+ *  Models the package inductance, capacitance, and resistance
+ *
+ *    vin - Input Voltage (From Package Model)
+ *    vout - Output Voltage (To Load Model)
+ *    gnd - ground net
+ *
+ *    Parameter C - Die Capacitor Val
+ *    Parameter CESR - ESR of Die Capacitor
+ *    Parameter CESL - ESL of Die Capacitor
+ *    Parameter N - Number of Die Capacitors
+ *    Parameter LDIE - Die Inductor Value
+ *    Parameter RDIE - Die R Value (optional)
+ */
+module arm_die(vin, vout, gnd);
+  inout vin, vout, gnd;
+  electrical vin, n1, vout, gnd;
+  genvar i;
+
+  parameter real C=25n;
+  parameter real CESR=0;
+  parameter real CESL=0; // L is lumped into LPCB
+  parameter integer N=4;
+  parameter real LDIE=1p;
+  parameter real RDIE=0;
+
+  my_ind#(.L(LDIE)) l_die(vin, n1);
+  my_res#(.R(RDIE)) r_die(n1,vout);
+
+  generate
+    for(i = 0; i < N; i=i+1) begin
+      my_real_cap#(.C(C), .ESR(CESR), .ESL(CESL)) c_die(vin, gnd);
+    end
+  endgenerate
+endmodule
+
+
+/*
+ * Module arm_power_distribution_network
+ *
+ *  Model of the VRM, PCB, Package, and Die Parasitic Inductances and
+ *  Resistances.
+ *
+ *    vin - Input Voltage (From ideal supply)
+ *    vout - Output Voltage (To Load Model)
+ *    vvrm - Voltage at the output of the vrm model
+ *    vpcb - voltage at the output of the pcb model
+ *    vpack - voltage at the output of the package model
+ *    vdie - voltage at the output of the die model
+ *    gnd - ground net
+ */
+module arm_power_distribution_network(vin, vout, vvrm, vpcb, vpack, vdie, iin, iout, gnd);
+	inout vin, vout, gnd;
+  output vvrm, vpcb, vpack, vdie, iin, iout;
+	electrical vin, vout, iin, iout, vvrm, vpcb, vpack, vdie, n1, n2, n3, n4, n5, gnd;
+
+  // Essential for getting a valid voltage read for some reason...
+  my_res#(.R(1n)) ri(vin, n1);
+  
+  arm_smps smps(n1, n2, gnd);
+  arm_pcb pcb(n2, n3, gnd);
+  arm_package package(n3, n4, gnd);
+  arm_die die(n4, n5, gnd);
+
+  // Essential for getting a valid voltage read for some reason...
+  my_res#(.R(1n)) ro(n5, vout);
+
+  analog begin
+    V(vvrm, gnd) <+ V(n2, gnd);
+    V(vpcb, gnd) <+ V(n3, gnd);
+    V(vpack, gnd) <+ V(n4, gnd);
+    V(vdie, gnd) <+ V(n5, gnd);
+    V(iin, gnd) <+ I(vin, n1);
+    V(iout, gnd) <+ I(n5, vout);
+  end
+endmodule
+
+`endif // ARM_PDN_VAMS
