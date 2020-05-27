@@ -22,47 +22,62 @@
 
 source util.sh
 
+script_name="run.sh"
+
+print_info () {
+  green="\e[32m"
+  nc="\e[0m"
+  echo -e "$green[ $script_name ]$nc $1"
+}
+
+print_error () {
+  red="\e[31m"
+  nc="\e[0m"
+  echo -e "$red[ $script_name ] Error:$nc $1"
+  exit 1
+}
+
 #--------------------------------------------------------------------
 # Check Environment
 #--------------------------------------------------------------------
 if [ -z "$VSIM_TOOLS" ]; then
-  echo "[ run.sh ] error: VSIM_TOOLS not set; source setup.sh"
+  print_error "VSIM_TOOLS not set; source setup.sh"
   exit
 fi
 if [ -z "$PREDICT_T_ROOT" ]; then
-  echo "[ run.sh ] error: PREDICT_T_ROOT not set; source setup.sh"
+  print_error "PREDICT_T_ROOT not set; source setup.sh"
   exit
 fi
 if [ -z "$GEM5_ROOT" ]; then
-  echo "[ run.sh ] error: GEM5_ROOT not set; source setup.sh"
+  print_error "GEM5_ROOT not set; source setup.sh"
   exit
 fi
 if [ -z "$OUTPUT_ROOT" ]; then
-  echo "[ run.sh ] error: OUTPUT_ROOT not set; source setup.sh"
+  print_error "OUTPUT_ROOT not set; source setup.sh"
   exit
 fi
 if [ -z "$MCPAT_ROOT" ]; then
-  echo "[ run.sh ] error: OUTPUT_ROOT not set; source setup.sh"
+  print_error "OUTPUT_ROOT not set; source setup.sh"
   exit
 fi
 if [ -z "$SIM_ROOT" ]; then
-  echo "[ run.sh ] error: SIM_ROOT not set; source setup.sh"
+  print_error "SIM_ROOT not set; source setup.sh"
   exit 1
 fi
 if [ -z "$VSIM_IMAGE" ]; then
-  echo "[ run.sh ] error: VSIM_IMAGE not set; source setup.sh"
+  print_error "VSIM_IMAGE not set; source setup.sh"
   exit 1
 fi
-echo "[ run.sh ] VSIM_TOOLS $VSIM_TOOLS"
-echo "[ run.sh ] PREDICT_T_ROOT $PREDICT_T_ROOT"
-echo "[ run.sh ] GEM5_ROOT $GEM5_ROOT"
-echo "[ run.sh ] OUTPUT_ROOT $OUTPUT_ROOT"
-echo "[ run.sh ] MCPAT_ROOT $MCPAT_ROOT"
-echo "[ run.sh ] SIM_ROOT $SIM_ROOT"
-echo "[ run.sh ] VSIM_IMAGE $VSIM_IMAGE"
+print_info "VSIM_TOOLS $VSIM_TOOLS"
+print_info "PREDICT_T_ROOT $PREDICT_T_ROOT"
+print_info "GEM5_ROOT $GEM5_ROOT"
+print_info "OUTPUT_ROOT $OUTPUT_ROOT"
+print_info "MCPAT_ROOT $MCPAT_ROOT"
+print_info "SIM_ROOT $SIM_ROOT"
+print_info "VSIM_IMAGE $VSIM_IMAGE"
 
 if [[ -z $(docker images -q $VSIM_IMAGE) ]]; then
-  echo "[ run_cadence.sh ] error: Docker container $VSIM_IMAGE is not built; source setup.sh"
+  print_error "Docker container $VSIM_IMAGE is not built; source setup.sh"
   exit 1
 fi
 
@@ -71,8 +86,8 @@ fi
 #--------------------------------------------------------------------
 TEST="$PREDICT_T_ROOT/testbin"
 INPUT="$TEST/input"
-echo "[ run.sh ] TEST $TEST"
-echo "[ run.sh ] INPUT $INPUT"
+print_info "TEST $TEST"
+print_info "INPUT $INPUT"
 
 
 #--------------------------------------------------------------------
