@@ -43,7 +43,7 @@
 `include "resistor.vams"
 `include "predictive_supply.vams"
 
-`timescale 1ps/1ps
+`timescale 1ns/1ps
 
 //`define INTEL_SERVER_PDN
 //`define ARM_PDN

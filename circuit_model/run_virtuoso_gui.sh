@@ -36,37 +36,4 @@ export LM_LICENSE_FILE=5280@cadence.webstore.illinois.edu
 # So far only CentOS 7 with GLIBC version 2.17 has worked.
 export OA_UNSUPPORTED_PLAT=linux_rhel50_gcc48x
 
-pushd /run_vsim
-cp $SIM_ROOT/interprocess.cpp ./interprocess.c
-cp $SIM_ROOT/interprocess.h .
-cp $SIM_ROOT/common/* .
-cp $SIM_ROOT/pdn/* .
-cp $SIM_ROOT/supply/* .
-cp $SIM_ROOT/circuit_model.vams .
-cp $SIM_ROOT/scf.scs .
-
-# BUILD 64 Bit VPI Library:
-gcc interprocess.c -O0 -g -DWITH_VPI -std=c11 -D_XOPEN_SOURCE=500 -fPIC -fpermissive -shared -I/software/cadence-Aug2016/INCISIVE152/tools.lnx86/include -lpthread -o interprocess.so
-
-# RUN 64 Bit version of VSIM:
-# TODO: Update this portion of the script to use the IRUN Wrapper with better flags.
-#+define+${3}=1 \
-#+define+${4}=1 \
-ncverilog \
-  +define+SHM_NAME=\\\"${1}\\\" \
-  +define+STEP_SIZE=${2} \
-  circuit_model.vams \
-  +access+r -loadvpi ./interprocess.so:register_create_shm \
-  -loadvpi ./interprocess.so:register_destroy_shm \
-  -loadvpi ./interprocess.so:register_wait_driver_data \
-  -loadvpi ./interprocess.so:register_get_voltage_setpoint \
-  -loadvpi ./interprocess.so:register_get_effective_resistance \
-  -loadvpi ./interprocess.so:register_get_prediction \
-  -loadvpi ./interprocess.so:register_get_enable \
-  -loadvpi ./interprocess.so:register_get_terminate_simulation \
-  -loadvpi ./interprocess.so:register_ack_driver_data \
-  -loadvpi ./interprocess.so:register_send_voltage \
-  -loadvpi ./interprocess.so:register_send_current \
-  -loadvpi ./interprocess.so:register_ack_simulation \
-  -top circuit_model \
-  -analogcontrol scf.scs > "$OUTPUT_ROOT/circuit_model/log/${1}_out.log"
+virtuoso
