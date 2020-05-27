@@ -41,7 +41,7 @@ module my_res(p, n);
   parameter real R=1;
 
   analog begin
-    I(p,n) <+ V(p,n)/R;
+    V(p,n) <+ I(p,n)*R;
   end
 endmodule
 

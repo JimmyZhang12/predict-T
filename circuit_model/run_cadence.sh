@@ -35,20 +35,7 @@ if [[ -z $(docker images -q $VSIM_IMAGE) ]]; then
   exit 1
 fi
 
-#docker run --rm --memory 16g --network=host \
-#  --user $(id -u):$(id -g) \
-#  --name=$1 \
-#  -v /software:/software \
-#  -v /dev/shm/:/dev/shm/ \
-#  -v $VSIM_TOOLS:$VSIM_TOOLS \
-#  -v $SIM_ROOT:$SIM_ROOT \
-#  -v $OUTPUT_ROOT:$OUTPUT_ROOT \
-#  -e SIM_ROOT \
-#  -e OUTPUT_ROOT \
-#  $VSIM_IMAGE \
-#  ./run_vsim.sh $1 $2
-#  #./run_vsim.sh $1 $2 $3 $4
-docker run -t -i --rm --memory 16g --network=host \
+docker run --rm --memory 16g --network=host \
   --user $(id -u):$(id -g) \
   --name=$1 \
   -v /software:/software \
@@ -58,6 +45,6 @@ docker run -t -i --rm --memory 16g --network=host \
   -v $OUTPUT_ROOT:$OUTPUT_ROOT \
   -e SIM_ROOT \
   -e OUTPUT_ROOT \
-  $VSIM_IMAGE
-#  ./run_vsim.sh $1 $2
+  $VSIM_IMAGE \
+  ./run_vsim.sh $1 $2
   #./run_vsim.sh $1 $2 $3 $4
