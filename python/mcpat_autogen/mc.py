@@ -1,24 +1,30 @@
-# MIT License
+# Copyright (c) 2020 University of Illinois
+# All rights reserved.
 #
-# Copyright (c) 2020 Andrew Smith
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions are
+# met: redistributions of source code must retain the above copyright
+# notice, this list of conditions and the following disclaimer;
+# redistributions in binary form must reproduce the above copyright
+# notice, this list of conditions and the following disclaimer in the
+# documentation and/or other materials provided with the distribution;
+# neither the name of the copyright holders nor the names of its
+# contributors may be used to endorse or promote products derived from
+# this software without specific prior written permission.
 #
-# Permission is hereby granted, free of charge, to any person obtaining a copy
-# of this software and associated documentation files (the "Software"), to deal
-# in the Software without restriction, including without limitation the rights
-# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-# copies of the Software, and to permit persons to whom the Software is
-# furnished to do so, subject to the following conditions:
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+# "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+# A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+# OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+# SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+# LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+# DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+# THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+# (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+# OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
-# The above copyright notice and this permission notice shall be included in all
-# copies or substantial portions of the Software.
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-# SOFTWARE.
+# Authors: Andrew Smith
 #
 # mc.py
 #
@@ -43,7 +49,8 @@ class MemoryController:
   channel. This is sufficient for most application.
   Further track down can be easily added in later
   versions."""
-  def __init__(self, component_id, component_name, stat_dict, config_dict, sim_dict):
+  def __init__(self, component_id, component_name, \
+                stat_dict, config_dict, sim_dict):
     self.name = "mc"
     self.id = "mc"
 
@@ -52,7 +59,10 @@ class MemoryController:
       "type" : ["0","1: low power; 0 high performance"],
       "mc_clock" : ["2666","DIMM IO bus clock rate MHz"],
       "vdd" : ["0","0 means using ITRS default vdd"],
-      "power_gating_vcc" : ["-1","\"-1\" means using default power gating virtual power supply voltage constrained by technology and computed automatically"],
+      "power_gating_vcc" : \
+        ["-1","\"-1\" means using default power gating virtual power"
+          "supply voltage constrained by technology and computed"
+          "automatically"],
       "peak_transfer_rate" : ["20000","MB/S"],
       "block_size" : ["64","B"],
       "number_mcs" : ["4",""],
@@ -66,7 +76,8 @@ class MemoryController:
     }
     self.stats = \
     {
-      "memory_accesses" : ["0","mem_ctrls.writeReqs + mem_ctrls.readReqs"],
+      "memory_accesses" : \
+        ["0","mem_ctrls.writeReqs + mem_ctrls.readReqs"],
       "memory_reads" : ["0","mem_ctrls.readReqs"],
       "memory_writes" : ["0","mem_ctrls.writeReqs"]
     }
@@ -79,7 +90,8 @@ class MemoryController:
     self.parameters["mc_clock"][0]=str(int(config_dict["tCK"])*2)
     self.parameters["vdd"][0]=str(float(config_dict["VDD"]))
     self.parameters["power_gating_vcc"][0]="-1"
-    self.parameters["peak_transfer_rate"][0]=str(int(stat_dict["bw_total::total"][1])/1e6)
+    self.parameters["peak_transfer_rate"][0]= \
+      str(int(stat_dict["bw_total::total"][1])/1e6)
     self.parameters["block_size"][0]="64"
     self.parameters["number_mcs"][0]="4"
     self.parameters["memory_channels_per_mc"][0]="2"
@@ -89,18 +101,27 @@ class MemoryController:
     self.parameters["IO_buffer_size_per_channel"][0]="64"
     self.parameters["databus_width"][0]="128"
     self.parameters["addressbus_width"][0]="52"
-    self.stats["memory_accesses"][0]=str(int(stat_dict["readReqs"][1])+int(stat_dict["writeReqs"][1]))
-    self.stats["memory_reads"][0]=str(int(stat_dict["readReqs"][1]))
-    self.stats["memory_writes"][0]=str(int(stat_dict["writeReqs"][1]))
+    self.stats["memory_accesses"][0]= \
+      str(int(stat_dict["readReqs"][1]) \
+      +int(stat_dict["writeReqs"][1]))
+    self.stats["memory_reads"][0]= \
+      str(int(stat_dict["readReqs"][1]))
+    self.stats["memory_writes"][0]= \
+      str(int(stat_dict["writeReqs"][1]))
 
   def xml(self):
-    """ Build an XML Tree from the parameters, stats, and subcomponents """
+    """ Build an XML Tree from the parameters, stats, and
+    subcomponents """
     top = ElementTree.Element('component', id=self.id, name=self.name)
     for key in sorted(self.parameters):
-      top.append(ElementTree.Comment(", ".join(['param', key, self.parameters[key][1]])))
-      top.append(ElementTree.Element('param', name=key, value=self.parameters[key][0]))
+      top.append(ElementTree.Comment( \
+        ", ".join(['param', key, self.parameters[key][1]])))
+      top.append(ElementTree.Element( \
+        'param', name=key, value=self.parameters[key][0]))
     for key in sorted(self.stats):
-      top.append(ElementTree.Comment(", ".join(['stat', key, self.stats[key][1]])))
-      top.append(ElementTree.Element('stat', name=key, value=self.stats[key][0]))
+      top.append(ElementTree.Comment( \
+        ", ".join(['stat', key, self.stats[key][1]])))
+      top.append(ElementTree.Element( \
+        'stat', name=key, value=self.stats[key][0]))
     return top
 
