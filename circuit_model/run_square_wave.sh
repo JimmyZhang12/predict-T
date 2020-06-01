@@ -1,7 +1,7 @@
 #!/bin/bash
 
-TRACE_ROOT="/home/andrew/scratch/predict-T/arbitrary_input_traces"
-LOG_ROOT="/home/andrew/scratch/predict-T/arbitrary_input_traces/package_model"
+TRACE_ROOT="$OUTPUT_ROOT/arbitrary_input_traces"
+LOG_ROOT="$OUTPUT_ROOT/arbitrary_input_traces/package_model"
 
 DEVICES=("SERVER" "LAPTOP" "MOBILE" "EMBEDDED" "PERF_UC" "LP_UP")
 TRACE_DIRS=("server" "laptop" "mobile" "embedded" "perf_uc" "lp_uc")

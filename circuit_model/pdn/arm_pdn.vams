@@ -1,0 +1,91 @@
+/*
+ * Copyright (c) 2020 Andrew Smith
+ * 
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+
+/*
+ * Verilog-AMS HDL
+ *
+ * This models the board capacitance, traces, and package impedence from the
+ * ARM Quad Core A Class CPUs.
+ *
+ * 1) CDIE = 35nF-100nF (2-cores A-Class will be around 35nF, Quad-core A-Class will be near the 100nF range)
+ * 2) Ldi/dt voltage droop - 120mV-150mV for a nominal 1V supply.
+ * 3) LPKG (lumped) - 40pH. This is including the traces and the ESL of the package decaps.
+ * 4) CPKG - 220nFx5.
+ * 5) LPCB (lumped) - ~100pH. This is including traces and ESL of the PCB decaps
+ * 6) CPCB = 8x10uF (Murata Caps).
+ * 7) LVRM - (Inductance in series with the PMIC) - 2.2uH.
+ * 8) Tantalum Filter Cap (filter cap for the PMIC) - 400uF.
+ * 
+ * Ldie can be neglected for most parts - 1-5pH.
+ */
+
+`ifndef ARM_PDN_VAMS
+`define ARM_PDN_VAMS
+
+`include "constants.vams"
+`include "disciplines.vams"
+`include "resistor.vams"
+`include "pdn_stage.vams"
+
+`timescale 1ps/1ps
+
+/*
+ * Module arm_power_distribution_network
+ *
+ *  Model of the VRM, PCB, Package, and Die Parasitic Inductances and
+ *  Resistances. Modeled as 4 PDN Stages in series.
+ *
+ *    vin - Input Voltage (From ideal supply)
+ *    vout - Output Voltage (To Load Model)
+ *    vvrm - Voltage at the output of the vrm model
+ *    vpcb - voltage at the output of the pcb model
+ *    vpack - voltage at the output of the package model
+ *    vdie - voltage at the output of the die model
+ *    gnd - ground net
+ */
+module arm_power_distribution_network(vin, vout, vvrm, vpcb, vpack, vdie, iin, iout, gnd);
+	inout vin, vout, gnd;
+  output vvrm, vpcb, vpack, vdie, iin, iout;
+	electrical vin, vout, iin, iout, vvrm, vpcb, vpack, vdie, n1, n2, n3, n4, n5, gnd;
+
+  // Essential for getting a valid voltage read for some reason...
+  //my_res#(.R(1n)) ri(vin, n1);
+  
+  pdn_stage#(.C_STAGE(400u), .N_CAP(1), .L_STAGE(0u),   .R_STAGE(0m))   smps(n1, n2, gnd);
+  pdn_stage#(.C_STAGE(10u),  .N_CAP(8), .L_STAGE(100p), .R_STAGE(5m))   pcb(n2, n3, gnd);
+  pdn_stage#(.C_STAGE(220n), .N_CAP(5), .L_STAGE(40p),  .R_STAGE(0.5m)) package(n3, n4, gnd);
+  pdn_stage#(.C_STAGE(25n),  .N_CAP(4), .L_STAGE(1p),   .R_STAGE(150n)) die(n4, n5, gnd);
+
+  // Essential for getting a valid voltage read for some reason...
+  //my_res#(.R(1n)) ro(n5, vout);
+
+  analog begin
+    V(vvrm, gnd) <+ V(n2, gnd);
+    V(vpcb, gnd) <+ V(n3, gnd);
+    V(vpack, gnd) <+ V(n4, gnd);
+    V(vdie, gnd) <+ V(n5, gnd);
+    V(iin, gnd) <+ I(vin, n1);
+    V(iout, gnd) <+ I(n5, vout);
+  end
+endmodule
+
+`endif // ARM_PDN_VAMS

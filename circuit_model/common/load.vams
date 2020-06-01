@@ -1,0 +1,92 @@
+/*
+ * Copyright (c) 2020 Andrew Smith
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+
+/*
+ * Verilog-AMS HDL
+ *
+ * load.vams
+ *
+ * Processor model
+ */
+
+`ifndef PROCESSOR_MODEL_VAMS
+`define PROCESSOR_MODEL_VAMS
+
+`include "constants.vams"
+`include "disciplines.vams"
+
+`timescale 1ps/1ps
+
+
+/*
+ * Module processor varistor
+ *
+ *  Model of the processor. Use a resistor to model the load.
+ *
+ *    p - Positive Terminal
+ *    n - Negative Terminal
+ *    r - R value (Voltage, not wreal is not supported in Verilog-A)
+ *
+ *    Parameter DT - the time in simulation ticks for the transition
+ */
+module processor_varistor(p, n, r);
+  inout p, n;
+  input r;
+  real r_load;
+  electrical p, n, r;
+
+  parameter DT=100p;
+
+  analog begin
+    r_load = V(r,n);
+    I(p, n) <+ V(p,n)/transition(r_load,0p,DT,DT);
+  end
+endmodule
+
+
+/*
+ * Module processor
+ *
+ *  Model of the processor. Use a current source to model the load.
+ *
+ *    p - Positive Terminal
+ *    n - Negative Terminal
+ *    i - I value (Voltage, not wreal is not supported in Verilog-A)
+ *
+ *    Parameter DT - the time in simulation ticks for the transition
+ */
+module processor(p, n, i);
+  inout p, n;
+  input i;
+  real i_load;
+  electrical p, n, i;
+
+  parameter DT=100p;
+
+  analog begin
+    i_load = V(i,n);
+    I(p, n) <+ transition(i_load,0p,DT,DT);
+  end
+endmodule
+
+
+`endif // PROCESSOR_MODEL_VAMS

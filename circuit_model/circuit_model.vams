@@ -18,188 +18,129 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
- * 
- * circuit_model.vams
- * 
- * The main testbench for the power supply and power distribution model.
- *
  */
 
+/*
+ * Verilog-AMS HDL
+ *
+ * circuit_model
+ *
+ * Top level circuit model.
+ */
+
+`ifndef CIRCUIT_MODEL_VAMS
+`define CIRCUIT_MODEL_VAMS
+
 `include "constants.vams"
+`include "load.vams"
 `include "disciplines.vams"
-`include "board_package.vams"
+`include "intel_pdn.vams"
+`include "arm_pdn.vams"
+`include "harvard_pdn.vams"
+`include "sources.vams"
+`include "capacitor.vams"
+`include "inductor.vams"
 `include "resistor.vams"
 `include "predictive_supply.vams"
 
-`timescale 1ns/1ns
+`timescale 1ns/1ps
 
-`define SERVER
-`define AVP
+//`define INTEL_SERVER_PDN
+`define ARM_PDN
+//`define HARVARD_PDN
 `define CYCLES 200
 
-module variable_isrc(p,n,i);
-  inout p,n,i;
-  electrical p,n,i;
-  analog begin
-    I(p,n) <+ V(p) / V(i);
-  end
-endmodule
 
-module variable_vsrc(p,n,v);
-  inout p,n,v;
-  electrical p,n,v;
-  analog begin
-    V(p,n) <+ V(v);
-  end
-endmodule
-
-module circuit_model ();
+/*
+ * Module circuit_model
+ *
+ *  This module is the top level module, it contains the driver code for the
+ *  interface between the driver process and the circuit simulation. The 
+ */
+module circuit_model();
   // Top Level Signals
-  wire _l_clk, _l_rst, _l_pwm;
-  wire [7:0] _l_e, _l_d;
-  electrical n4, gnd, n3, n2, n1, vsense_out, vsense_in, _i_step;
-  //electrical _en;
+  electrical vin, iin, gnd, vout, iout, vvrm, vpcb, vpackage, vdie, vset;
 
   // Gem5 Interface Signals
-  real _v_set, _dr, _r, _r_last, _r_new, _prediction;
-  reg _enable;
-  electrical _ve_set, _vr_last;
-  reg _term_sim;
-  real _v_next;
+  real v_set;
+  electrical proc_load, prediction;
+  real _proc_load, _prediction;
+  reg prediction_enable;
+  reg term_sim;
+  reg retval;
 
-  // for logging:
-  real v_vout, i_vout, v_vin, i_vin;
+  // Logging
+  real _vvrm, _vpcb, _vpackage, _vdie, _iin, _iout;
 
-  // Modules
-  //variable_vsrc supply(.p(n1), .n(gnd), .v(_ve_set));
-  simple_buck_model supply(.vid(_ve_set),
-                           ._i_step(_i_step),
-                           .vout(n1),
-                           .en(_enable));
-  my_res#(.R(1u)) rsensea(.p(n1), .n(n3));
-`ifdef SERVER
-  board_package_intel_server filter(.vin(n3), .vout(n4), .gnd(gnd), .vsense_in(vsense_in), .vsense_out(vsense_out));
-`endif
-`ifdef LAPTOP
-  board_package_laptop filter(.vin(n3), .vout(n4), .gnd(gnd), .vsense_in(vsense_in), .vsense_out(vsense_out));
-`endif
-`ifdef MOBILE
-  board_package_mobile filter(.vin(n3), .vout(n4), .gnd(gnd), .vsense_in(vsense_in), .vsense_out(vsense_out));
-`endif
-`ifdef EMBEDDED
-  board_package_embedded filter(.vin(n3), .vout(n4), .gnd(gnd), .vsense_in(vsense_in), .vsense_out(vsense_out));
-`endif
-`ifdef PERF_UC
-  board_package_perf_uc filter(.vin(n3), .vout(n4), .gnd(gnd), .vsense_in(vsense_in), .vsense_out(vsense_out));
-`endif
-`ifdef LP_UC
-  board_package_lp filter(.vin(n3), .vout(n4), .gnd(gnd), .vsense_in(vsense_in), .vsense_out(vsense_out));
-`endif
-  my_res#(.R(1u)) rsenseb(.p(n4), .n(n2));
-  variable_isrc load(.p(n2), .n(gnd), .i(_vr_last));
+  // Supply Model
+  my_vcvs supply(.p(vin), .n(gnd), .vp(vset), .vn(gnd));
 
+`ifdef ARM_PDN
+  arm_power_distribution_network pdn(.vin(vin), .vout(vout), .gnd(gnd), .vvrm(vvrm), .vpcb(vpcb), .vpack(vpackage), .vdie(vdie), .iin(iin), .iout(iout));
+`endif
+`ifdef HARVARD_PDN
+  harvard_power_distribution_network pdn(.vin(vin), .vout(vout), .gnd(gnd), .vvrm(vvrm), .vpcb(vpcb), .vpack(vpackage), .vdie(vdie), .iin(iin), .iout(iout));
+`endif
+
+  // Processor Load
+  processor proc(.p(vout), .n(gnd), .i(proc_load));
 
   analog begin
     V(gnd) <+ 0.0;
-    _v_next = V(n4);
-    V(_vr_last) <+ _r;
-    V(_i_step) <+ _prediction;
-    //V(_en) <+ _enable;
-
-`ifdef SERVER
-`ifdef IDEAL
-    V(_ve_set) <+ _v_set + (1/_r_last)*801u;
-`endif
-`ifdef AVP
-    V(_ve_set) <+ _v_set;
-`endif
-`endif
-`ifdef LAPTOP
-`ifdef IDEAL
-    V(_ve_set) <+ _v_set + (1/_r_last)*1601u;
-`endif
-`ifdef AVP
-    V(_ve_set) <+ _v_set;
-`endif
-`endif
-`ifdef MOBILE
-`ifdef IDEAL
-    V(_ve_set) <+ _v_set + (1/_r_last)*1601u;
-`endif
-`ifdef AVP
-    V(_ve_set) <+ _v_set;
-`endif
-`endif
-`ifdef EMBEDDED
-`ifdef IDEAL
-    V(_ve_set) <+ _v_set + (1/_r_last)*11m;
-`endif
-`ifdef AVP
-    V(_ve_set) <+ _v_set;
-`endif
-`endif
-`ifdef PERF_UC
-`ifdef IDEAL
-    V(_ve_set) <+ _v_set + (1/_r_last)*11m;
-`endif
-`ifdef AVP
-    V(_ve_set) <+ _v_set;
-`endif
-`endif
-`ifdef LP_UC
-`ifdef IDEAL
-    V(_ve_set) <+ _v_set + (1/_r_last)*2m;
-`endif
-`ifdef AVP
-    V(_ve_set) <+ _v_set;
-`endif
-`endif
-
-    v_vout = V(vsense_out, gnd);
-    i_vout = I(n4, n2);
-    v_vin = V(vsense_in, gnd);
-    i_vin = I(n1, n3);
+    V(vset) <+ v_set;
+    _vvrm = V(vvrm, gnd);
+    _vpcb = V(vpcb, gnd);
+    _vpackage = V(vpackage, gnd);
+    _vdie = V(vdie, gnd);
+    _iout = V(iout, gnd);
+    _iin = V(iin, gnd);
+    V(proc_load, gnd) <+ _proc_load;
+    V(prediction, gnd) <+ _prediction;
   end
 
   initial begin
-    $create_shm(1, `SHM_NAME);
-    _r_last = 1;
-    _r_new = 1;
-    _r = 1;
-    _dr = 1;
+    // Create a shared memory region to communicate with driver process
+    retval = $create_shm(1, `SHM_NAME);
+
+    // Initial values
+    _proc_load = 1.0;
+    _prediction = 1.0;
+
+    // Main Loop
     while(1) begin
+      // Sync every `STEP_SIZE time units
       if($time % `STEP_SIZE == 0) begin
         $wait_driver_data;
-        _v_set = $get_voltage_setpoint();
-        _r_last = _r_new;
-        _r_new = $get_effective_resistance();
-        _dr = abs(_r_last - _r_new)/`CYCLES;
+        // Get signals from driver process
+        v_set = $get_voltage_setpoint();
+        _proc_load = $get_load();
         _prediction = $get_prediction();
-        _enable = $get_enable();
-        _term_sim = $get_terminate_simulation();
-        //$display("%d,%f,%f,%f,%f", _v_set, _r_last, _prediction, _enable, _term_sim);
+        prediction_enable = $get_enable();
+        term_sim = $get_terminate_simulation();
         $ack_driver_data;
-        $send_voltage(v_vout);
-        $send_current(i_vout);
+        // Send signals back to driver process
+        retval = $send_voltage(_vdie);
+        retval = $send_current(_iout);
         $ack_simulation;
-        if(_term_sim != 0) begin
+        if(term_sim != 0) begin
+          // Cleanup
           $destroy_shm;
           $finish;
         end
       end
+      // Clear enable signal 10 time units after setting it
       if($time % `STEP_SIZE == 10) begin
-        _enable = 0;
+        prediction_enable = 0;
       end
-      if(_r_last < _r_new) begin
-        _r = min(_r + _dr, _r_new);
-      end
-      else if(_r_last >= _r_new) begin
-        _r = max(_r - _dr, _r_new);
-      end 
-      $display("%d,%f,%f,%f,%f,%f,%f,%f,%f,%d,%f", $time, v_vin, i_vin, v_vout, i_vout, _r, _r_last, _r_new, _dr, _enable, _prediction);
+
+      // Write outpput values
+      $display("%d,%f,%f,%f,%f,%f,%f,%f,%d,%f", $time, _vvrm, _vpcb, _vpackage, _vdie, _iin, _iout, _proc_load, prediction_enable, _prediction);
       #1;
     end
+    // Cleanup
     $destroy_shm;
     $finish;
   end
 endmodule
+
+`endif // CIRCUIT_MODEL_VAMS

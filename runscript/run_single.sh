@@ -103,15 +103,9 @@ L1I=("32kB")
 L2=("256kB")
 L3=("16MB")
 
-name=("basicmath" "bitcnts" "qsort" "susan_smooth" "susan_edge" "susan_corner" "dijkstra" "patricia" "blowfish_encrypt" "blowfish_decrypt" "rijndael_encrypt" "rijndael_decrypt" "sha" "crc" "fft" "ffti" "toast" "untoast")
-exe=("basicmath" "bitcnts" "qsort" "susan" "susan" "susan" "dijkstra" "patricia" "blowfish" "blowfish" "rijndael" "rijndael" "sha" "crc" "fft" "fft" "toast" "untoast")
-opt=("" "1000" "${INPUT}/qsort_large.dat" "${INPUT}/susan_large.pgm ${output}/susan_large_s.pgm -s" "${INPUT}/susan_large.pgm ${output}/susan_large_s.pgm -e" "${INPUT}/susan_large.pgm ${output}/susan_large_s.pgm -c" "${INPUT}/dijkstra.dat" "${INPUT}/patricia_small.udp" "e ${INPUT}/blowfish_small.asc ${output}/blowfish_small.enc 1234567890abcdeffedcba0987654321" "d ${INPUT}/blowfish_small.enc ${output}/blowfish_small.asc 1234567890abcdeffedcba0987654321" "${INPUT}/rijndael_small.asc ${output}/rijndael_small.enc e 1234567890abcdeffedcba09876543211234567890abcdeffedcba0987654321" "${INPUT}/rijndael_small.enc ${output}/rijndael_small.asc d 1234567890abcdeffedcba09876543211234567890abcdeffedcba0987654321" "${INPUT}/sha_small.asc" "${INPUT}/crc_small.pcm" "4 4096" "4 8192 -i" "-fps -c ${INPUT}/toast_small.au" "-fps -c ${INPUT}/toast_small.gsm")
-#name=("dijkstra" "toast" "susan_smooth" "fft")
-#exe=("dijkstra" "toast" "susan" "fft")
-#opt=("${INPUT}/dijkstra.dat" "-fps -c ${INPUT}/toast_small.au" "${INPUT}/susan_large.pgm ${output}/susan_large_s.pgm -s" "4 4096")
-#name=("dijkstra")
-#exe=("dijkstra")
-#opt=("${INPUT}/dijkstra.dat")
+name=("dijkstra")
+exe=("dijkstra")
+opt=("${INPUT}/dijkstra.dat")
 
 #TABLE_SIZE=("1024" "4096")
 #PC_START=("6" "10" "14")
@@ -133,11 +127,8 @@ for j in ${!name[@]}; do
       for l in ${!TABLE_SIZE[@]}; do
         for m in ${!PC_START[@]}; do
           for o in ${!HISTORY_SIZE[@]}; do
-            #TN="${name[$j]}_${TABLE_SIZE[$l]}_${PC_START[$m]}_${INTERVAL[$i]}_${HISTORY_SIZE[$o]}_SimplePredictorDisableBuck1MHz"
-            TN="${name[$j]}_${TABLE_SIZE[$l]}_${PC_START[$m]}_${INTERVAL[$i]}_harvard_PDN_Test"
-#            TN="${name[$j]}_${TABLE_SIZE[$l]}_${PC_START[$m]}_${INTERVAL[$i]}_mcSimplePredictorEnableBuck1MHz"
+            TN="${name[$j]}_${TABLE_SIZE[$l]}_${PC_START[$m]}_${INTERVAL[$i]}_ARM_PDN_Test"
             se_single_core_xeon_e7_8893 $TN ${DURATION[$i]} ${INTERVAL[$i]} ${STEP[$i]} ${PROFILE_START[$i]} ${exe[$j]} "${opt[$j]}"
-#            se_n_core_xeon_e7_8893 $TN ${DURATION[$i]} ${INTERVAL[$i]} ${STEP[$i]} ${PROFILE_START[$i]} ${exe[$j]} "${opt[$j]}" "4"
             while [ `jobs | wc -l` -ge 32 ]; do
               sleep 1
             done
