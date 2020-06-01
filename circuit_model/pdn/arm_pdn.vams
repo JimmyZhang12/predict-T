@@ -44,163 +44,15 @@
 `include "constants.vams"
 `include "disciplines.vams"
 `include "resistor.vams"
-`include "inductor.vams"
-`include "capacitor.vams"
+`include "pdn_stage.vams"
 
 `timescale 1ps/1ps
-
-
-/*
- * Module arm_smps
- *
- *  Switched Mode Power Supply impedence model, it is noted that R can be
- *  ignored because the real supply would regulate to keep the voltage at the
- *  device constant.
- *
- *    vin - Input Voltage (From ideal supply)
- *    vout - Output Voltage (To PCB Model)
- *    gnd - ground net
- *
- *    Parameter CBULK - Bulk Capacitance Value
- *    Parameter LVRM - VRM Inductor Value
- *    Parameter RVRM - VRM R Value (optional)
- */
-module arm_smps(vin, vout, gnd);
-  inout vin, vout, gnd;
-  electrical vin, n1, vout, gnd;
-
-  parameter real CBULK=400u;
-  parameter real LVRM=2.2u;
-  parameter real RVRM=0;
-
-  my_ind#(.L(LVRM)) l_vrm(vin, n1);
-  my_res#(.R(RVRM)) r_vrm(n1, vout);
-  my_cap#(.C(CBULK)) c_bulk(vout, gnd);
-endmodule
-
-
-/*
- * Module arm_pcb
- *
- *  Models the PCB inducances and ceramic PCB Capacitors.
- *
- *    vin - Input Voltage (From VRM)
- *    vout - Output Voltage (To Package Model)
- *    gnd - ground net
- *
- *    Parameter C - Ceramic Capacitor Val
- *    Parameter CESR - ESR of Ceramic Capacitor
- *    Parameter CESL - ESL of Ceramic Capacitor
- *    Parameter N - Number of Ceramic Capacitors
- *    Parameter LPCB - PCB Inductor Value
- *    Parameter RPCB - PCB R Value (optional)
- */
-module arm_pcb(vin, vout, gnd);
-  inout vin, vout, gnd;
-  electrical vin, n1, vout, gnd;
-  genvar i;
-
-  parameter real C=10u;
-  parameter real CESR=0;
-  parameter real CESL=0; // L is lumped into LPCB
-  parameter integer N=8;
-  parameter real LPCB=100p;
-  parameter real RPCB=0;
-
-  my_ind#(.L(LPCB)) l_pcb(vin, n1);
-  my_res#(.R(RPCB)) r_pcb(n1,vout);
-
-  generate
-    for(i = 0; i < N; i=i+1) begin
-      my_real_cap#(.C(C), .ESR(CESR), .ESL(CESL)) c_pcb(vin, gnd);
-    end
-  endgenerate
-endmodule
-
-
-/*
- * Module arm_package
- *
- *  Models the package inductance, capacitance, and resistance
- *
- *    vin - Input Voltage (From PCB)
- *    vout - Output Voltage (To DIE Model)
- *    gnd - ground net
- *
- *    Parameter C - Package Capacitor Val
- *    Parameter CESR - ESR of Package Capacitor
- *    Parameter CESL - ESL of Package Capacitor
- *    Parameter N - Number of Package Capacitors
- *    Parameter LPAK - Package Inductor Value
- *    Parameter RPAK - Package R Value (optional)
- */
-module arm_package(vin, vout, gnd);
-  inout vin, vout, gnd;
-  electrical vin, n1, vout, gnd;
-  genvar i;
-
-  parameter real C=220n;
-  parameter real CESR=0;
-  parameter real CESL=0; // L is lumped into LPCB
-  parameter integer N=5;
-  parameter real LPAK=40p;
-  parameter real RPAK=5m;
-
-  my_ind#(.L(LPAK)) l_package(vin, n1);
-  my_res#(.R(RPAK)) r_package(n1,vout);
-
-  generate
-    for(i = 0; i < N; i=i+1) begin
-      my_real_cap#(.C(C), .ESR(CESR), .ESL(CESL)) c_package(vin, gnd);
-    end
-  endgenerate
-endmodule
-
-
-/*
- * Module arm_die
- *
- *  Models the package inductance, capacitance, and resistance
- *
- *    vin - Input Voltage (From Package Model)
- *    vout - Output Voltage (To Load Model)
- *    gnd - ground net
- *
- *    Parameter C - Die Capacitor Val
- *    Parameter CESR - ESR of Die Capacitor
- *    Parameter CESL - ESL of Die Capacitor
- *    Parameter N - Number of Die Capacitors
- *    Parameter LDIE - Die Inductor Value
- *    Parameter RDIE - Die R Value (optional)
- */
-module arm_die(vin, vout, gnd);
-  inout vin, vout, gnd;
-  electrical vin, n1, vout, gnd;
-  genvar i;
-
-  parameter real C=25n;
-  parameter real CESR=0;
-  parameter real CESL=0; // L is lumped into LPCB
-  parameter integer N=4;
-  parameter real LDIE=1p;
-  parameter real RDIE=0;
-
-  my_ind#(.L(LDIE)) l_die(vin, n1);
-  my_res#(.R(RDIE)) r_die(n1,vout);
-
-  generate
-    for(i = 0; i < N; i=i+1) begin
-      my_real_cap#(.C(C), .ESR(CESR), .ESL(CESL)) c_die(vin, gnd);
-    end
-  endgenerate
-endmodule
-
 
 /*
  * Module arm_power_distribution_network
  *
  *  Model of the VRM, PCB, Package, and Die Parasitic Inductances and
- *  Resistances.
+ *  Resistances. Modeled as 4 PDN Stages in series.
  *
  *    vin - Input Voltage (From ideal supply)
  *    vout - Output Voltage (To Load Model)
@@ -216,15 +68,15 @@ module arm_power_distribution_network(vin, vout, vvrm, vpcb, vpack, vdie, iin, i
 	electrical vin, vout, iin, iout, vvrm, vpcb, vpack, vdie, n1, n2, n3, n4, n5, gnd;
 
   // Essential for getting a valid voltage read for some reason...
-  my_res#(.R(1n)) ri(vin, n1);
+  //my_res#(.R(1n)) ri(vin, n1);
   
-  arm_smps smps(n1, n2, gnd);
-  arm_pcb pcb(n2, n3, gnd);
-  arm_package package(n3, n4, gnd);
-  arm_die die(n4, n5, gnd);
+  pdn_stage#(.C_STAGE(400u), .N_CAP(1), .L_STAGE(0u),   .R_STAGE(0m))   smps(n1, n2, gnd);
+  pdn_stage#(.C_STAGE(10u),  .N_CAP(8), .L_STAGE(100p), .R_STAGE(5m))   pcb(n2, n3, gnd);
+  pdn_stage#(.C_STAGE(220n), .N_CAP(5), .L_STAGE(40p),  .R_STAGE(0.5m)) package(n3, n4, gnd);
+  pdn_stage#(.C_STAGE(25n),  .N_CAP(4), .L_STAGE(1p),   .R_STAGE(150n)) die(n4, n5, gnd);
 
   // Essential for getting a valid voltage read for some reason...
-  my_res#(.R(1n)) ro(n5, vout);
+  //my_res#(.R(1n)) ro(n5, vout);
 
   analog begin
     V(vvrm, gnd) <+ V(n2, gnd);

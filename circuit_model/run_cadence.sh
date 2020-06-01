@@ -20,18 +20,33 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+script_name="run_cadence.sh"
+
+print_info () {
+  green="\e[32m"
+  nc="\e[0m"
+  echo -e "$green[ $script_name ]$nc $1"
+}
+
+print_error () {
+  red="\e[31m"
+  nc="\e[0m"
+  echo -e "$red[ $script_name ] Error:$nc $1"
+  exit 1
+}
+
 if [ -z "$SIM_ROOT" ]; then
-  echo "[ run_cadence.sh ] error: SIM_ROOT not set; source setup.sh"
+  print_error "SIM_ROOT not set; source setup.sh"
   exit 1
 fi
 
 if [ -z "$VSIM_IMAGE" ]; then
-  echo "[ run_cadence.sh ] error: VSIM_IMAGE not set; source setup.sh"
+  print_error "VSIM_IMAGE not set; source setup.sh"
   exit 1
 fi
 
 if [[ -z $(docker images -q $VSIM_IMAGE) ]]; then
-  echo "[ run_cadence.sh ] error: Docker container $VSIM_IMAGE is not built; source setup.sh"
+  print_error "Docker container $VSIM_IMAGE is not built; source setup.sh"
   exit 1
 fi
 

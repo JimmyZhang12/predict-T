@@ -23,70 +23,56 @@
 /*
  * Verilog-AMS HDL
  *
- * capacitor.vams
- *
- * Ideal and Realistic Capacitor VAMS Model
- *
+ * This is a single order power distribution network stage.
  */
 
-`ifndef MY_CAPACITOR_VAMS
-`define MY_CAPACITOR_VAMS
+`ifndef PDN_STAGE_VAMS
+`define PDN_STAGE_VAMS
 
 `include "constants.vams"
 `include "disciplines.vams"
 `include "resistor.vams"
 `include "inductor.vams"
+`include "capacitor.vams"
 
-`timescale 1ns/1ps
-
-
-/*
- * Module my_cap
- *
- *  Ideal Capacitor Model
- *
- *    p - Positive Terminal
- *    n - Negative Terminal
- *    
- *    Parameter C - Capacitance
- */
-module my_cap(p, n);
-  inout p, n;
-  electrical p, n;
-  parameter real C=0;
-
-  analog begin
-    I(p,n) <+ C * ddt(V(p,n));
-  end
-endmodule
-
+`timescale 1ps/1ps
 
 /*
- * Module my_real_cap
+ * Module pdn_stage
  *
- *  Realistic Capacitor Model
+ *  Models the L,C,R of a power supply stage.
  *
- *    p - Positive Terminal
- *    n - Negative Terminal
- *    
- *    Parameter C - Capacitance
- *    Parameter ESL - Series Inductance
- *    Parameter ESR - Series Resistance
- *    Parameter RL - Leakage
+ *    vin - Input Voltage (From Supply)
+ *    vout - Output Voltage (To Load)
+ *    gnd - ground net
+ *
+ *    Parameter C_STAGE - Capacitor Val
+ *    Parameter CESR - ESR of Capacitor
+ *    Parameter CESL - ESL of Capacitor
+ *    Parameter N_CAP - Number of Capacitors
+ *    Parameter L_STAGE - Inductor Value
+ *    Parameter R_STAGE - R Value
  */
-module my_real_cap(p, n);
-  inout p, n;
-  electrical p, n;
-  electrical n1, n2;
-  parameter real C=1u;
-  parameter real ESL=0;
-  parameter real ESR=1u;
-  parameter real RL=10M;
-  
-  my_res#(.R(RL)) r_leak(p, n);
-  my_cap#(.C(C)) c_deal(p, n1);
-  my_ind#(.L(ESL)) l_esl(n1, n2);
-  my_res#(.R(ESR)) r_esr(n2, n);
+module pdn_stage(vin, vout, gnd);
+  inout vin, vout, gnd;
+  electrical vin, n1, vout, gnd;
+  genvar i;
+
+  parameter real C_STAGE=25n;
+  parameter real CESR=1n;
+  parameter real CESL=1p;
+  parameter integer N_CAP=4;
+  parameter real L_STAGE=1p;
+  parameter real R_STAGE=1n;
+
+  my_ind#(.L(L_STAGE)) l_stage(vin, n1);
+  my_res#(.R(R_STAGE)) r_stage(n1,vout);
+
+  generate
+    for(i = 0; i < N_CAP; i=i+1) begin
+      my_real_cap#(.C(C_STAGE), .ESR(CESR), .ESL(CESL)) c_stage(vout, gnd);
+    end
+  endgenerate
 endmodule
 
-`endif // MY_CAPACITOR_VAMS
+`endif // PDN_STAGE_VAMS

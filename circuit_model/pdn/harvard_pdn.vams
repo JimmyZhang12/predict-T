@@ -37,6 +37,9 @@
 
 `timescale 1ps/1ps
 
+//`define HARVARD_PDN_Q_2_5
+`define HARVARD_PDN_Q_3_0
+//`define HARVARD_PDN_Q_3_5
 
 /*
  * Module harvard_power_distribution_network
@@ -62,9 +65,23 @@ module harvard_power_distribution_network(vin, vout, vvrm, vpcb, vpack, vdie, ii
   output vvrm, vpcb, vpack, vdie, iin, iout;
 	electrical vin, vout, iin, iout, vvrm, vpcb, vpack, vdie, n1, n2, n3, gnd;
 
-  parameter real R_LUMPED=0.5m;
-  parameter real L_LUMPED=40m;
-  parameter real C_LUMPED=200m;
+`ifdef HARVARD_PDN_Q_2_5
+  parameter real R_LUMPED=1m;
+  parameter real L_LUMPED=3.9788p;
+  parameter real C_LUMPED=636.62n;
+`elsif HARVARD_PDN_Q_3_0
+  parameter real R_LUMPED=1m;
+  parameter real L_LUMPED=4.77p;
+  parameter real C_LUMPED=530n;
+`elsif HARVARD_PDN_Q_3_5
+  parameter real R_LUMPED=1m;
+  parameter real L_LUMPED=5.5704p;
+  parameter real C_LUMPED=454.729n;
+`else // Defaults to Q = 3.0
+  parameter real R_LUMPED=1m;
+  parameter real L_LUMPED=4.77p;
+  parameter real C_LUMPED=530n;
+`endif
 
   // Essential for getting a valid voltage read for some reason...
   my_res#(.R(1n)) ri(vin, n1);

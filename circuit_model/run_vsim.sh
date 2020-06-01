@@ -60,7 +60,7 @@ ncverilog \
   -loadvpi ./interprocess.so:register_destroy_shm \
   -loadvpi ./interprocess.so:register_wait_driver_data \
   -loadvpi ./interprocess.so:register_get_voltage_setpoint \
-  -loadvpi ./interprocess.so:register_get_effective_resistance \
+  -loadvpi ./interprocess.so:register_get_load \
   -loadvpi ./interprocess.so:register_get_prediction \
   -loadvpi ./interprocess.so:register_get_enable \
   -loadvpi ./interprocess.so:register_get_terminate_simulation \

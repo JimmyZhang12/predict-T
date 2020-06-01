@@ -46,8 +46,8 @@
 `timescale 1ns/1ps
 
 //`define INTEL_SERVER_PDN
-//`define ARM_PDN
-`define HARVARD_PDN
+`define ARM_PDN
+//`define HARVARD_PDN
 `define CYCLES 200
 
 
@@ -59,15 +59,14 @@
  */
 module circuit_model();
   // Top Level Signals
-  wire _l_clk, _l_rst, _l_pwm;
-  wire [7:0] _l_e, _l_d;
-  electrical vin, iin, gnd, vout, iout, vvrm, vpcb, vpackage, vdie, _i_step, vset;
+  electrical vin, iin, gnd, vout, iout, vvrm, vpcb, vpackage, vdie, vset;
 
   // Gem5 Interface Signals
-  real _v_set, _dr, _r, _r_last, _r_new, _prediction;
-  reg _enable;
-  electrical _vr_last;
-  reg _term_sim;
+  real v_set;
+  electrical proc_load, prediction;
+  real _proc_load, _prediction;
+  reg prediction_enable;
+  reg term_sim;
   reg retval;
 
   // Logging
@@ -84,21 +83,19 @@ module circuit_model();
 `endif
 
   // Processor Load
-  processor proc(.p(vout), .n(gnd), .r(_vr_last));
+  processor proc(.p(vout), .n(gnd), .i(proc_load));
 
   analog begin
     V(gnd) <+ 0.0;
-    V(_vr_last) <+ _r;
-    V(_i_step) <+ _prediction;
-
-    V(vset) <+ _v_set;
-
+    V(vset) <+ v_set;
     _vvrm = V(vvrm, gnd);
     _vpcb = V(vpcb, gnd);
     _vpackage = V(vpackage, gnd);
     _vdie = V(vdie, gnd);
     _iout = V(iout, gnd);
     _iin = V(iin, gnd);
+    V(proc_load, gnd) <+ _proc_load;
+    V(prediction, gnd) <+ _prediction;
   end
 
   initial begin
@@ -106,10 +103,8 @@ module circuit_model();
     retval = $create_shm(1, `SHM_NAME);
 
     // Initial values
-    _r_last = 1;
-    _r_new = 1;
-    _r = 1;
-    _dr = 1;
+    _proc_load = 1.0;
+    _prediction = 1.0;
 
     // Main Loop
     while(1) begin
@@ -117,19 +112,17 @@ module circuit_model();
       if($time % `STEP_SIZE == 0) begin
         $wait_driver_data;
         // Get signals from driver process
-        _v_set = $get_voltage_setpoint();
-        _r_last = _r_new;
-        _r_new = $get_effective_resistance();
-        _dr = abs(_r_last - _r_new)/`CYCLES;
+        v_set = $get_voltage_setpoint();
+        _proc_load = $get_load();
         _prediction = $get_prediction();
-        _enable = $get_enable();
-        _term_sim = $get_terminate_simulation();
+        prediction_enable = $get_enable();
+        term_sim = $get_terminate_simulation();
         $ack_driver_data;
         // Send signals back to driver process
         retval = $send_voltage(_vdie);
         retval = $send_current(_iout);
         $ack_simulation;
-        if(_term_sim != 0) begin
+        if(term_sim != 0) begin
           // Cleanup
           $destroy_shm;
           $finish;
@@ -137,19 +130,11 @@ module circuit_model();
       end
       // Clear enable signal 10 time units after setting it
       if($time % `STEP_SIZE == 10) begin
-        _enable = 0;
+        prediction_enable = 0;
       end
-
-      // Bring resistace to the new setpoint at the simulation timescale
-      if(_r_last < _r_new) begin
-        _r = min(_r + _dr, _r_new);
-      end
-      else if(_r_last >= _r_new) begin
-        _r = max(_r - _dr, _r_new);
-      end 
 
       // Write outpput values
-      $display("%d,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%d,%f", $time, _vvrm, _vpcb, _vpackage, _vdie, _iin, _iout, _r, _r_last, _r_new, _dr, _enable, _prediction);
+      $display("%d,%f,%f,%f,%f,%f,%f,%f,%d,%f", $time, _vvrm, _vpcb, _vpackage, _vdie, _iin, _iout, _proc_load, prediction_enable, _prediction);
       #1;
     end
     // Cleanup

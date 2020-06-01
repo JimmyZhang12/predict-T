@@ -1,5 +1,3 @@
-#!/bin/bash
-#
 # Copyright (c) 2020 Andrew Smith
 # 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -20,29 +18,20 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-if [ -z "$SIM_ROOT" ]; then
-  echo "[ run_cadence.sh ] error: SIM_ROOT not set; source setup.sh"
-  exit 1
-fi
+import math
+import sys
+import argparse
 
-if [ -z "$VSIM_IMAGE" ]; then
-  echo "[ run_cadence.sh ] error: VSIM_IMAGE not set; source setup.sh"
-  exit 1
-fi
+parser = argparse.ArgumentParser(description='Calculate LC based on a R,Q,F0, for a second order PDN model')
+parser.add_argument('-r','--dc_resistance',type=float,required=True,help='The DC Resistance of the PDN')
+parser.add_argument('-q','--quality',type=float,required=True,help='The Quality Factor of the PDN')
+parser.add_argument('-f','--resonant_freq',type=float,required=True,help='The resonant frequency f0 of the PDN')
+args = parser.parse_args()
 
-if [[ -z $(docker images -q $VSIM_IMAGE) ]]; then
-  echo "[ run_cadence.sh ] error: Docker container $VSIM_IMAGE is not built; source setup.sh"
-  exit 1
-fi
+r = args.dc_resistance
+q = args.quality
+f0 = args.resonant_freq
 
-docker run -t -i --rm --memory 16g --network=host \
-  --user $(id -u):$(id -g) \
-  --name=$1 \
-  -v /software:/software \
-  -v /dev/shm/:/dev/shm/ \
-  -v $VSIM_TOOLS:$VSIM_TOOLS \
-  -v $SIM_ROOT:$SIM_ROOT \
-  -v $OUTPUT_ROOT:$OUTPUT_ROOT \
-  -e SIM_ROOT \
-  -e OUTPUT_ROOT \
-  $VSIM_IMAGE
+l = r*q/(2*math.pi*f0)
+c = 1/(math.pow((2*math.pi)*f0,2)*l)
+print("R: "+str(r)+" Q: "+str(q)+" L: "+str(l)+" C: "+str(c))

@@ -51,7 +51,7 @@
 
 typedef struct {
   double v_set;          // The next voltage setpoint
-  double curr_r_load;    // The current load of the system
+  double curr_load;      // The current load of the system
   double prediction;     // The value of the predicted load
   uint32_t enable;       // Enable the Aux Circuit
   uint32_t sim_over;     // Terminate Simulation
@@ -98,13 +98,13 @@ void destroy_shm();
 
 void wait_driver_data();
 double get_voltage_setpoint();
-double get_effective_resistance();
+double get_load();
 uint32_t get_terminate_simulation();
 void ack_driver_data();
 int send_voltage(double voltage);
 int send_current(double current);
 
-void set_driver_signals(double voltage_setpoint, double resistance, uint32_t terminate_sim);
+void set_driver_signals(double voltage_setpoint, double load, uint32_t terminate_sim);
 double get_voltage();
 double get_current();
 void ack_supply();
@@ -114,7 +114,7 @@ void register_create_shm();
 void register_destroy_shm();
 void register_wait_driver_data();
 void register_get_voltage_setpoint();
-void register_get_effective_resistance();
+void register_get_load();
 void register_get_prediction();
 void register_get_enable();
 void register_get_terminate_simulation();

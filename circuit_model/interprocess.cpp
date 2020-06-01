@@ -57,7 +57,7 @@ void init_shm(mapped* p) {
   sem_init(&p->pv.sem, 1, 1);
   p->pv.new_data = NO_NEW_DATA;
   p->pv.data.v_set = 0;
-  p->pv.data.curr_r_load = 0;
+  p->pv.data.curr_load = 0;
   p->pv.data.prediction = 0;
   p->pv.data.enable = 0;
   p->pv.data.sim_over = 0;
@@ -162,7 +162,7 @@ void wait_driver_data() {
   //printf("Shared memory region at: %p with size: %lu\n", shm_ptr, SHM_LENGTH); 
   while(1) {
     sem_wait(&shm_ptr->pv.sem);
-    //printf("pv.nd:%d, pv.vs:%d, pv.er:%d, pv.ts:%d\n", shm_ptr->pv.new_data, shm_ptr->pv.data.v_set, shm_ptr->pv.data.curr_r_load, shm_ptr->pv.data.sim_over);
+    //printf("pv.nd:%d, pv.vs:%d, pv.er:%d, pv.ts:%d\n", shm_ptr->pv.new_data, shm_ptr->pv.data.v_set, shm_ptr->pv.data.curr_load, shm_ptr->pv.data.sim_over);
     if(shm_ptr->pv.new_data == NEW_DATA) {
       sem_post(&shm_ptr->pv.sem);
       return;
@@ -217,9 +217,9 @@ double get_voltage_setpoint() {
   return ret;
 }
 
-// get_effective_resistance
-//   get the resistance of the load:
-double get_effective_resistance() {
+// get_load
+//   get the resistance/current of the load:
+double get_load() {
 #ifdef WITH_VPI
   vpiHandle systfref, argsiter, argh;
   struct t_vpi_value value;
@@ -229,11 +229,11 @@ double get_effective_resistance() {
   sem_wait(&shm_ptr->pv.sem);
 #ifdef WITH_VPI
   systfref = vpi_handle(vpiSysTfCall, NULL); /* get system function that invoked C routine */
-  value.value.real = shm_ptr->pv.data.curr_r_load;
+  value.value.real = shm_ptr->pv.data.curr_load;
   value.format = vpiRealVal;/* return the result */
   vpi_put_value(systfref, &value, NULL, vpiNoDelay);
 #else
-  ret = shm_ptr->pv.data.curr_r_load;
+  ret = shm_ptr->pv.data.curr_load;
 #endif
   sem_post(&shm_ptr->pv.sem);
   return ret;
@@ -411,14 +411,14 @@ void ack_supply() {
   return;
 }
 
-void set_driver_signals(double voltage_setpoint, double resistance, uint32_t terminate_sim) {
+void set_driver_signals(double voltage_setpoint, double load, uint32_t terminate_sim) {
   // Wait for the verilog simulation to consume the previous data:
   while(1) {
     sem_wait(&shm_ptr->pv.sem);
     if(shm_ptr->pv.new_data == NO_NEW_DATA) {
       //printf("Sending V:%lf R:%lf\n", voltage_setpoint, resistance);
       shm_ptr->pv.data.v_set = voltage_setpoint;
-      shm_ptr->pv.data.curr_r_load = resistance;
+      shm_ptr->pv.data.curr_load = load;
       shm_ptr->pv.data.sim_over = terminate_sim;
       shm_ptr->pv.new_data = NEW_DATA;
       sem_post(&shm_ptr->pv.sem);
@@ -482,13 +482,13 @@ void register_get_voltage_setpoint() {
 }
 
 // register_wait_driver_data
-void register_get_effective_resistance() {
+void register_get_load() {
     s_vpi_systf_data data;
     data.type = vpiSysFunc;
     data.sysfunctype = vpiRealFunc;
-    data.tfname ="$get_effective_resistance";
-    data.user_data ="$get_effective_resistance";
-    data.calltf=get_effective_resistance;
+    data.tfname ="$get_load";
+    data.user_data ="$get_load";
+    data.calltf=get_load;
     data.compiletf=0;
     data.sizetf=get_size;
     data.user_data=0;
