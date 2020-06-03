@@ -20,8 +20,6 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-source util.sh
-
 script_name="run.sh"
 
 print_info () {
@@ -75,6 +73,8 @@ print_info "OUTPUT_ROOT $OUTPUT_ROOT"
 print_info "MCPAT_ROOT $MCPAT_ROOT"
 print_info "SIM_ROOT $SIM_ROOT"
 print_info "VSIM_IMAGE $VSIM_IMAGE"
+
+source $PREDICT_T_ROOT/runscript/util.sh
 
 if [[ -z $(docker images -q $VSIM_IMAGE) ]]; then
   print_error "Docker container $VSIM_IMAGE is not built; source setup.sh"
