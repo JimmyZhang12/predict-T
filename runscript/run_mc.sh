@@ -20,7 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-script_name="run_single.sh"
+script_name="run_mc.sh"
 
 print_info () {
   green="\e[32m"
@@ -102,22 +102,14 @@ L1D=("64kB")
 L1I=("32kB")
 L2=("256kB")
 L3=("16MB")
+
+name=("vector_add")
+exe=("vector_add")
+opt=("65536 %s")
+#NC=("1" "2" "4" "6" "8" "12" "16" "20" "24")
+NC=("12" "16" "20" "24")
 CLK=("3.5GHz")
-
-name=("dijkstra")
-exe=("dijkstra")
-opt=("${INPUT}/dijkstra.dat")
-
-#TABLE_SIZE=("1024" "4096")
-#PC_START=("6" "10" "14")
-#HISTORY_SIZE=("1" "2")
-#TABLE_SIZE=("1024")
-#PC_START=("6")
-#HISTORY_SIZE=("2")
-TABLE_SIZE=("256")
-PC_START=("10")
-HISTORY_SIZE=("2")
-
+#CLK=("1.5GHz" "2.0GHz" "2.5GHz" "3.0GHz" "3.5GHz")
 
 #--------------------------------------------------------------------
 # Run
@@ -125,16 +117,22 @@ HISTORY_SIZE=("2")
 for j in ${!name[@]}; do 
   for i in ${!INTERVAL[@]}; do 
     for k in ${!L1D[@]}; do 
-      for c in ${!CLK[@]}; do 
-        for l in ${!TABLE_SIZE[@]}; do
-          for m in ${!PC_START[@]}; do
-            for o in ${!HISTORY_SIZE[@]}; do
-              TN="${name[$j]}_${TABLE_SIZE[$l]}_${PC_START[$m]}_${INTERVAL[$i]}_ARM_PDN_Test"
-              se_sc_classic_mc_ncv $TN ${DURATION[$i]} ${INTERVAL[$i]} ${STEP[$i]} ${PROFILE_START[$i]} ${exe[$j]} "${opt[$j]}" ${CLK[$c]}
-              while [ `jobs | wc -l` -ge 32 ]; do
-                sleep 1
-              done
-            done
+      for t in ${!NC[@]}; do
+        for c in ${!CLK[@]}; do
+          # Test Name
+          TN="test_${name[$j]}_${NC[$t]}c_${CLK[$c]}_ruby_nmp_nncv"
+
+          # Format the options with the num cores
+          if [ $(echo "${opt[$j]}" | grep -o "%s" | wc -w) -eq 1 ]; then
+            printf -v OPTIONS "${opt[$j]}" ${NC[$t]}
+          elif [ $(echo "${opt[$j]}" | grep -o "%s" | wc -w) -eq 2 ]; then
+            printf -v OPTIONS "${opt[$j]}" ${NC[$t]} ${NC[$t]}
+          fi
+
+          # Run on System
+          se_mc_ruby_nmc_nncv $TN ${exe[$j]} "${OPTIONS}" ${NC[$t]} ${CLK[$c]}
+          while [ `jobs | wc -l` -ge 32 ]; do
+            sleep 1
           done
         done
       done

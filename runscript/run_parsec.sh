@@ -20,7 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-script_name="run_single.sh"
+script_name="run_parsec.sh"
 
 print_info () {
   green="\e[32m"
@@ -86,6 +86,7 @@ fi
 #--------------------------------------------------------------------
 TEST="$PREDICT_T_ROOT/testbin"
 INPUT="$TEST/input"
+OUTPUT="$TEST/output"
 print_info "TEST $TEST"
 print_info "INPUT $INPUT"
 
@@ -102,22 +103,12 @@ L1D=("64kB")
 L1I=("32kB")
 L2=("256kB")
 L3=("16MB")
-CLK=("3.5GHz")
 
-name=("dijkstra")
-exe=("dijkstra")
-opt=("${INPUT}/dijkstra.dat")
+NC=("1" "2" "4" "6" "8" "12")
 
-#TABLE_SIZE=("1024" "4096")
-#PC_START=("6" "10" "14")
-#HISTORY_SIZE=("1" "2")
-#TABLE_SIZE=("1024")
-#PC_START=("6")
-#HISTORY_SIZE=("2")
-TABLE_SIZE=("256")
-PC_START=("10")
-HISTORY_SIZE=("2")
-
+name=("x264" "swaptions" "freqmine" "fluidanimate" "blackscholes")
+exe=("x264" "swaptions" "freqmine" "fluidanimate" "blackscholes")
+opt=("\055q 0 --threads %s ${OUTPUT}/test.x264 ${INPUT}/x264_%s.y4m" "\055ns 1000 -sm 100000 -nt %s -sd 012384701" "${INPUT}/kosarak_250k.dat 1" "%s 1000 ./inputs/fluidanimate.fluid" "%s ${INPUT}/blackscholes.txt ${OUTPUT}/blackscholes_%s.txt")
 
 #--------------------------------------------------------------------
 # Run
@@ -125,17 +116,21 @@ HISTORY_SIZE=("2")
 for j in ${!name[@]}; do 
   for i in ${!INTERVAL[@]}; do 
     for k in ${!L1D[@]}; do 
-      for c in ${!CLK[@]}; do 
-        for l in ${!TABLE_SIZE[@]}; do
-          for m in ${!PC_START[@]}; do
-            for o in ${!HISTORY_SIZE[@]}; do
-              TN="${name[$j]}_${TABLE_SIZE[$l]}_${PC_START[$m]}_${INTERVAL[$i]}_ARM_PDN_Test"
-              se_sc_classic_mc_ncv $TN ${DURATION[$i]} ${INTERVAL[$i]} ${STEP[$i]} ${PROFILE_START[$i]} ${exe[$j]} "${opt[$j]}" ${CLK[$c]}
-              while [ `jobs | wc -l` -ge 32 ]; do
-                sleep 1
-              done
-            done
-          done
+      for t in ${!NC[@]}; do
+        # Test Name
+        TN="parsec_${name[$j]}_${NC[$t]}c_ruby_nmp_nncv"
+
+        # Format the options with the num cores
+        if [ $(echo "${opt[$j]}" | grep -o "%s" | wc -w) -eq 1 ]; then
+          printf -v OPTIONS "${opt[$j]}" ${NC[$t]}
+        elif [ $(echo "${opt[$j]}" | grep -o "%s" | wc -w) -eq 2 ]; then
+          printf -v OPTIONS "${opt[$j]}" ${NC[$t]} ${NC[$t]}
+        fi
+
+        # Run on System
+        se_single_core_xeon_e7_8893_ruby_no_mcpat_no_ncverilog $TN ${exe[$j]} "${OPTIONS}" ${NC[$t]}
+        while [ `jobs | wc -l` -ge 32 ]; do
+          sleep 1
         done
       done
     done

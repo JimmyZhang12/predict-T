@@ -20,42 +20,41 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-se_single_core_xeon_e7_8893() {
+#------------------------------------------------------------------------------
+# se_sc_classic_mc_ncv
+#   Syscall Emulation with Single Core, Classic Caches, and McPAT+NCVERILOG
+#------------------------------------------------------------------------------
+se_sc_classic_mc_ncv() {
   TN=$1
-  DURATION=$2
-  INTERVAL=$3
-  STEP=$4
-  PROFILE_START=$5
+  DUR=$2
+  INT=$3
+  S=$4
+  PS=$5
   EXE=$6
   OPT=$7
+  CLK=$8
   L1I="32kB"
   L1D="64kB"
   L2="256kB"
   L3="16MB"
-
-  #echo "Test Name: $TN, Duration: $DURATION, Interval: $INTERVAL, Step: $STEP, Profile Start: $PROFILE_START, Exe: $EXE, Opt: $OPT"
-
-#  --power_pred_type=TestPowerPredictor \
-#  --power_pred_table_size=${TABLE_SIZE[$l]} \
-#  --power_pred_pc_start=${PC_START[$m]} \
-#  --power_pred_history_size=${HISTORY_SIZE[$o]} \
   
   echo "
 $GEM5_ROOT/build/X86/gem5.opt \
 --outdir=${OUTPUT_ROOT}/gem5_out/$TN \
---mcpat_template=${PREDICT_T_ROOT}/mcpat-template-x86-sc.xml \
+--mcpat_enable \
 --mcpat_path=${PREDICT_T_ROOT}/mcpat \
 --mcpat_out=${OUTPUT_ROOT}/mcpat_out \
 --mcpat_testname=$TN \
---power_profile_start=${PROFILE_START[$i]} \
---power_profile_duration=${DURATION[$i]} \
---power_profile_interval=${INTERVAL[$i]} \
+--power_profile_start=${PS} \
+--power_profile_duration=${DUR} \
+--power_profile_interval=${INT} \
+--ncverilog_enable \
 --ncverilog_path=${PREDICT_T_ROOT}/circuit_model \
---ncverilog_step=${STEP[$i]} \
+--ncverilog_step=${S} \
 ../gem5/configs/example/se.py \
---cmd=testbin/${exe[$j]} \
---opt=\"${opt[$j]}\" \
---power_profile_interval=${INTERVAL[$i]} \
+--cmd=testbin/${EXE} \
+--opt=\"${OPT}\" \
+--power_profile_interval=${INT} \
 --num-cpus=1 \
 --cpu-type=DerivO3CPU \
 --l1i_size=${L1I} \
@@ -70,23 +69,24 @@ $GEM5_ROOT/build/X86/gem5.opt \
 --l3_size=${L3} \
 --l3-hwp-type=TaggedPrefetcher \
 --caches \
---sys-clock=3.5GHz \
+--sys-clock=$CLK \
 --mem-size=8GB > ${OUTPUT_ROOT}/text_out/$TN.out &"
   $GEM5_ROOT/build/X86/gem5.opt \
     --outdir=${OUTPUT_ROOT}/gem5_out/$TN \
-    --mcpat_template=${PREDICT_T_ROOT}/mcpat-template-x86-sc.xml \
+    --mcpat_enable \
     --mcpat_path=${MCPAT_ROOT} \
     --mcpat_out=${OUTPUT_ROOT}/mcpat_out \
     --mcpat_testname=$TN \
-    --power_profile_start=${PROFILE_START[$i]} \
-    --power_profile_duration=${DURATION[$i]} \
-    --power_profile_interval=${INTERVAL[$i]} \
+    --power_profile_start=${PS} \
+    --power_profile_duration=${DUR} \
+    --power_profile_interval=${INT} \
+    --ncverilog_enable \
     --ncverilog_path=${PREDICT_T_ROOT}/circuit_model \
-    --ncverilog_step=${STEP[$i]} \
+    --ncverilog_step=${S} \
     $GEM5_ROOT/configs/example/se.py \
-    --cmd=$PREDICT_T_ROOT/testbin/${exe[$j]} \
-    --opt="${opt[$j]}" \
-    --power_profile_interval=${INTERVAL[$i]} \
+    --cmd=$PREDICT_T_ROOT/testbin/${EXE} \
+    --opt="${OPT}" \
+    --power_profile_interval=${INT} \
     --num-cpus=1 \
     --cpu-type=DerivO3CPU \
     --l1i_size=${L1I} \
@@ -105,22 +105,26 @@ $GEM5_ROOT/build/X86/gem5.opt \
     --mem-size=8GB > ${OUTPUT_ROOT}/text_out/$TN.out &
 }
 
-se_n_core_xeon_e7_8893() {
+
+
+#------------------------------------------------------------------------------
+# se_mc_classic_mc_ncv
+#   Syscall Emulation with Multiple Cores, Classic Caches, and McPAT+NCVERILOG
+#------------------------------------------------------------------------------
+se_mc_classic_mc_ncv() {
   TN=$1
-  DURATION=$2
-  INTERVAL=$3
-  STEP=$4
-  PROFILE_START=$5
+  DUR=$2
+  INT=$3
+  S=$4
+  PS=$5
   EXE=$6
   OPT=$7
-  NCORES=$8
+  NPROC=$8
+  CLK=$9
   L1I="32kB"
   L1D="64kB"
   L2="256kB"
   L3="16MB"
-
-  #echo "Test Name: $TN, Duration: $DURATION, Interval: $INTERVAL, Step: $STEP, Profile Start: $PROFILE_START, Exe: $EXE, Opt: $OPT, NCores: $NCORES"
-  #exit
 
 #  --power_pred_type=TestPowerPredictor \
 #  --power_pred_table_size=${TABLE_SIZE[$l]} \
@@ -130,27 +134,28 @@ se_n_core_xeon_e7_8893() {
   echo "
 ../gem5/build/X86/gem5.opt \
 --outdir=${OUTPUT_ROOT}/gem5_out/$TN \
---mcpat_template=${PREDICT_T_ROOT}/mcpat-template-x86-sc.xml \
+--mcpat_enable \
 --mcpat_path=${PREDICT_T_ROOT}/mcpat \
 --mcpat_out=${OUTPUT_ROOT}/mcpat_out \
 --mcpat_testname=$TN \
---power_profile_start=${PROFILE_START} \
---power_profile_duration=${DURATION} \
---power_profile_interval=${INTERVAL} \
+--power_profile_start=${PS} \
+--power_profile_duration=${DUR} \
+--power_profile_interval=${INT} \
+--ncverilog_enable \
 --ncverilog_path=${PREDICT_T_ROOT}/package_model \
---ncverilog_step=${STEP} \
+--ncverilog_step=${S} \
 ../gem5/configs/example/se.py \
 --cmd=testbin/${EXE} \
 --opt=\"${OPT}\" \
---power_profile_interval=${INTERVAL} \
---num-cpus=$NCORES \
+--power_profile_interval=${INT} \
+--num-cpus=$NPROC \
 --cpu-type=DerivO3CPU \
 --l1i_size=${L1I} \
 --l1i-hwp-type=TaggedPrefetcher \
 --l1d_size=${L1D} \
 --l1d-hwp-type=TaggedPrefetcher \
 --l2cache \
---num-l2caches=1 \
+--num-l2caches=$NPROC \
 --l2_size=${L2} \
 --l2-hwp-type=TaggedPrefetcher \
 --l3cache \
@@ -161,34 +166,196 @@ se_n_core_xeon_e7_8893() {
 --mem-size=8GB > ${OUTPUT_ROOT}text_out/$TN.out &"
   ../gem5/build/X86/gem5.opt \
     --outdir=${OUTPUT_ROOT}/gem5_out/$TN \
-    --mcpat_template=${PREDICT_T_ROOT}/mcpat-template-x86-sc.xml \
+    --mcpat_enable \
     --mcpat_path=${PREDICT_T_ROOT}/mcpat \
     --mcpat_out=${OUTPUT_ROOT}/mcpat_out \
     --mcpat_testname=$TN \
-    --power_profile_start=${PROFILE_START} \
-    --power_profile_duration=${DURATION} \
-    --power_profile_interval=${INTERVAL} \
+    --power_profile_start=${PS} \
+    --power_profile_duration=${DUR} \
+    --power_profile_interval=${INT} \
+    --ncverilog_enable \
     --ncverilog_path=${PREDICT_T_ROOT}/package_model \
-    --ncverilog_step=${STEP} \
+    --ncverilog_step=${S} \
     ../gem5/configs/example/se.py \
     --cmd=testbin/${EXE} \
-    --opt="${OPR}" \
-    --power_profile_interval=${INTERVAL} \
-    --num-cpus=$NCORES \
+    --opt="${OPT}" \
+    --power_profile_interval=${INT} \
+    --num-cpus=$NPROC \
     --cpu-type=DerivO3CPU \
     --l1i_size=${L1I} \
     --l1i-hwp-type=TaggedPrefetcher \
     --l1d_size=${L1D} \
     --l1d-hwp-type=TaggedPrefetcher \
     --l2cache \
-    --num-l2caches=$NCORES \
+    --num-l2caches=$NPROC \
     --l2_size=${L2} \
     --l2-hwp-type=TaggedPrefetcher \
     --l3cache \
     --l3_size=${L3} \
     --l3-hwp-type=TaggedPrefetcher \
     --caches \
-    --sys-clock=3.5GHz \
-    --mem-size=8GB 
-#> ${OUTPUT_ROOT}/text_out/$TN.out &
+    --sys-clock=$CLK \
+    --mem-size=8GB > ${OUTPUT_ROOT}/text_out/$TN.out &
+}
+
+
+
+#------------------------------------------------------------------------------
+# se_mc_classic_nmc_nncv
+#   Syscall Emulation with Multiple Cores, Classic Caches, and No McPAT, No
+#   NCVERILOG
+#------------------------------------------------------------------------------
+se_mc_classic_nmc_nncv() {
+  TN=$1
+  EXE=$2
+  OPT=$3
+  NPROC=$4
+  CLK=$5
+  L1I="32kB"
+  L1D="64kB"
+  L2="256kB"
+  L3="16MB"
+  
+  echo "
+$GEM5_ROOT/build/X86/gem5.opt \
+--outdir=${OUTPUT_ROOT}/gem5_out/$TN \
+../gem5/configs/example/se.py \
+--cmd=testbin/${EXE} \
+--opt=\"${EXE}\" \
+--num-cpus=$NPROC \
+--cpu-type=DerivO3CPU \
+--l1i_size=${L1I} \
+--l1i-hwp-type=TaggedPrefetcher \
+--l1d_size=${L1D} \
+--l1d-hwp-type=TaggedPrefetcher \
+--l2cache \
+--num-l2caches=$NC \
+--l2_size=${L2} \
+--l2-hwp-type=TaggedPrefetcher \
+--l3cache \
+--l3_size=${L3} \
+--l3-hwp-type=TaggedPrefetcher \
+--caches \
+--sys-clock=$CLK \
+--mem-size=8GB > ${OUTPUT_ROOT}/text_out/$TN.out &"
+  $GEM5_ROOT/build/X86/gem5.opt \
+    --outdir=${OUTPUT_ROOT}/gem5_out/$TN \
+    $GEM5_ROOT/configs/example/se.py \
+    --cmd=$PREDICT_T_ROOT/testbin/${EXE} \
+    --opt="${OPT}" \
+    --num-cpus=$NPROC \
+    --cpu-type=DerivO3CPU \
+    --l1i_size=${L1I} \
+    --l1i-hwp-type=TaggedPrefetcher \
+    --l1d_size=${L1D} \
+    --l1d-hwp-type=TaggedPrefetcher \
+    --l2cache \
+    --num-l2caches=$NC \
+    --l2_size=${L2} \
+    --l2-hwp-type=TaggedPrefetcher \
+    --l3cache \
+    --l3_size=${L3} \
+    --l3-hwp-type=TaggedPrefetcher \
+    --caches \
+    --sys-clock=$CLK \
+    --mem-size=8GB > ${OUTPUT_ROOT}/text_out/$TN.out &
+}
+
+
+
+#------------------------------------------------------------------------------
+# se_mc_ruby_nmc_nncv
+#   Syscall Emulation with Multiple Cores, Ruby MESI_Three_Level Caches, and
+#   No McPAT, No NCVERILOG
+#------------------------------------------------------------------------------
+se_mc_ruby_nmc_nncv() {
+  TN=$1
+  EXE=$2
+  OPT=$3
+  NPROC=$4
+  CLK=$5
+  L1I="32kB"
+  L1D="64kB"
+  L2="256kB"
+  L3="16MB"
+  
+  echo "
+$GEM5_ROOT/build/X86_MESI_Three_Level/gem5.opt \
+--outdir=${OUTPUT_ROOT}/gem5_out/$TN \
+../gem5/configs/example/se.py \
+--cmd=testbin/${EXE} \
+--opt=\"${OPT}\" \
+--num-cpus=$NPROC \
+--cpu-type=DerivO3CPU \
+--ruby \
+--l0i_size=${L1I} \
+--l0d_size=${L1D} \
+--l1_size=${L2} \
+--l2_size=${L3} \
+--sys-clock=$CLK \
+--mem-size=8GB > ${OUTPUT_ROOT}/text_out/$TN.out &"
+  $GEM5_ROOT/build/X86_MESI_Three_Level/gem5.opt \
+    --outdir=${OUTPUT_ROOT}/gem5_out/$TN \
+    $GEM5_ROOT/configs/example/se.py \
+    --cmd=$PREDICT_T_ROOT/testbin/${EXE} \
+    --opt="${OPT}" \
+    --num-cpus=$NPROC \
+    --cpu-type=DerivO3CPU \
+    --ruby \
+    --l0i_size=${L1I} \
+    --l0d_size=${L1D} \
+    --l1_size=${L2} \
+    --l2_size=${L3} \
+    --sys-clock=$CLK \
+    --mem-size=8GB > ${OUTPUT_ROOT}/text_out/$TN.out &
+}
+
+
+
+#------------------------------------------------------------------------------
+# se_mc_ruby_nmc_nncv_debug
+#   Syscall Emulation with Multiple Cores, Ruby MESI_Three_Level Caches, and
+#   No McPAT, No NCVERILOG, Run in GDB
+#------------------------------------------------------------------------------
+se_mc_ruby_nmc_nncv_debug() {
+  TN=$1
+  EXE=$2
+  OPT=$3
+  NPROC=$4
+  CLK=$5
+  L1I="32kB"
+  L1D="64kB"
+  L2="256kB"
+  L3="16MB"
+  
+  echo "
+gdb --args $GEM5_ROOT/build/X86_MESI_Three_Level/gem5.debug \
+--outdir=${OUTPUT_ROOT}/gem5_out/$TN \
+../gem5/configs/example/se.py \
+--cmd=testbin/${EXE} \
+--opt=\"${OPT}\" \
+--num-cpus=$NPROC \
+--cpu-type=DerivO3CPU \
+--ruby \
+--l0i_size=${L1I} \
+--l0d_size=${L1D} \
+--l1_size=${L2} \
+--l2_size=${L3} \
+--sys-clock=$CLK \
+--mem-size=8GB"
+gdb --args \
+  $GEM5_ROOT/build/X86_MESI_Three_Level/gem5.debug \
+  --outdir=${OUTPUT_ROOT}/gem5_out/$TN \
+  $GEM5_ROOT/configs/example/se.py \
+  --cmd=$PREDICT_T_ROOT/testbin/${EXE} \
+  --opt="${OPT}" \
+  --num-cpus=$NPROC \
+  --cpu-type=DerivO3CPU \
+  --ruby \
+  --l0i_size=${L1I} \
+  --l0d_size=${L1D} \
+  --l1_size=${L2} \
+  --l2_size=${L3} \
+  --sys-clock=$CLK \
+  --mem-size=8GB
 }
