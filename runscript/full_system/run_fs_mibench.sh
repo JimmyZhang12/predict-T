@@ -20,7 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-script_name="run_fs_checkpoint.sh"
+script_name="run_fs_mibench.sh"
 
 print_info () {
   green="\e[32m"
@@ -81,8 +81,8 @@ if [[ -z $(docker images -q $VSIM_IMAGE) ]]; then
   exit 1
 fi
 
-RCS_SCRIPT="${PREDICT_T_ROOT}/runscript/full_system/hack_back_ckpt.rcS"
-#RCS_SCRIPT="${PREDICT_T_ROOT}/runscript/full_system/run_mibench.rcs"
+#RCS_SCRIPT="${PREDICT_T_ROOT}/runscript/full_system/cp.rcs"
+RCS_SCRIPT="${PREDICT_T_ROOT}/runscript/full_system/run_mibench.rcs"
 CONFIG_FILE="${GEM5_ROOT}/configs/example/fs.py"
 #IMAGE="${PREDICT_T_ROOT}/runscript/full_system/disks/base.img"
 #IMAGE="${PREDICT_T_ROOT}/runscript/full_system/disks/linux-x86.img"
@@ -96,26 +96,38 @@ KERNEL="${PREDICT_T_ROOT}/runscript/full_system/binaries/x86_64-vmlinux-2.6.28.4
 CHKPT_DIR="${OUTPUT_ROOT}/gem5_cpt"
 G5_OUT="${OUTPUT_ROOT}/gem5_out"
 
-TN="fs_cpt_AtomicSimpleCPU_4"
-
-if [ ! -d $CHKPT_DIR/$TN ]; then
-  print_info "creating $CHKPT_DIR/$TN"
-  mkdir -p $CHKPT_DIR/$TN
-fi
+TN="fs_mibench_derivO3_4"
+CPT="fs_cpt_AtomicSimpleCPU_4"
 
 $GEM5_ROOT/build/X86/gem5.opt \
   -d ${G5_OUT}/$TN \
   $CONFIG_FILE \
   --script=$RCS_SCRIPT \
   --disk-image=$IMAGE \
-  --cpu-type=AtomicSimpleCPU \
   --kernel=$KERNEL \
   --num-cpus=4 \
   --caches \
   --l2cache \
-  --checkpoint-dir=$CHKPT_DIR/$TN \
+  --checkpoint-dir=$CHKPT_DIR/$CPT -r 1 \
+  --cpu-type=DerivO3CPU \
   --num-l2caches=4
 
+#gdb --args $GEM5_ROOT/build/X86/gem5.debug \
+#  -d ${G5_OUT}/$TN \
+#  $CONFIG_FILE \
+#  --script=$RCS_SCRIPT \
+#  --disk-image=$IMAGE \
+#  --kernel=$KERNEL \
+#  --num-cpus=4 \
+#  --caches \
+#  --l2cache \
+#  --checkpoint-dir=$CHKPT_DIR/$CPT -r 1 \
+#  --cpu-type=DerivO3CPU \
+#  --num-l2caches=4
+
+#  --cpu-type=DerivO3CPU \
+#  --cpu-type=AtomicSimpleCPU \
+#  --restore-with-cpu=DerivO3CPU \
 #  --script=$RCS_SCRIPT \
 #  --checkpoint-dir=$CHKPT_DIR -r 1
 #  --checkpoint-at-end

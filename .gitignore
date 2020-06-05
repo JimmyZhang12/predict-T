@@ -147,9 +147,13 @@ dmypy.json
 # Project Dir:
 tests/
 testbin/
+testbin_old/
+parsec/
 mcpat_out/
 gem5_out/
 text_out/
 *.tar.gz
 *.csv
 .fuse*
+
+*.xz

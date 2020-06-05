@@ -110,9 +110,54 @@ drwx------ 2 root root 16384 Jun  3 12:01 lost+found
 ### Adding the Base Files to the Image:
 
 Next the root directory files must be added to the image. To install the root
-directory files, first obtain a copy from [ubuntu-base](http://cdimage.ubuntu.com/ubuntu-base/releases/). In this example I am using kernel 5.4.44 and release 20.04. With the disk image mounted to ./mnt:
+directory files, first obtain a copy from
+[ubuntu-base](http://cdimage.ubuntu.com/ubuntu-base/releases/). In this example
+I am using kernel 5.4.44 and release 20.04. With the disk image mounted to
+./mnt:
 ```
 $ sudo tar -xvf ubuntu-base-20.04-base-amd64.tar.gz -C ./mnt
 ```
 
+### Chroot & Update Software
 
+Next, the disk image needs to be prepared, updated, and software installed so
+that the benchmarks can be built and run. The image does not have a proper
+`resolve.conf` file so it will not be able to get updates, however the hosts
+`resolve.conf` file can be imported into the disk image.
+```
+$ sudo cp /etc/resolv.conf mnt/etc/resolv.conf
+```
+
+Before chroot, the `/sys /dev /proc` directories must be bound to the mount.
+```
+$ sudo mount -o bind /sys mnt/sys
+$ sudo mount -o bind /dev mnt/dev
+$ sudo mount -o bind /proc mnt/proc
+```
+
+Finally chroot into the mount
+```
+sudo chroot mnt /bin/bash
+```
+
+At this point we have changed the effective root of our system and we will now
+be able to update, upgrade, and install software packages.
+```
+\# apt-get update && apt-get upgrade && apt-get install make gcc g++
+```
+
+### Exiting and Unmounting
+
+To exit the chroot, simply type exit and you will return back. To safely
+unmount everything, first unmout the mnt/sys mnt/dev mnt/proc that were bound
+from the host.
+```
+$ sudo umount mnt/sys
+$ sudo umount mnt/proc
+$ sudo umount mnt/dev
+```
+
+Now the image can be unmounted from out mount point:
+```
+$ sudo umount mnt
+```
