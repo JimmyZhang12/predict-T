@@ -68,7 +68,7 @@ print_info "export SIM_ROOT $SIM_ROOT"
 # |____/ \___/ \____|_|\_|_____|_| \_\
 #
 #--------------------------------------------------------------------
-export VSIM_IMAGE="centos7:cadence"
+export VSIM_IMAGE="centos7:$(whoami)_cadence"
 print_info "export VSIM_IMAGE $VSIM_IMAGE"
 if [[ -z $(docker images -q $VSIM_IMAGE) ]]; then
   ddir="$PREDICT_T_ROOT/circuit_model/docker"

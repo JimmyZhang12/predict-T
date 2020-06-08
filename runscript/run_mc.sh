@@ -55,7 +55,7 @@ if [ -z "$OUTPUT_ROOT" ]; then
   exit
 fi
 if [ -z "$MCPAT_ROOT" ]; then
-  print_error "OUTPUT_ROOT not set; source setup.sh"
+  print_error "MCPAT_ROOT not set; source setup.sh"
   exit
 fi
 if [ -z "$SIM_ROOT" ]; then
@@ -106,8 +106,9 @@ L3=("16MB")
 name=("vector_add")
 exe=("vector_add")
 opt=("65536 %s")
-#NC=("1" "2" "4" "6" "8" "12" "16" "20" "24")
-NC=("12" "16" "20" "24")
+NC=("1" "2" "4" "6" "8" "12" "16" "20" "24" "32")
+#NC=("1" "2" "4" "6" "8")
+#NC=("12" "16" "20" "24")
 CLK=("3.5GHz")
 #CLK=("1.5GHz" "2.0GHz" "2.5GHz" "3.0GHz" "3.5GHz")
 
@@ -120,7 +121,8 @@ for j in ${!name[@]}; do
       for t in ${!NC[@]}; do
         for c in ${!CLK[@]}; do
           # Test Name
-          TN="test_${name[$j]}_${NC[$t]}c_${CLK[$c]}_ruby_nmp_nncv"
+          #TN="test_${name[$j]}_${NC[$t]}c_${CLK[$c]}_ruby_nmp_nncv"
+          TN="test_${name[$j]}_${NC[$t]}c_${CLK[$c]}_classic_nmp_nncv"
 
           # Format the options with the num cores
           if [ $(echo "${opt[$j]}" | grep -o "%s" | wc -w) -eq 1 ]; then
@@ -130,7 +132,8 @@ for j in ${!name[@]}; do
           fi
 
           # Run on System
-          se_mc_ruby_nmc_nncv $TN ${exe[$j]} "${OPTIONS}" ${NC[$t]} ${CLK[$c]}
+          #se_mc_ruby_nmc_nncv $TN ${EXE[$j]} "${OPTIONS}" ${NC[$t]} ${CLK[$c]}
+          se_mc_classic_nmc_nncv $TN ${exe[$j]} "${OPTIONS}" ${NC[$t]} ${CLK[$c]}
           while [ `jobs | wc -l` -ge 32 ]; do
             sleep 1
           done

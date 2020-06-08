@@ -57,3 +57,8 @@ def generate_xml(stat_file, config_file, out_file, **kwargs):
 
   return 0
 
+if __name__ == "__main__":
+  # launch test:
+  if(generate_xml(sys.argv[1], sys.argv[2], sys.argv[3], voltage=1.2, temperature=300, lithography=22) != 1):
+    sys.exit(1)
+  sys.exit(0)

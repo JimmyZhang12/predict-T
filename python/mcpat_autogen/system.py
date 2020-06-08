@@ -32,6 +32,7 @@
 
 from xml.etree import ElementTree
 from xml.dom import minidom
+import math
 
 from core import Core
 from cache import Cache
@@ -152,7 +153,7 @@ class System:
     self.parameters["homogeneous_NoCs"][0] = str(1)
     self.parameters["core_tech_node"][0] = \
       config_dict["system.tech_node"] \
-      if "system.tech_node" in config_dict.keys() else "90"
+      if "system.tech_node" in config_dict.keys() else "22"
     self.parameters["target_core_clockrate"][0] = \
       str((1.0e-6/float(config_dict["system.clk_domain.clock"]))*1.0e12)
     self.parameters["temperature"][0] = str(sim_dict["temperature"])
@@ -167,17 +168,23 @@ class System:
     self.parameters["virtual_memory_page_size"][0] = str(4096)
 
     # Intialize the Parameters based on the stats
+    num_zeros = int(math.floor(math.log10(num_cpu))+1)
+
     self.stats["total_cycles"][0] = \
       str(int(stat_dict["system.cpu.numCycles"][1])) if(num_cpu==1) \
-      else str(int(stat_dict["system.cpu0.numCycles"][1]))
+      else str(int(stat_dict[ \
+        "system.cpu{a}.numCycles".format(a=str(0).zfill(num_zeros))][1]))
     self.stats["idle_cycles"][0] = \
       str(int(stat_dict["system.cpu.idleCycles"][1])) if(num_cpu==1) \
-      else str(int(stat_dict["system.cpu0.idleCycles"][1]))
+      else str(int(stat_dict[ \
+        "system.cpu{a}.idleCycles".format(a=str(0).zfill(num_zeros))][1]))
     self.stats["busy_cycles"][0] = \
       str(int(stat_dict["system.cpu.numCycles"][1]) \
       -int(stat_dict["system.cpu.idleCycles"][1])) \
-      if(num_cpu==1) else str(int(stat_dict["system.cpu0.numCycles"][1]) \
-      -int(stat_dict["system.cpu0.idleCycles"][1]))
+      if(num_cpu==1) else str(int(stat_dict[ \
+        "system.cpu{a}.numCycles".format(a=str(0).zfill(num_zeros))][1]) \
+      -int(stat_dict[ \
+        "system.cpu{a}.idleCycles".format(a=str(0).zfill(num_zeros))][1]))
 
     assert(self.stats["total_cycles"] > 0)
 
@@ -188,10 +195,10 @@ class System:
       ( \
         self.id+".core"+str(i), \
         "core"+str(i), \
-        prune_dict("system.cpu." if num_cpu==1 else "system.cpu"+str(i) \
-          +".", stat_dict), \
-        prune_dict("system.cpu." if num_cpu==1 else "system.cpu"+str(i) \
-          +".", config_dict), \
+        prune_dict("system.cpu." if num_cpu==1 else "system.cpu"+str(i).zfill(num_zeros) \
+          +"."+","+"system.cpu"+str(i)+".", stat_dict), \
+        prune_dict("system.cpu." if num_cpu==1 else "system.cpu"+str(i).zfill(num_zeros) \
+          +"."+","+"system.cpu"+str(i)+".", config_dict), \
         sim_dict \
       ) \
       for i in range(int(self.parameters["number_of_cores"][0])) \
@@ -202,10 +209,10 @@ class System:
       ( \
         self.id+".L2"+str(i), \
         "L2"+str(i), \
-        prune_dict("system.l2." if num_cpu==1 else "system.l2"+str(i) \
-          +".", stat_dict), \
-        prune_dict("system.l2." if num_cpu==1 else "system.l2"+str(i) \
-          +".", config_dict), \
+        prune_dict("system.l2." if num_cpu==1 else "system.l2"+str(i).zfill(num_zeros) \
+          +"."+","+"system.l2"+str(i)+".", stat_dict), \
+        prune_dict("system.l2." if num_cpu==1 else "system.l2"+str(i).zfill(num_zeros) \
+          +"."+","+"system.l2"+str(i)+".", config_dict), \
         sim_dict \
       ) \
       for i in range(int(self.parameters["number_of_cores"][0])) \

@@ -221,7 +221,7 @@ $GEM5_ROOT/build/X86/gem5.opt \
 --outdir=${OUTPUT_ROOT}/gem5_out/$TN \
 ../gem5/configs/example/se.py \
 --cmd=testbin/${EXE} \
---opt=\"${EXE}\" \
+--opt=\"${OPT}\" \
 --num-cpus=$NPROC \
 --cpu-type=DerivO3CPU \
 --l1i_size=${L1I} \
@@ -229,7 +229,7 @@ $GEM5_ROOT/build/X86/gem5.opt \
 --l1d_size=${L1D} \
 --l1d-hwp-type=TaggedPrefetcher \
 --l2cache \
---num-l2caches=$NC \
+--num-l2caches=$NPROC \
 --l2_size=${L2} \
 --l2-hwp-type=TaggedPrefetcher \
 --l3cache \
@@ -250,7 +250,7 @@ $GEM5_ROOT/build/X86/gem5.opt \
     --l1d_size=${L1D} \
     --l1d-hwp-type=TaggedPrefetcher \
     --l2cache \
-    --num-l2caches=$NC \
+    --num-l2caches=$NPROC \
     --l2_size=${L2} \
     --l2-hwp-type=TaggedPrefetcher \
     --l3cache \

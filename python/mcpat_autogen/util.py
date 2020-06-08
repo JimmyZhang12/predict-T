@@ -97,10 +97,11 @@ def prune_dict(path, d):
   """ Returns a new dictionary of all the items on the specified path """
   new = {}
   for key, val in d.items():
-    if path in key:
-      new[key.replace(path, "")]=val
-    if "system.clk_domain.clock" in key:
-      new[key.replace("system.clk_domain.","")]=val
+    for p in path.split(","):
+      if p in key:
+        new[key.replace(p, "")]=val
+      if "system.clk_domain.clock" in key:
+        new[key.replace("system.clk_domain.","")]=val
   return new
 
 def get_noc_dimensions(nc):
@@ -124,4 +125,11 @@ def get_noc_dimensions(nc):
       min_x = elem[0]
       min_y = elem[1]
   return min_x, min_y
+
+def dict_get(d, key):
+  """ Returns 0 if the key is not in the dict """
+  """ This reduces the required size of the stat file """
+  if key in d:
+    return d[key]
+  return 0
 
