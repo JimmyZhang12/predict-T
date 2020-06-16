@@ -56,6 +56,7 @@ gcc interprocess.c -O0 -g -DWITH_VPI -std=c11 -D_XOPEN_SOURCE=500 -fPIC -fpermis
 ncverilog \
   +define+SHM_NAME=\\\"${1}\\\" \
   +define+${2} \
+  +define+RF_TIME=${3} \
   circuit_model.vams \
   +access+r -loadvpi ./interprocess.so:register_create_shm \
   -loadvpi ./interprocess.so:register_destroy_shm \
@@ -71,4 +72,4 @@ ncverilog \
   -loadvpi ./interprocess.so:register_send_current \
   -loadvpi ./interprocess.so:register_ack_simulation \
   -top circuit_model \
-  -analogcontrol scf.scs > "$OUTPUT_ROOT/circuit_model/log/${1}_out.log"
+  -analogcontrol scf.scs #> "$OUTPUT_ROOT/circuit_model/log/${1}_out.log"

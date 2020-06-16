@@ -48,7 +48,9 @@
 //`define INTEL_SERVER_PDN
 //`define ARM
 //`define HARVARD
-`define NUM_LOADS 1
+`ifndef RF_TIME
+`define RF_TIME 250p
+`endif
 
 
 /*
@@ -59,11 +61,10 @@
  */
 module circuit_model();
   // Top Level Signals
-  electrical vin, iin, gnd, vout, iout, vvrm, vpcb, vpackage, vdie, vset, dt;
+  electrical vin, iin, gnd, vout, iout, vvrm, vpcb, vpackage, vdie, vset;
 
   // Gem5 Interface Signals
   real v_set;
-  real _dt;
   electrical proc_load, prediction;
   real _proc_load, _prediction;
   reg prediction_enable;
@@ -88,7 +89,7 @@ module circuit_model();
 `endif
 
   // Processor Load
-  processor proc(.p(vout), .n(gnd), .i(proc_load), .dt(dt));
+  processor#(.DT(`RF_TIME)) proc(.p(vout), .n(gnd), .i(proc_load));
 
   analog begin
     V(gnd) <+ 0.0;
@@ -99,7 +100,6 @@ module circuit_model();
     _vdie = V(vdie, gnd);
     _iout = V(iout, gnd);
     _iin = V(iin, gnd);
-    V(dt, gnd) <+ _dt;
     V(proc_load, gnd) <+ _proc_load;
     V(prediction, gnd) <+ _prediction;
   end
@@ -141,8 +141,6 @@ module circuit_model();
       if(last_time >= 10) begin
         prediction_enable = 0;
       end
-      // Use _dt as the rise time for a specific load
-      _dt = last_time/1.0e-12;
       last_time = last_time + 1;
       // Write outpput values
       $display("%d,%f,%f,%f,%f,%f,%f,%f,%d,%f", $time, _vvrm, _vpcb, _vpackage, _vdie, _iin, _iout, _proc_load, prediction_enable, _prediction);

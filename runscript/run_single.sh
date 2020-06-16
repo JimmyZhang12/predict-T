@@ -93,7 +93,7 @@ print_info "INPUT $OUTPUT"
 #--------------------------------------------------------------------
 # Configure Simulation Parameters
 #--------------------------------------------------------------------
-DURATION=("1000") # Data Points to Simulate
+DURATION=("100") # Data Points to Simulate
 INTERVAL=("10000") # Sim Cycles
 ROI_INTERVAL=("100")
 # When to start ROI, in Sim Ticks, -or- ROI by setting "-1"
@@ -112,10 +112,20 @@ L3=("16MB")
 #CLK_=("3500000000")
 CLK=( "1.0GHz"     "2.0GHz"     "3.0GHz"     "4.0GHz")
 CLK_=("1000000000" "2000000000" "3000000000" "4000000000")
+CID=("1" "2" "3" "4")
 
 name=("dijkstra" "toast" "fft" "rijndael_encrypt")
 exe=("dijkstra" "toast" "fft" "rijndael")
 opt=("${INPUT}/dijkstra.dat" "-fps -c ${INPUT}/toast.au" "4 4096" "${INPUT}/rijndael.asc ${OUTPUT}/rijndael.enc e 1234567890abcdeffedcba09876543211234567890abcdeffedcba0987654321")
+#name=("fft")
+#exe=("fft")
+#opt=("4 4096")
+#name=("rijndael_encrypt")
+#exe=("rijndael")
+#opt=("${INPUT}/rijndael.asc ${OUTPUT}/rijndael.enc e 1234567890abcdeffedcba09876543211234567890abcdeffedcba0987654321")
+#name=("toast")
+#exe=("toast")
+#opt=("-fps -c ${INPUT}/toast.au")
 
 #--------------------------------------------------------------------
 # Run
@@ -126,7 +136,8 @@ for j in ${!name[@]}; do
       for p in ${!PDN[@]}; do
         for c in ${!CLK[@]}; do 
           for cs in ${!CPU_CYCLES[@]}; do
-            TN="${name[$j]}_${DURATION[$i]}_${CPU_CYCLES[${cs}]}_${CLK[$c]}_${PDN[$p]}_triangle_transition"
+            sleep 1
+            TN="${name[$j]}_${DURATION[$i]}_${CPU_CYCLES[${cs}]}_${CID[$c]}_${PDN[$p]}_tt"
             se_sc_classic_mc_ncv $TN ${DURATION[$i]} ${INTERVAL[$i]} ${PROFILE_START[$i]} ${exe[$j]} "${opt[$j]}" ${CLK[$c]} ${PDN[$p]} ${CLK_[$c]} $VOLTAGE ${CPU_CYCLES[${cs}]}
             while [ `jobs | wc -l` -ge 32 ]; do
               sleep 1
