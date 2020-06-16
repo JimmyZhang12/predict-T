@@ -157,3 +157,6 @@ text_out/
 .fuse*
 
 *.xz
+
+# Executables
+mcpat

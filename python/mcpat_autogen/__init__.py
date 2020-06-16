@@ -25,6 +25,8 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 # Authors: Andrew Smith
+#
+# TODO: Expand to work with MESI_Two_Level
 
 from xml.etree import ElementTree
 from xml.dom import minidom
@@ -45,8 +47,12 @@ def generate_xml(stat_file, config_file, out_file, **kwargs):
   config_dict = build_gem5_config_dict(config_file)
   sim_dict = build_gem5_sim_dict(**kwargs)
 
+  ruby = False
+  if "system.ruby.clk_domain.clock" in config_dict:
+    ruby = True
+
   # Build the system
-  s = System("system", "system", stat_dict, config_dict, sim_dict)
+  s = System("system", "system", stat_dict, config_dict, sim_dict, ruby)
 
   root = ElementTree.Element('component', id='root', name='root')
   root.append(s.xml())

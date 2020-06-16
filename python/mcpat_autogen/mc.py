@@ -50,7 +50,7 @@ class MemoryController:
   Further track down can be easily added in later
   versions."""
   def __init__(self, component_id, component_name, \
-                stat_dict, config_dict, sim_dict):
+                stat_dict, config_dict, sim_dict, ruby):
     self.name = "mc"
     self.id = "mc"
 

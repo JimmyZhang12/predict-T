@@ -60,6 +60,7 @@ void init_shm(mapped* p) {
   p->pv.data.curr_load = 0;
   p->pv.data.prediction = 0;
   p->pv.data.enable = 0;
+  p->pv.data.time_to_next = 1000;
   p->pv.data.sim_over = 0;
   
   sem_init(&p->vp.sem, 1, 1);
@@ -274,6 +275,28 @@ uint32_t get_enable() {
 #ifdef WITH_VPI
   systfref = vpi_handle(vpiSysTfCall, NULL); /* get system function that invoked C routine */
   value.value.integer = (int)shm_ptr->pv.data.enable;
+  value.format = vpiIntVal;/* return the result */
+  vpi_put_value(systfref, &value, NULL, vpiNoDelay);
+#else
+  ret = shm_ptr->pv.data.enable;
+#endif
+  sem_post(&shm_ptr->pv.sem);
+  return ret;
+}
+
+// get_time_to_next()
+//   get the enable signal
+uint32_t get_time_to_next() {
+#ifdef WITH_VPI
+  vpiHandle systfref, argsiter, argh;
+  struct t_vpi_value value;
+#endif
+  uint32_t ret = 0;
+
+  sem_wait(&shm_ptr->pv.sem);
+#ifdef WITH_VPI
+  systfref = vpi_handle(vpiSysTfCall, NULL); /* get system function that invoked C routine */
+  value.value.integer = (int)shm_ptr->pv.data.time_to_next;
   value.format = vpiIntVal;/* return the result */
   vpi_put_value(systfref, &value, NULL, vpiNoDelay);
 #else
@@ -516,6 +539,19 @@ void register_get_enable() {
     data.sysfunctype = vpiIntFunc;
     data.tfname ="$get_enable";
     data.calltf=get_enable;
+    data.compiletf=0;
+    data.sizetf=get_size;
+    data.user_data=0;
+    vpi_register_systf(&data);
+}
+
+// register_get_time_to_next
+void register_get_time_to_next() {
+    s_vpi_systf_data data;
+    data.type = vpiSysFunc;
+    data.sysfunctype = vpiIntFunc;
+    data.tfname ="$get_time_to_next";
+    data.calltf=get_time_to_next;
     data.compiletf=0;
     data.sizetf=get_size;
     data.user_data=0;

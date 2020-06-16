@@ -79,6 +79,8 @@ else
   rm $OUTPUT/*
 fi
 
+GOLDEN="./test_expected"
+
 TEST="./tmp"
 if [ ! -d $TEST ]; then
   print_info "Creating $TEST"
@@ -107,24 +109,30 @@ for t in $(ls $INPUT); do
   python $TEST/__init__.py $INPUT/$t/stats.txt $INPUT/$t/config.ini $OUTPUT/$t.xml > $OUTPUT/$t.out 2> $OUTPUT/$t.err
   if [ -s $OUTPUT/$t.err ] || [ ! -s $OUTPUT/$t.xml ];
   then
-    print_error "Test $t autogen FAIL, check $OUTPUT/$t.err"
+    print_error "$t Autogen; check $OUTPUT/$t.err"
     FAIL_COUNT=$((FAIL_COUNT + 1))
-  else
-		$MCPAT_ROOT/mcpat -infile $OUTPUT/$t.xml -print_level 5 -opt_for_clk 1 > $OUTPUT/${t}_mcpat.out 2> $OUTPUT/${t}_mcpat.err
-		if [ -s $OUTPUT/${t}_mcpat.err ];
-		then
-      print_error "Test $t McPAT FAIL, check $OUTPUT/${t}_mcpat.err"
-      FAIL_COUNT=$((FAIL_COUNT + 1))
-    else
-      if [ $(grep -rnI "nan\|inf" $OUTPUT/${t}_mcpat.out | wc -l) -eq 0 ];
-      then
-        print_pass "Test $t McPAT PASS"
-        PASS_COUNT=$((PASS_COUNT + 1))
-      else
-        print_error "Test $t McPAT FAIL. nan or inf found"
-        FAIL_COUNT=$((FAIL_COUNT + 1))
-      fi
-    fi
+  #else
+		#$MCPAT_ROOT/mcpat -i $OUTPUT/$t.xml > $OUTPUT/${t}_mcpat.out 2> $OUTPUT/${t}_mcpat.err
+		#if [ -s $OUTPUT/${t}_mcpat.err ];
+		#then
+    #  print_error "$t McPAT; check $OUTPUT/${t}_mcpat.err"
+    #  FAIL_COUNT=$((FAIL_COUNT + 1))
+    #else
+    #  if [ $(grep -rnI "nan\|inf" $OUTPUT/${t}_mcpat.out | wc -l) -eq 0 ];
+    #  then
+    #    if [ $(diff $GOLDEN/$t.out $OUTPUT/${t}_mcpat.out | wc -l) -eq 0 ];
+    #    then
+    #      print_pass "$t"
+    #      PASS_COUNT=$((PASS_COUNT + 1))
+    #    else
+    #      print_error "$t MCPAT; differed from expected output"
+    #      FAIL_COUNT=$((FAIL_COUNT + 1))
+    #    fi
+    #  else
+    #    print_error "$t MCPAT; found nan/inf in output"
+    #    FAIL_COUNT=$((FAIL_COUNT + 1))
+    #  fi
+    #fi
   fi
 done
 print_test_results $PASS_COUNT $FAIL_COUNT $TOTAL_COUNT

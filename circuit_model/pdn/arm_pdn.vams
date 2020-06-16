@@ -71,8 +71,8 @@ module arm_power_distribution_network(vin, vout, vvrm, vpcb, vpack, vdie, iin, i
   //my_res#(.R(1n)) ri(vin, n1);
   
   pdn_stage#(.C_STAGE(400u), .N_CAP(1), .L_STAGE(0u),   .R_STAGE(0m))   smps(n1, n2, gnd);
-  pdn_stage#(.C_STAGE(10u),  .N_CAP(8), .L_STAGE(100p), .R_STAGE(5m))   pcb(n2, n3, gnd);
-  pdn_stage#(.C_STAGE(220n), .N_CAP(5), .L_STAGE(40p),  .R_STAGE(0.5m)) package(n3, n4, gnd);
+  pdn_stage#(.C_STAGE(10u),  .N_CAP(8), .L_STAGE(0p),   .R_STAGE(0m))   pcb(n2, n3, gnd);
+  pdn_stage#(.C_STAGE(220n), .N_CAP(5), .L_STAGE(40p),  .R_STAGE(2m)) package(n3, n4, gnd);
   pdn_stage#(.C_STAGE(25n),  .N_CAP(4), .L_STAGE(1p),   .R_STAGE(150n)) die(n4, n5, gnd);
 
   // Essential for getting a valid voltage read for some reason...

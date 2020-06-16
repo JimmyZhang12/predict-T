@@ -84,38 +84,35 @@ fi
 #--------------------------------------------------------------------
 TEST="$PREDICT_T_ROOT/testbin"
 INPUT="$TEST/input"
-OUTPUT="$TEST/output"
 print_info "TEST $TEST"
 print_info "INPUT $INPUT"
-print_info "INPUT $OUTPUT"
 
 
 #--------------------------------------------------------------------
 # Configure Simulation Parameters
 #--------------------------------------------------------------------
-DURATION=("1000") # Data Points to Simulate
+DURATION=("40") # Data Points to Simulate
 INTERVAL=("10000") # Sim Cycles
 ROI_INTERVAL=("100")
 # When to start ROI, in Sim Ticks, -or- ROI by setting "-1"
 PROFILE_START=("-1") 
 # Power Distribution Network Type:
-PDN=("HARVARD")
+#PDN=("AKJDLKF" "HARVARD" "ARM")
+PDN=("ARM")
 
 VOLTAGE="1.0"
-CPU_CYCLES=("1" "10")
+CPU_CYCLES=("1")
 
 L1D=("64kB")
 L1I=("32kB")
 L2=("256kB")
 L3=("16MB")
-#CLK=( "3.5GHz")
-#CLK_=("3500000000")
-CLK=( "1.0GHz"     "2.0GHz"     "3.0GHz"     "4.0GHz")
-CLK_=("1000000000" "2000000000" "3000000000" "4000000000")
+CLK=("2.0GHz")
+CLK_=("2000000000")
 
-name=("dijkstra" "toast" "fft" "rijndael_encrypt")
-exe=("dijkstra" "toast" "fft" "rijndael")
-opt=("${INPUT}/dijkstra.dat" "-fps -c ${INPUT}/toast.au" "4 4096" "${INPUT}/rijndael.asc ${OUTPUT}/rijndael.enc e 1234567890abcdeffedcba09876543211234567890abcdeffedcba0987654321")
+name=("dijkstra")
+exe=("dijkstra")
+opt=("${INPUT}/dijkstra.dat")
 
 #--------------------------------------------------------------------
 # Run
@@ -126,8 +123,8 @@ for j in ${!name[@]}; do
       for p in ${!PDN[@]}; do
         for c in ${!CLK[@]}; do 
           for cs in ${!CPU_CYCLES[@]}; do
-            TN="${name[$j]}_${DURATION[$i]}_${CPU_CYCLES[${cs}]}_${CLK[$c]}_${PDN[$p]}_triangle_transition"
-            se_sc_classic_mc_ncv $TN ${DURATION[$i]} ${INTERVAL[$i]} ${PROFILE_START[$i]} ${exe[$j]} "${opt[$j]}" ${CLK[$c]} ${PDN[$p]} ${CLK_[$c]} $VOLTAGE ${CPU_CYCLES[${cs}]}
+            TN="${name[$j]}_${DURATION[$i]}_${CPU_CYCLES[${cs}]}_${CLK[$c]}_${PDN[$p]}"
+            se_sc_classic_mc_ncv_debug $TN ${DURATION[$i]} ${INTERVAL[$i]} ${PROFILE_START[$i]} ${exe[$j]} "${opt[$j]}" ${CLK[$c]} ${PDN[$p]} ${CLK_[$c]} $VOLTAGE ${CPU_CYCLES[${cs}]}
             while [ `jobs | wc -l` -ge 32 ]; do
               sleep 1
             done
@@ -136,8 +133,4 @@ for j in ${!name[@]}; do
       done
     done
   done
-done
-
-while [ `jobs | wc -l` -ne 1 ]; do
-  sleep 1
 done

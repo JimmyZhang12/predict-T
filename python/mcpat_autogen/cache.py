@@ -35,7 +35,7 @@ from xml.dom import minidom
 
 class Cache:
   def __init__(self, component_id, component_name, \
-                stat_dict, config_dict, sim_dict):
+                stat_dict, config_dict, sim_dict, ruby=False):
     self.name = "cache"
     self.id = "cache"
 
@@ -79,34 +79,64 @@ class Cache:
     self.id = component_id
 
     # Init the Cache Parameters and Stats:
-    self.parameters["config"][0]= \
-      ",".join([config_dict["size"],config_dict["tags.block_size"], \
-      config_dict["assoc"],"1","1",config_dict["response_latency"], \
-      config_dict["tags.block_size"],"0"])
-    self.parameters["buffer_sizes"][0]= \
-      ",".join([config_dict["mshrs"],config_dict["mshrs"], \
-      config_dict["mshrs"],config_dict["mshrs"]])
-    self.parameters["clockrate"][0]= \
-      str((1.0e-6/float(config_dict["clock"]))*1.0e12)
-    self.parameters["vdd"][0]= \
-      str(float(sim_dict["voltage"]))
-    self.stats["read_accesses"][0]= \
-      str(int(stat_dict["ReadExReq_accesses::total"][1]) \
-      +int(stat_dict["ReadCleanReq_accesses::total"][1]) \
-      +int(stat_dict["ReadSharedReq_accesses::total"][1]))
-    self.stats["read_misses"][0]= \
-      str(int(stat_dict["ReadCleanReq_misses::total"][1]) \
-      +int(stat_dict["ReadExReq_misses::total"][1]))
-    self.stats["write_accesses"][0]= \
-      str(int(stat_dict["WritebackDirty_accesses::total"][1]) \
-      +int(stat_dict["WritebackClean_accesses::total"][1]))
-    self.stats["write_misses"][0]= \
-      str(int(stat_dict["WritebackClean_accesses::total"][1]) \
-      +int(stat_dict["WritebackClean_accesses::total"][1]) \
-      -int(stat_dict["WritebackDirty_hits::total"][1]) \
-      -int(stat_dict["WritebackDirty_hits::total"][1]))
-    self.stats["conflicts"][0]= \
-      str(int(stat_dict["replacements"][1]))
+    if ruby:
+      self.parameters["config"][0]= \
+        ",".join([config_dict["size"],config_dict["tags.block_size"], \
+        config_dict["assoc"],"1","1",config_dict["response_latency"], \
+        config_dict["tags.block_size"],"0"])
+      self.parameters["buffer_sizes"][0]= \
+        ",".join([config_dict["mshrs"],config_dict["mshrs"], \
+        config_dict["mshrs"],config_dict["mshrs"]])
+      self.parameters["clockrate"][0]= \
+        str((1.0e-6/float(config_dict["clock"]))*1.0e12)
+      self.parameters["vdd"][0]= \
+        str(float(sim_dict["voltage"]))
+      self.stats["read_accesses"][0]= \
+        str(int(stat_dict["ReadExReq_accesses::total"][1]) \
+        +int(stat_dict["ReadCleanReq_accesses::total"][1]) \
+        +int(stat_dict["ReadSharedReq_accesses::total"][1]))
+      self.stats["read_misses"][0]= \
+        str(int(stat_dict["ReadCleanReq_misses::total"][1]) \
+        +int(stat_dict["ReadExReq_misses::total"][1]))
+      self.stats["write_accesses"][0]= \
+        str(int(stat_dict["WritebackDirty_accesses::total"][1]) \
+        +int(stat_dict["WritebackClean_accesses::total"][1]))
+      self.stats["write_misses"][0]= \
+        str(int(stat_dict["WritebackClean_accesses::total"][1]) \
+        +int(stat_dict["WritebackClean_accesses::total"][1]) \
+        -int(stat_dict["WritebackDirty_hits::total"][1]) \
+        -int(stat_dict["WritebackDirty_hits::total"][1]))
+      self.stats["conflicts"][0]= \
+        str(int(stat_dict["replacements"][1]))
+    else:
+      self.parameters["config"][0]= \
+        ",".join([config_dict["size"],config_dict["tags.block_size"], \
+        config_dict["assoc"],"1","1",config_dict["response_latency"], \
+        config_dict["tags.block_size"],"0"])
+      self.parameters["buffer_sizes"][0]= \
+        ",".join([config_dict["mshrs"],config_dict["mshrs"], \
+        config_dict["mshrs"],config_dict["mshrs"]])
+      self.parameters["clockrate"][0]= \
+        str((1.0e-6/float(config_dict["clock"]))*1.0e12)
+      self.parameters["vdd"][0]= \
+        str(float(sim_dict["voltage"]))
+      self.stats["read_accesses"][0]= \
+        str(int(stat_dict["ReadExReq_accesses::total"][1]) \
+        +int(stat_dict["ReadCleanReq_accesses::total"][1]) \
+        +int(stat_dict["ReadSharedReq_accesses::total"][1]))
+      self.stats["read_misses"][0]= \
+        str(int(stat_dict["ReadCleanReq_misses::total"][1]) \
+        +int(stat_dict["ReadExReq_misses::total"][1]))
+      self.stats["write_accesses"][0]= \
+        str(int(stat_dict["WritebackDirty_accesses::total"][1]) \
+        +int(stat_dict["WritebackClean_accesses::total"][1]))
+      self.stats["write_misses"][0]= \
+        str(int(stat_dict["WritebackClean_accesses::total"][1]) \
+        +int(stat_dict["WritebackClean_accesses::total"][1]) \
+        -int(stat_dict["WritebackDirty_hits::total"][1]) \
+        -int(stat_dict["WritebackDirty_hits::total"][1]))
+      self.stats["conflicts"][0]= \
+        str(int(stat_dict["replacements"][1]))
 
   def xml(self):
     """ Build an XML Tree from the parameters, stats, and subcomponents """

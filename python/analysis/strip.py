@@ -4,7 +4,11 @@ import sys
 a = []
 
 infile = sys.argv[1]
-outfile = sys.argv[1].split(".")[0]+".csv"
+
+fname = sys.argv[1].split(".")
+fname[-1]="csv"
+
+outfile = ".".join(fname)
 
 with open(infile, "r") as inf:
   a = inf.readlines()
