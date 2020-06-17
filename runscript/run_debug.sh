@@ -101,7 +101,7 @@ PROFILE_START=("-1")
 PDN=("ARM")
 
 VOLTAGE="1.0"
-CPU_CYCLES=("1")
+CPU_CYCLES=("10")
 
 L1D=("64kB")
 L1I=("32kB")

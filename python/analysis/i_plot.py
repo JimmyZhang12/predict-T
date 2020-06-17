@@ -14,6 +14,7 @@ parser.add_argument('--tests', type=str, default="", help="test names to read in
 parser.add_argument('--resolution', type=str, default="1", help="Resolution in cpu-cycles")
 parser.add_argument('--trace_len', type=str, default="1", help="Trace length in epochs")
 parser.add_argument('--pdn', type=str, default="HARVARD", help="PDN Type")
+parser.add_argument('--stat', type=str, default="vout", help="Plot")
 args = parser.parse_args()
 
 def get_files(path, name):
@@ -31,7 +32,7 @@ def get_csvs(files, csv_names):
 def get_names(files, name, trace_len, resolution, pdn):
   names = []
   for file in files:
-    names.append(file.split("/")[-1].replace(name+"_"+trace_len+"_"+resolution+"_", "").replace(pdn+"_tt_out.csv", ""))
+    names.append(file.split("/")[-1].replace(name+"_"+trace_len+"_"+resolution+"_", "").replace("_"+pdn+"_IdealSensor_out.csv", ""))
   return names
 
 pdn_model=args.pdn
@@ -43,7 +44,7 @@ csvs = []
 names = []
 for name in tests:
   files.append(get_files(args.input, name))
-  csvs.append(get_csvs(files[-1], "time,vin,va,vb,vout,iin,iout,proc_load,enable,prediction"))
+  csvs.append(get_csvs(files[-1], "time,vin,va,vb,vout,_vout_mean,vout_mean,iin,iout,proc_load,enable,prediction,ttn,rt"))
   names.append(get_names(files[-1], name, trace_len, resolution, pdn_model))
 title = "Time Domain Trace"
 print(files)
@@ -52,9 +53,7 @@ print(names)
 apps = []
 times = []
 
-stat_to_plt = "iout"
-
-stat_to_plt = "vout"
+stat_to_plt = args.stat
 
 for j in range(len(tests)):
   a = []
@@ -79,8 +78,11 @@ for j in range(len(tests)):
     axs[j].plot(t, i, linewidth=1, label=n)
   axs[j].legend()
   axs[j].set_title(tests[j])
-  axs[j].set_yticks(np.arange(0.8,1.2,0.05))
+  axs[j].set_yticks(np.arange(0.0,50,5))
+  #axs[j].set_yticks(np.arange(0.9,1.1,0.05))
   axs[j].set_xlabel("Time (ns)")
-  axs[j].set_ylabel("Vout (V)")
+  #axs[j].set_ylabel("10c Period (ps)")
+  #axs[j].set_ylabel("Vout (V)")
+  axs[j].set_ylabel("Iout (A)")
 fig.suptitle(title+" "+pdn_model+" PDN; Resolution "+resolution+"c")
 plt.show()

@@ -102,7 +102,7 @@ PROFILE_START=("-1")
 PDN=("HARVARD")
 
 VOLTAGE="1.0"
-CPU_CYCLES=("1" "10")
+CPU_CYCLES=("1")
 
 L1D=("64kB")
 L1I=("32kB")
@@ -137,7 +137,7 @@ for j in ${!name[@]}; do
         for c in ${!CLK[@]}; do 
           for cs in ${!CPU_CYCLES[@]}; do
             sleep 1
-            TN="${name[$j]}_${DURATION[$i]}_${CPU_CYCLES[${cs}]}_${CID[$c]}_${PDN[$p]}_tt"
+            TN="${name[$j]}_${DURATION[$i]}_${CPU_CYCLES[${cs}]}_${CID[$c]}_${PDN[$p]}_IdealSensor"
             se_sc_classic_mc_ncv $TN ${DURATION[$i]} ${INTERVAL[$i]} ${PROFILE_START[$i]} ${exe[$j]} "${opt[$j]}" ${CLK[$c]} ${PDN[$p]} ${CLK_[$c]} $VOLTAGE ${CPU_CYCLES[${cs}]}
             while [ `jobs | wc -l` -ge 32 ]; do
               sleep 1

@@ -61,5 +61,5 @@ docker run --rm --memory 16g --network=host \
   -e SIM_ROOT \
   -e OUTPUT_ROOT \
   $VSIM_IMAGE \
-  ./run_vsim.sh $1 $2
+  ./run_vsim.sh $1 $2 $3
   #./run_vsim.sh $1 $2 $3 $4
