@@ -27,15 +27,17 @@
 se_sc_classic_mc_ncv() {
   TN=$1
   DUR=$2
-  INT=$3
-  PS=$4
-  EXE=$5
-  OPT=$6
-  CLK=$7
-  P=$8
-  F=$9
-  V=${10}
-  CS=${11}
+  INSTRS=$3
+  INT=$4
+  PS=$5
+  EXE=$6
+  OPT=$7
+  CLK=$8
+  P=$9
+  F=${10}
+  V=${11}
+  CS=${12}
+  PRED=${13}
   L1I="32kB"
   L1D="64kB"
   L2="256kB"
@@ -50,6 +52,7 @@ $GEM5_ROOT/build/X86/gem5.opt \
 --mcpat_testname=$TN \
 --power_profile_start=${PS} \
 --power_profile_duration=${DUR} \
+--power_profile_instrs=${INSTRS} \
 --power_profile_interval=${INT} \
 --ncverilog_enable \
 --ncverilog_warmup=10 \
@@ -63,7 +66,8 @@ $GEM5_ROOT/build/X86/gem5.opt \
 --power_pred_cpu_cycles=${CS} \
 --power_pred_cpu_freq=${F} \
 --power_pred_voltage=${V} \
---power_pred_voltage_emergency=0.95 \
+--power_pred_voltage_emergency=0.96 \
+--power_pred_type=${PRED} \
 --num-cpus=1 \
 --cpu-type=DerivO3CPU \
 --l1i_size=${L1I} \
@@ -81,8 +85,8 @@ $GEM5_ROOT/build/X86/gem5.opt \
 --sys-clock=$CLK \
 --mem-size=8GB > ${OUTPUT_ROOT}/text_out/$TN.out &"
   #--debug-flags=StatEvent \
-  #gdb --args $GEM5_ROOT/build/X86/gem5.opt \
     #--ncverilog_feedback \
+  #gdb --args $GEM5_ROOT/build/X86/gem5.debug \
   time $GEM5_ROOT/build/X86/gem5.opt \
     --outdir=${OUTPUT_ROOT}/gem5_out/$TN \
     --mcpat_enable \
@@ -91,6 +95,7 @@ $GEM5_ROOT/build/X86/gem5.opt \
     --mcpat_testname=$TN \
     --power_profile_start=${PS} \
     --power_profile_duration=${DUR} \
+    --power_profile_instrs=${INSTRS} \
     --power_profile_interval=${INT} \
     --ncverilog_enable \
     --ncverilog_warmup=10 \
@@ -104,8 +109,8 @@ $GEM5_ROOT/build/X86/gem5.opt \
     --power_pred_cpu_cycles=${CS} \
     --power_pred_cpu_freq=${F} \
     --power_pred_voltage=${V} \
-    --power_pred_voltage_emergency=0.95 \
-    --power_pred_type=IdealSensor \
+    --power_pred_voltage_emergency=0.96 \
+    --power_pred_type=${PRED} \
     --num-cpus=1 \
     --cpu-type=DerivO3CPU \
     --l1i_size=${L1I} \
@@ -120,7 +125,7 @@ $GEM5_ROOT/build/X86/gem5.opt \
     --l3_size=${L3} \
     --l3-hwp-type=TaggedPrefetcher \
     --caches \
-    --sys-clock=3.5GHz \
+    --sys-clock=${CLK} \
     --mem-size=8GB > ${OUTPUT_ROOT}/text_out/$TN.out &
 }
 

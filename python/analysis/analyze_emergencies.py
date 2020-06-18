@@ -14,6 +14,8 @@ parser.add_argument('--tests', type=str, default="", help="test names to read in
 parser.add_argument('--pdn', type=str, default="HARVARD", help="PDN Type")
 parser.add_argument('--e_low', type=float, default=0.95)
 parser.add_argument('--e_high', type=float, default=1.05)
+parser.add_argument('--resolution', type=str, default="1", help="Resolution in cpu-cycles")
+parser.add_argument('--trace_len', type=str, default="1", help="Trace length in epochs")
 #parser.add_argument('--headers', type=str, default="", help="the headers for the CSV")
 #parser.add_argument('--data', type=str, default="", help="the data to to plot")
 args = parser.parse_args()
@@ -31,21 +33,23 @@ def get_csvs(files, csv_names):
     dfs.append(pd.read_csv(file, header=None, names=csv_names.split(",")))
   return dfs
 
-def get_names(files, name):
+def get_names(files, name, trace_len, resolution, pdn):
   names = []
   for file in files:
-    names.append(file.split("/")[-1].replace(name+"_1000_1_", "").replace("_ARM_feedback_out.csv", ""))
+    names.append(file.split("/")[-1].replace(name+"_"+trace_len+"_"+resolution+"_", "").replace("_"+pdn+"_IdealSensor_out.csv", ""))
   return names
 
 pdn_model=args.pdn
 tests = args.tests.split(",")
+resolution = args.resolution
+trace_len = args.trace_len
 files = []
 csvs = []
 names = []
 for name in tests:
   files.append(get_files(args.input, name))
-  csvs.append(get_csvs(files[-1], "time,vin,va,vb,vout,iin,iout,proc_load,enable,prediction"))
-  names.append(get_names(files[-1], name))
+  csvs.append(get_csvs(files[-1], "time,vin,va,vb,vout,_vout_mean,vout_mean,iin,iout,proc_load,enable,prediction,ttn,rt"))
+  names.append(get_names(files[-1], name, trace_len, resolution, pdn_model))
 print(files)
 print(names)
 
