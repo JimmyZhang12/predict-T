@@ -1,0 +1,27 @@
+#!/bin/bash
+/sbin/m5 resetstats
+
+echo "Launching Test Susan"
+/testbin/susan /testbin/input/susan.pgm /testbin/input/susan_s.pgm -s &
+
+# echo "Launching Test Blowfish E"
+# /testbin/blowfish e /testbin/input/blowfish.asc /testbin/input/blowfish_out.enc 1234567890abcdeffedcba0987654321 &
+
+echo "Launching Test Blowfish D"
+/testbin/blowfish d /testbin/input/blowfish.enc /testbin/input/blowfish_out.asc 1234567890abcdeffedcba0987654321 &
+
+echo "Launching Dijkstra"
+/testbin/dijkstra /testbin/input/dijkstra.dat &
+
+echo "Launching Test Toast"
+/testbin/toast -fps -c testbin/input/toast.au > /testbin/input/toast.out &
+
+# Wait for jobs to complete
+while [ $(jobs | wc -l) -ne 0 ]; do
+  jobs
+  echo "$(jobs | wc -l)"
+  sleep 1
+done
+
+# Exit
+/sbin/m5 exit

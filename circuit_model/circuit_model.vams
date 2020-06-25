@@ -43,12 +43,18 @@
 `include "resistor.vams"
 `include "predictive_supply.vams"
 
-`timescale 1ns/1ps
+`timescale 1ps/1ps
 
 //`define INTEL_SERVER_PDN
-`define ARM_PDN
-//`define HARVARD_PDN
-`define CYCLES 200
+//`define ARM
+//`define HARVARD
+`ifndef RF_TIME
+`define RF_TIME 250p
+`endif
+
+`ifndef PTIME
+`define PTIME 250
+`endif
 
 
 /*
@@ -68,6 +74,10 @@ module circuit_model();
   reg prediction_enable;
   reg term_sim;
   reg retval;
+  integer time_to_next;
+  integer last_time;
+  real vout_mean;
+  real _vout_mean;
 
   // Logging
   real _vvrm, _vpcb, _vpackage, _vdie, _iin, _iout;
@@ -75,15 +85,17 @@ module circuit_model();
   // Supply Model
   my_vcvs supply(.p(vin), .n(gnd), .vp(vset), .vn(gnd));
 
-`ifdef ARM_PDN
+`ifdef ARM
   arm_power_distribution_network pdn(.vin(vin), .vout(vout), .gnd(gnd), .vvrm(vvrm), .vpcb(vpcb), .vpack(vpackage), .vdie(vdie), .iin(iin), .iout(iout));
-`endif
-`ifdef HARVARD_PDN
+`elsif HARVARD
+  harvard_power_distribution_network pdn(.vin(vin), .vout(vout), .gnd(gnd), .vvrm(vvrm), .vpcb(vpcb), .vpack(vpackage), .vdie(vdie), .iin(iin), .iout(iout));
+`else
+  // Default to harvard model
   harvard_power_distribution_network pdn(.vin(vin), .vout(vout), .gnd(gnd), .vvrm(vvrm), .vpcb(vpcb), .vpack(vpackage), .vdie(vdie), .iin(iin), .iout(iout));
 `endif
 
   // Processor Load
-  processor proc(.p(vout), .n(gnd), .i(proc_load));
+  processor#(.DT(`RF_TIME)) proc(.p(vout), .n(gnd), .i(proc_load));
 
   analog begin
     V(gnd) <+ 0.0;
@@ -103,23 +115,29 @@ module circuit_model();
     retval = $create_shm(1, `SHM_NAME);
 
     // Initial values
+    _vout_mean = 0.0;
+    vout_mean = 0.0;
     _proc_load = 1.0;
     _prediction = 1.0;
+    time_to_next = 0;
+    last_time = 0;
 
     // Main Loop
     while(1) begin
-      // Sync every `STEP_SIZE time units
-      if($time % `STEP_SIZE == 0) begin
+      if(last_time >= time_to_next) begin
+        last_time = 0;
+        vout_mean = _vout_mean/(time_to_next + 1.0);
         $wait_driver_data;
         // Get signals from driver process
         v_set = $get_voltage_setpoint();
         _proc_load = $get_load();
         _prediction = $get_prediction();
         prediction_enable = $get_enable();
+        time_to_next = $get_time_to_next();
         term_sim = $get_terminate_simulation();
         $ack_driver_data;
         // Send signals back to driver process
-        retval = $send_voltage(_vdie);
+        retval = $send_voltage(vout_mean);
         retval = $send_current(_iout);
         $ack_simulation;
         if(term_sim != 0) begin
@@ -127,14 +145,18 @@ module circuit_model();
           $destroy_shm;
           $finish;
         end
+        _vout_mean = 0.0;
       end
       // Clear enable signal 10 time units after setting it
-      if($time % `STEP_SIZE == 10) begin
+      if(last_time >= 10) begin
         prediction_enable = 0;
       end
-
+      _vout_mean = _vout_mean + _vdie;
+      last_time = last_time + 1;
       // Write outpput values
-      $display("%d,%f,%f,%f,%f,%f,%f,%f,%d,%f", $time, _vvrm, _vpcb, _vpackage, _vdie, _iin, _iout, _proc_load, prediction_enable, _prediction);
+      if($time % `PTIME) begin
+        $display("%d,%f,%f,%f,%f,%f,%f,%f,%f,%f,%d,%f,%d,%d", $time, _vvrm, _vpcb, _vpackage, _vdie, _vout_mean, vout_mean, _iin, _iout, _proc_load, prediction_enable, _prediction, time_to_next, `RF_TIME);
+      end
       #1;
     end
     // Cleanup

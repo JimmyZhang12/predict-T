@@ -32,7 +32,6 @@ print_error () {
   red="\e[31m"
   nc="\e[0m"
   echo -e "$red[ $script_name ] Error:$nc $1"
-  exit 1
 }
 
 #--------------------------------------------------------------------
@@ -44,29 +43,15 @@ print_error () {
 # |_| /_/   \_\_| |_| |_|____/
 #
 #--------------------------------------------------------------------
-if [ $(uname -a | grep Microsoft | wc -l) -ne 0 ]; then
-# WSL
-  export WIN_PATH="/c/Users/Andrew/Documents/Linux/Documents/linux"
-  export WIN_SCRATCH="/c/Users/Andrew/Documents/Linux/Documents/linux_scratch"
-  print_info "Windows Subsystem Linux"
-  export VSIM_TOOLS="$WIN_PATH/cadence"
-  export PREDICT_T_ROOT="$WIN_PATH/predict-T"
-  export GEM5_ROOT="$WIN_PATH/gem5"
-  export OUTPUT_ROOT="$WIN_SCRATCH/predict-T"
-  export MCPAT_ROOT="$WIN_PATH/mcpat"
-  export SIM_ROOT="$PREDICT_T_ROOT/circuit_model"
-  print_info "export WIN_PATH $WIN_PATH"
-  print_info "export WIN_SCRATCH $WIN_SCRATCH"
-else
 # Native Linux
-  print_info "Native Linux"
-  export VSIM_TOOLS="$HOME/cadence"
-  export PREDICT_T_ROOT="$HOME/predict-T"
-  export GEM5_ROOT="$HOME/gem5"
-  export OUTPUT_ROOT="$HOME/scratch/predict-T"
-  export MCPAT_ROOT="$HOME/mcpat"
-  export SIM_ROOT="$PREDICT_T_ROOT/circuit_model"
-fi
+print_info "Native Linux"
+export VSIM_TOOLS="$HOME/cadence"
+export PREDICT_T_ROOT="$HOME/research/predict-T"
+export GEM5_ROOT="$HOME/research/gem5"
+export OUTPUT_ROOT="$HOME/scratch/predict-T"
+#export MCPAT_ROOT="$HOME/research/mcpat"
+export MCPAT_ROOT="$HOME/research/predict-T"
+export SIM_ROOT="$PREDICT_T_ROOT/circuit_model"
 
 print_info "export VSIM_TOOLS $VSIM_TOOLS"
 print_info "export PREDICT_T_ROOT $PREDICT_T_ROOT"
@@ -84,7 +69,7 @@ print_info "export SIM_ROOT $SIM_ROOT"
 # |____/ \___/ \____|_|\_|_____|_| \_\
 #
 #--------------------------------------------------------------------
-export VSIM_IMAGE="centos7:cadence"
+export VSIM_IMAGE="centos7:$(whoami)_cadence"
 print_info "export VSIM_IMAGE $VSIM_IMAGE"
 if [[ -z $(docker images -q $VSIM_IMAGE) ]]; then
   ddir="$PREDICT_T_ROOT/circuit_model/docker"

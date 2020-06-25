@@ -34,27 +34,28 @@ import os
 import sys
 import re
 from file_read_backwards import FileReadBackwards
+from collections import defaultdict
 from functools import reduce
 
 def build_gem5_stat_dict(file):
   """ Build a dict of stats from the Gem5 stats.txt """
-  stats = {}
+  stats = defaultdict(lambda: [0]*64)
   with FileReadBackwards(file, encoding="utf-8") as sf:
     for line in sf:
       if line.strip() == "":
         continue
       elif "End Simulation Statistics" in line:
-        stats = {}
+        stats = defaultdict(lambda: 0)
       elif "Begin Simulation Statistics" in line:
         return stats
       else:
         stat = []
-        sstr = re.sub('\s+', ' ', line).strip()
+        sstr = re.sub('\s+', ' ', line).strip().split("#")[0].strip()
         if('-----' in sstr):
           continue
         elif(sstr == ''):
           continue
-        elif(sstr.split(' ')[1] == '|'):
+        elif('|' in sstr):
           # Ruby Stats
           l = []
           for i in sstr.split('|')[1:]:
@@ -69,7 +70,7 @@ def build_gem5_stat_dict(file):
 
 def build_gem5_config_dict(file):
   """ Build a dict of system parameters from the Gem5 config.ini """
-  config = {}
+  config = defaultdict(lambda: "0")
   hierarchy = ""
   with open(file, "r") as cf:
     lines = cf.readlines()
@@ -88,19 +89,22 @@ def build_gem5_config_dict(file):
 def build_gem5_sim_dict(**kwargs):
   """ Build a sim_dict of parameters & stats coming directly from the runtime,
   such as instantaneous voltage, and temperature of the device"""
-  sim_dict = {}
+  sim_dict = defaultdict(lambda: [0]*64)
   for key, val in kwargs.items():
     sim_dict[key] = val
   return sim_dict
 
-def prune_dict(path, d):
+def prune_dict(path, d, init=[0]*64):
   """ Returns a new dictionary of all the items on the specified path """
-  new = {}
+  new = defaultdict(lambda: init)
   for key, val in d.items():
-    if path in key:
-      new[key.replace(path, "")]=val
-    if "system.clk_domain.clock" in key:
-      new[key.replace("system.clk_domain.","")]=val
+    for p in path.split(","):
+      if p in key:
+        new[key.replace(p, "")]=val
+      if "system.clk_domain.clock" in key:
+        new[key.replace("system.clk_domain.","")]=val
+      if "system.ruby.clk_domain.clock" in key:
+        new[key.replace("system.ruby.clk_domain.","ruby.")]=val
   return new
 
 def get_noc_dimensions(nc):

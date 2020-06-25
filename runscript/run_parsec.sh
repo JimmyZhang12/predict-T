@@ -20,7 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-script_name="run_fs_checkpoint.sh"
+script_name="run_parsec.sh"
 
 print_info () {
   green="\e[32m"
@@ -81,58 +81,58 @@ if [[ -z $(docker images -q $VSIM_IMAGE) ]]; then
   exit 1
 fi
 
-RCS_SCRIPT="${PREDICT_T_ROOT}/runscript/full_system/hack_back_ckpt.rcS"
-#RCS_SCRIPT="${PREDICT_T_ROOT}/runscript/full_system/run_mibench.rcs"
-CONFIG_FILE="${GEM5_ROOT}/configs/example/fs.py"
-#IMAGE="${PREDICT_T_ROOT}/runscript/full_system/disks/base.img"
-#IMAGE="${PREDICT_T_ROOT}/runscript/full_system/disks/linux-x86.img"
-IMAGE="${PREDICT_T_ROOT}/runscript/full_system/disks/x86root-parsec.img"
-#IMAGE="${PREDICT_T_ROOT}/runscript/full_system/disks/linux-x86-5.4.44.img"
+#--------------------------------------------------------------------
+# Configure Test Specific Paths
+#--------------------------------------------------------------------
+TEST="$PREDICT_T_ROOT/testbin"
+INPUT="$TEST/input"
+OUTPUT="$TEST/output"
+print_info "TEST $TEST"
+print_info "INPUT $INPUT"
 
-#KERNEL="${PREDICT_T_ROOT}/runscript/full_system/binaries/x86_64-vmlinux-4.9.186"
-#KERNEL="${PREDICT_T_ROOT}/runscript/full_system/binaries/x86_64-vmlinux-2.6.22.9"
-KERNEL="${PREDICT_T_ROOT}/runscript/full_system/binaries/x86_64-vmlinux-2.6.28.4-smp"
-#KERNEL="${PREDICT_T_ROOT}/runscript/full_system/binaries/x86_64-vmlinux-5.4.44"
-CHKPT_DIR="${OUTPUT_ROOT}/gem5_cpt"
-G5_OUT="${OUTPUT_ROOT}/gem5_out"
 
-TN="fs_cpt_AtomicSimpleCPU_4"
+#--------------------------------------------------------------------
+# Configure Simulation Parameters
+#--------------------------------------------------------------------
+DURATION=("10000000")
+INTERVAL=("1000000")
+STEP=("1000")
+PROFILE_START=("0")
 
-if [ ! -d $CHKPT_DIR/$TN ]; then
-  print_info "creating $CHKPT_DIR/$TN"
-  mkdir -p $CHKPT_DIR/$TN
-fi
+L1D=("64kB")
+L1I=("32kB")
+L2=("256kB")
+L3=("16MB")
 
-$GEM5_ROOT/build/X86/gem5.opt \
-  -d ${G5_OUT}/$TN \
-  $CONFIG_FILE \
-  --script=$RCS_SCRIPT \
-  --disk-image=$IMAGE \
-  --cpu-type=AtomicSimpleCPU \
-  --kernel=$KERNEL \
-  --num-cpus=4 \
-  --caches \
-  --l2cache \
-  --checkpoint-dir=$CHKPT_DIR/$TN \
-  --num-l2caches=4
+NC=("1" "2" "4" "6" "8" "12")
 
-#  --script=$RCS_SCRIPT \
-#  --checkpoint-dir=$CHKPT_DIR -r 1
-#  --checkpoint-at-end
-#  --dtb-file=$DTB \
-#  --machine-type=VExpress_GEM5_V1 \
-#  --script=$RCS_SCRIPT \
-#  --mem-size=32GB \
-#  --mem-channels=8 \
-#  --mem-ranks=2 \
-#  --mem-type=DDR4_2400_16x4 \
+name=("x264" "swaptions" "freqmine" "fluidanimate" "blackscholes")
+exe=("x264" "swaptions" "freqmine" "fluidanimate" "blackscholes")
+opt=("\055q 0 --threads %s ${OUTPUT}/test.x264 ${INPUT}/x264_%s.y4m" "\055ns 1000 -sm 100000 -nt %s -sd 012384701" "${INPUT}/kosarak_250k.dat 1" "%s 1000 ./inputs/fluidanimate.fluid" "%s ${INPUT}/blackscholes.txt ${OUTPUT}/blackscholes_%s.txt")
 
-#$GEM5_ROOT/build/X86/gem5.opt \
-#  -d ${CHKPT_DIR}/$TN \
-#  $CONFIG_FILE \
-#  --cpu-type=AtomicSimpleCPU \
-#  --disk-image=$IMAGE \
-#  --kernel=$KERNEL \
-#  --num-cpus=4 --ruby \
-#  --caches --l2cache --l2_size=512kB --num-dirs=4 --num-l2=4 \
-#  --l1d_size=32kB --l1i_size=32kB --l1d_assoc=2 --l1i_assoc=2 \
+#--------------------------------------------------------------------
+# Run
+#--------------------------------------------------------------------
+for j in ${!name[@]}; do 
+  for i in ${!INTERVAL[@]}; do 
+    for k in ${!L1D[@]}; do 
+      for t in ${!NC[@]}; do
+        # Test Name
+        TN="parsec_${name[$j]}_${NC[$t]}c_ruby_nmp_nncv"
+
+        # Format the options with the num cores
+        if [ $(echo "${opt[$j]}" | grep -o "%s" | wc -w) -eq 1 ]; then
+          printf -v OPTIONS "${opt[$j]}" ${NC[$t]}
+        elif [ $(echo "${opt[$j]}" | grep -o "%s" | wc -w) -eq 2 ]; then
+          printf -v OPTIONS "${opt[$j]}" ${NC[$t]} ${NC[$t]}
+        fi
+
+        # Run on System
+        se_single_core_xeon_e7_8893_ruby_no_mcpat_no_ncverilog $TN ${exe[$j]} "${OPTIONS}" ${NC[$t]}
+        while [ `jobs | wc -l` -ge 32 ]; do
+          sleep 1
+        done
+      done
+    done
+  done
+done

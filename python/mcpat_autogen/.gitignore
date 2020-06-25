@@ -2,3 +2,7 @@
 *.pyc
 *.swp
 *.swo
+
+tmp/
+test_output/
+test_input/

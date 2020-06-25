@@ -38,8 +38,8 @@
 `timescale 1ps/1ps
 
 //`define HARVARD_PDN_Q_2_5
-`define HARVARD_PDN_Q_3_0
-//`define HARVARD_PDN_Q_3_5
+//`define HARVARD_PDN_Q_3_0
+`define HARVARD_PDN_Q_3_5
 
 /*
  * Module harvard_power_distribution_network

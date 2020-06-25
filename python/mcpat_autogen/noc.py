@@ -36,7 +36,7 @@ from util import *
 
 class NoC:
   def __init__(self, component_id, component_name, \
-                stat_dict, config_dict, sim_dict, **kwargs):
+                stat_dict, config_dict, sim_dict, ruby, **kwargs):
     self.name = "noc"
     self.id = "noc"
 
@@ -101,9 +101,35 @@ class NoC:
 
     # Calculate the sum of all the packet counts:
     s = 0
-    for key in stat_dict:
-      if "pkt_count::total" in key and "bus" in key:
-        s += int(stat_dict[key][1])
+    if ruby:
+      self.parameters["clockrate"][0]= \
+        str((1.0e-6/float(config_dict["system.ruby.clk_domain.clock"]))*1.0e12)
+      for key in stat_dict:
+        if "msg_count.Broadcast_Control" in key or \
+            "msg_count.Completion_Control" in key or \
+            "msg_count.Control" in key or \
+            "msg_count.Data" in key or \
+            "msg_count.Forwarded_Control" in key or \
+            "msg_count.Invalidate_Control" in key or \
+            "msg_count.Multicast_Control" in key or \
+            "msg_count.Persistent_Control" in key or \
+            "msg_count.Reissue_Control" in key or \
+            "msg_count.Request_Control" in key or \
+            "msg_count.ResponseL2hit_Data" in key or \
+            "msg_count.ResponseLocal_Data" in key or \
+            "msg_count.Response_Control" in key or \
+            "msg_count.Response_Data" in key or \
+            "msg_count.Unblock_Control" in key or \
+            "msg_count.Writeback_Control" in key or \
+            "msg_count.Writeback_Data" in key:
+          s += int(stat_dict[key][1])
+    else:
+      self.parameters["clockrate"][0]= \
+        str((1.0e-6/float(config_dict["system.clk_domain.clock"]))*1.0e12)
+      for key in stat_dict:
+        if "pkt_count::total" in key and "bus" in key:
+          s += int(stat_dict[key][1])
+
 
     self.stats["total_accesses"][0]=str(s)
     self.stats["duty_cycle"][0]=str(1.0)

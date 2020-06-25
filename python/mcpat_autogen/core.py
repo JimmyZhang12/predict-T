@@ -42,7 +42,7 @@ from util import *
 
 class Core:
   def __init__(self, component_id, component_name, \
-                stat_dict, config_dict, sim_dict):
+                stat_dict, config_dict, sim_dict, ruby):
     self.name = "core"
     self.id = "core"
 
@@ -407,7 +407,7 @@ class Core:
       self.id+".predictor", \
       "PBT", \
       prune_dict("branchPred.",stat_dict), \
-      prune_dict("branchPred.",config_dict), \
+      prune_dict("branchPred.",config_dict, "0"), \
       sim_dict \
     )
     self.itlb = TLB \
@@ -415,7 +415,7 @@ class Core:
       self.id+".itlb", \
       "itlb", \
       prune_dict("itb_walker_cache.",stat_dict), \
-      prune_dict("itb.",config_dict), \
+      prune_dict("itb.",config_dict, "0"), \
       sim_dict \
     )
     self.icache = ICache \
@@ -423,7 +423,7 @@ class Core:
       self.id+".icache", \
       "icache", \
       prune_dict("icache.",stat_dict), \
-      prune_dict("icache.",config_dict), \
+      prune_dict("icache.",config_dict, "0"), \
       sim_dict \
     )
     self.dtlb = TLB \
@@ -431,7 +431,7 @@ class Core:
       self.id+".dtlb", \
       "dtlb", \
       prune_dict("dtb_walker_cache.",stat_dict), \
-      prune_dict("dtb.",config_dict), \
+      prune_dict("dtb.",config_dict, "0"), \
       sim_dict \
     )
     self.dcache = DCache \
@@ -439,7 +439,7 @@ class Core:
       self.id+".dcache", \
       "dcache", \
       prune_dict("dcache.",stat_dict), \
-      prune_dict("dcache.",config_dict), \
+      prune_dict("dcache.",config_dict, "0"), \
       sim_dict \
     )
     self.btb = BTB \
@@ -447,7 +447,7 @@ class Core:
       self.id+".BTB", \
       "BTB", \
       prune_dict("branchPred.",stat_dict), \
-      prune_dict("branchPred.",config_dict), \
+      prune_dict("branchPred.",config_dict, "0"), \
       sim_dict \
     )
 

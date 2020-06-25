@@ -83,7 +83,7 @@ module my_real_cap(p, n);
   parameter real ESR=1u;
   parameter real RL=10M;
   
-  my_res#(.R(RL)) r_leak(p, n);
+  //my_res#(.R(RL)) r_leak(p, n);
   my_cap#(.C(C)) c_deal(p, n1);
   my_ind#(.L(ESL)) l_esl(n1, n2);
   my_res#(.R(ESR)) r_esr(n2, n);

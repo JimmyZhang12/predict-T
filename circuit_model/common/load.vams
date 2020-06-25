@@ -46,7 +46,6 @@
  *    n - Negative Terminal
  *    r - R value (Voltage, not wreal is not supported in Verilog-A)
  *
- *    Parameter DT - the time in simulation ticks for the transition
  */
 module processor_varistor(p, n, r);
   inout p, n;
@@ -54,11 +53,11 @@ module processor_varistor(p, n, r);
   real r_load;
   electrical p, n, r;
 
-  parameter DT=100p;
+  parameter real DT=10p;
 
   analog begin
     r_load = V(r,n);
-    I(p, n) <+ V(p,n)/transition(r_load,0p,DT,DT);
+    I(p, n) <+ V(p, n)/transition(r_load, 0p, DT, DT);
   end
 endmodule
 
@@ -72,7 +71,6 @@ endmodule
  *    n - Negative Terminal
  *    i - I value (Voltage, not wreal is not supported in Verilog-A)
  *
- *    Parameter DT - the time in simulation ticks for the transition
  */
 module processor(p, n, i);
   inout p, n;
@@ -80,11 +78,11 @@ module processor(p, n, i);
   real i_load;
   electrical p, n, i;
 
-  parameter DT=100p;
+  parameter real DT=10p;
 
   analog begin
     i_load = V(i,n);
-    I(p, n) <+ transition(i_load,0p,DT,DT);
+    I(p, n) <+ transition(i_load, 0p, DT, DT);
   end
 endmodule
 

@@ -54,6 +54,7 @@ typedef struct {
   double curr_load;      // The current load of the system
   double prediction;     // The value of the predicted load
   uint32_t enable;       // Enable the Aux Circuit
+  uint32_t time_to_next; // Time to next sync event in picoseconds
   uint32_t sim_over;     // Terminate Simulation
 } v_incoming_signals;
 

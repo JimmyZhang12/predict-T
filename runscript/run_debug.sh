@@ -84,33 +84,21 @@ fi
 #--------------------------------------------------------------------
 TEST="$PREDICT_T_ROOT/testbin"
 INPUT="$TEST/input"
-OUTPUT="$TEST/output"
 print_info "TEST $TEST"
 print_info "INPUT $INPUT"
-print_info "OUTPUT $OUTPUT"
-
-TRAINING_ROOT="$OUTPUT_ROOT/training_data"
-print_info "TRAINING_ROOT $TRAINING_ROOT"
 
 
 #--------------------------------------------------------------------
 # Configure Simulation Parameters
 #--------------------------------------------------------------------
-DURATION=("-1") # Data Points to Simulate
-INSTRUCTIONS=("100000") # Instructions to Simulate
+DURATION=("40") # Data Points to Simulate
 INTERVAL=("10000") # Sim Cycles
 ROI_INTERVAL=("100")
 # When to start ROI, in Sim Ticks, -or- ROI by setting "-1"
 PROFILE_START=("-1") 
 # Power Distribution Network Type:
-PDN=("HARVARD")
-#PREDICTOR=("DecorOnly" "uArchEventPredictor")
-#PREDICTOR=("IdealSensor" "Test")
-#PREDICTOR=("IdealSensor" "Test" "DecorOnly" "uArchEventPredictor")
-#PREDICTOR=("IdealSensor" "DecorOnly" "uArchEventPredictor")
-#PREDICTOR=("HarvardPowerPredictor")
-PREDICTOR=("PerceptronPredictor")
-#PREDICTOR=("Test")
+#PDN=("AKJDLKF" "HARVARD" "ARM")
+PDN=("ARM")
 
 VOLTAGE="1.0"
 CPU_CYCLES=("10")
@@ -119,33 +107,12 @@ L1D=("64kB")
 L1I=("32kB")
 L2=("256kB")
 L3=("16MB")
-#CLK=( "3.5GHz")
-#CLK_=("3500000000")
-#CLK=( "3.0GHz"     "4.0GHz")
-#CLK_=("3000000000" "4000000000")
-#CID=( "3"          "4")
-CLK=( "4.0GHz")
-CLK_=("4000000000")
-CID=( "4")
+CLK=("2.0GHz")
+CLK_=("2000000000")
 
-#name=("rijndael_encrypt" "dijkstra" "toast" "fft")
-#exe=("rijndael" "dijkstra" "toast" "fft")
-#opt=("${INPUT}/rijndael.asc ${OUTPUT}/rijndael.enc e 1234567890abcdeffedcba09876543211234567890abcdeffedcba0987654321" "${INPUT}/dijkstra.dat" "-fps -c ${INPUT}/toast.au" "4 4096")
-name=("basicmath" "bitcnts" "qsort" "susan_smooth" "susan_edge" "susan_corner" "dijkstra" "blowfish_encrypt" "blowfish_decrypt" "rijndael_encrypt" "rijndael_decrypt" "sha" "crc" "fft" "ffti" "toast" "untoast")
-exe=("basicmath" "bitcnts" "qsort" "susan" "susan" "susan" "dijkstra" "blowfish" "blowfish" "rijndael" "rijndael" "sha" "crc" "fft" "fft" "toast" "untoast")
-opt=("" "1000" "${INPUT}/qsort.dat" "${INPUT}/susan.pgm ${OUTPUT}/susan_s.pgm -s" "${INPUT}/susan.pgm ${OUTPUT}/susan_e.pgm -e" "${INPUT}/susan.pgm ${OUTPUT}/susan_c.pgm -c" "${INPUT}/dijkstra.dat" "e ${INPUT}/blowfish.asc ${OUTPUT}/blowfish.enc 1234567890abcdeffedcba0987654321" "d ${INPUT}/blowfish.enc ${OUTPUT}/blowfish.asc 1234567890abcdeffedcba0987654321" "${INPUT}/rijndael.asc ${OUTPUT}/rijndael.enc e 1234567890abcdeffedcba09876543211234567890abcdeffedcba0987654321" "${INPUT}/rijndael.enc ${OUTPUT}/rijndael.asc d 1234567890abcdeffedcba09876543211234567890abcdeffedcba0987654321" "${INPUT}/sha.asc" "${INPUT}/crc.pcm" "4 4096" "4 8192 -i" "-fps -c ${INPUT}/toast.au" "-fps -c ${INPUT}/untoast.au.run.gsm")
-#name=("blowfish_encrypt")
-#exe=("blowfish")
-#opt=("e ${INPUT}/blowfish.asc ${OUTPUT}/blowfish.enc 1234567890abcdeffedcba0987654321")
-#name=("fft")
-#exe=("fft")
-#opt=("4 4096")
-#name=("rijndael_encrypt")
-#exe=("rijndael")
-#opt=("${INPUT}/rijndael.asc ${OUTPUT}/rijndael.enc e 1234567890abcdeffedcba09876543211234567890abcdeffedcba0987654321")
-#name=("toast")
-#exe=("toast")
-#opt=("-fps -c ${INPUT}/toast.au")
+name=("dijkstra")
+exe=("dijkstra")
+opt=("${INPUT}/dijkstra.dat")
 
 #--------------------------------------------------------------------
 # Run
@@ -156,21 +123,14 @@ for j in ${!name[@]}; do
       for p in ${!PDN[@]}; do
         for c in ${!CLK[@]}; do 
           for cs in ${!CPU_CYCLES[@]}; do
-            for pred in ${!PREDICTOR[@]}; do
-              sleep 0.5
-              TN="${name[$j]}_${INSTRUCTIONS[$i]}_${CPU_CYCLES[${cs}]}_${CID[$c]}_${PDN[$p]}_${PREDICTOR[$pred]}"
-              se_sc_classic_mc_ncv $TN ${DURATION[$i]} ${INSTRUCTIONS[$i]} ${INTERVAL[$i]} ${PROFILE_START[$i]} ${exe[$j]} "${opt[$j]}" ${CLK[$c]} ${PDN[$p]} ${CLK_[$c]} $VOLTAGE ${CPU_CYCLES[${cs}]} ${PREDICTOR[$pred]}
-              while [ `jobs | wc -l` -ge 16 ]; do
-                sleep 1
-              done
+            TN="${name[$j]}_${DURATION[$i]}_${CPU_CYCLES[${cs}]}_${CLK[$c]}_${PDN[$p]}"
+            se_sc_classic_mc_ncv_debug $TN ${DURATION[$i]} ${INTERVAL[$i]} ${PROFILE_START[$i]} ${exe[$j]} "${opt[$j]}" ${CLK[$c]} ${PDN[$p]} ${CLK_[$c]} $VOLTAGE ${CPU_CYCLES[${cs}]}
+            while [ `jobs | wc -l` -ge 32 ]; do
+              sleep 1
             done
           done
         done
       done
     done
   done
-done
-
-while [ `jobs | wc -l` -ne 1 ]; do
-  sleep 1
 done
