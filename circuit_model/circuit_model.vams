@@ -52,6 +52,10 @@
 `define RF_TIME 250p
 `endif
 
+`ifndef PTIME
+`define PTIME 250
+`endif
+
 
 /*
  * Module circuit_model
@@ -150,7 +154,9 @@ module circuit_model();
       _vout_mean = _vout_mean + _vdie;
       last_time = last_time + 1;
       // Write outpput values
-      $display("%d,%f,%f,%f,%f,%f,%f,%f,%f,%f,%d,%f,%d,%d", $time, _vvrm, _vpcb, _vpackage, _vdie, _vout_mean, vout_mean, _iin, _iout, _proc_load, prediction_enable, _prediction, time_to_next, `RF_TIME);
+      if($time % `PTIME) begin
+        $display("%d,%f,%f,%f,%f,%f,%f,%f,%f,%f,%d,%f,%d,%d", $time, _vvrm, _vpcb, _vpackage, _vdie, _vout_mean, vout_mean, _iin, _iout, _proc_load, prediction_enable, _prediction, time_to_next, `RF_TIME);
+      end
       #1;
     end
     // Cleanup

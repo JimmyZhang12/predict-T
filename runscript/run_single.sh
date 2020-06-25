@@ -94,16 +94,19 @@ print_info "INPUT $OUTPUT"
 # Configure Simulation Parameters
 #--------------------------------------------------------------------
 DURATION=("-1") # Data Points to Simulate
-INSTRUCTIONS=("30") # Data Points to Simulate
+INSTRUCTIONS=("100000") # Instructions to Simulate
 INTERVAL=("10000") # Sim Cycles
 ROI_INTERVAL=("100")
 # When to start ROI, in Sim Ticks, -or- ROI by setting "-1"
 PROFILE_START=("-1") 
 # Power Distribution Network Type:
 PDN=("HARVARD")
-PREDICTOR=("DecorOnly" "uArchEventPredictor")
+#PREDICTOR=("DecorOnly" "uArchEventPredictor")
 #PREDICTOR=("IdealSensor" "Test")
 #PREDICTOR=("IdealSensor" "Test" "DecorOnly" "uArchEventPredictor")
+#PREDICTOR=("IdealSensor" "DecorOnly" "uArchEventPredictor")
+PREDICTOR=("HarvardPowerPredictor")
+#PREDICTOR=("Test")
 
 VOLTAGE="1.0"
 CPU_CYCLES=("10")
@@ -117,10 +120,13 @@ L3=("16MB")
 CLK=( "3.0GHz"     "4.0GHz")
 CLK_=("3000000000" "4000000000")
 CID=( "3"          "4")
+#CLK=( "4.0GHz")
+#CLK_=("4000000000")
+#CID=( "4")
 
-name=("dijkstra" "toast" "fft" "rijndael_encrypt")
-exe=("dijkstra" "toast" "fft" "rijndael")
-opt=("${INPUT}/dijkstra.dat" "-fps -c ${INPUT}/toast.au" "4 4096" "${INPUT}/rijndael.asc ${OUTPUT}/rijndael.enc e 1234567890abcdeffedcba09876543211234567890abcdeffedcba0987654321")
+name=("rijndael_encrypt" "dijkstra" "toast" "fft")
+exe=("rijndael" "dijkstra" "toast" "fft")
+opt=("${INPUT}/rijndael.asc ${OUTPUT}/rijndael.enc e 1234567890abcdeffedcba09876543211234567890abcdeffedcba0987654321" "${INPUT}/dijkstra.dat" "-fps -c ${INPUT}/toast.au" "4 4096")
 #name=("fft")
 #exe=("fft")
 #opt=("4 4096")
@@ -144,7 +150,7 @@ for j in ${!name[@]}; do
               sleep 0.5
               TN="${name[$j]}_${INSTRUCTIONS[$i]}_${CPU_CYCLES[${cs}]}_${CID[$c]}_${PDN[$p]}_${PREDICTOR[$pred]}"
               se_sc_classic_mc_ncv $TN ${DURATION[$i]} ${INSTRUCTIONS[$i]} ${INTERVAL[$i]} ${PROFILE_START[$i]} ${exe[$j]} "${opt[$j]}" ${CLK[$c]} ${PDN[$p]} ${CLK_[$c]} $VOLTAGE ${CPU_CYCLES[${cs}]} ${PREDICTOR[$pred]}
-              while [ `jobs | wc -l` -ge 32 ]; do
+              while [ `jobs | wc -l` -ge 16 ]; do
                 sleep 1
               done
             done

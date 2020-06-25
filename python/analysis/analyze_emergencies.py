@@ -36,7 +36,11 @@ def get_csvs(files, csv_names):
 def get_names(files, name, trace_len, resolution, pdn):
   names = []
   for file in files:
-    names.append(file.split("/")[-1].replace(name+"_"+trace_len+"_"+resolution+"_", "").replace("_"+pdn+"_IdealSensor_out.csv", ""))
+    #names.append(file.split("/")[-1].replace(name+"_"+trace_len+"_"+resolution+"_", "").replace("_"+pdn+"_DecorOnly_out.csv", ""))
+    #names.append(file.split("/")[-1].replace(name+"_"+trace_len+"_"+resolution+"_", "").replace("_"+pdn+"_IdealSensor_out.csv", ""))
+    #names.append(file.split("/")[-1].replace(name+"_"+trace_len+"_"+resolution+"_", "").replace("_"+pdn+"_Test_out.csv", ""))
+    #names.append(file.split("/")[-1].replace(name+"_"+trace_len+"_"+resolution+"_", "").replace("_"+pdn+"_uArchEventPredictor_out.csv", ""))
+    names.append(file.split("/")[-1].replace(name+"_"+trace_len+"_"+resolution+"_", "").replace("_"+pdn+"_HarvardPowerPredictor_out.csv", ""))
   return names
 
 pdn_model=args.pdn
@@ -107,7 +111,7 @@ for i in range(len(tests)):
   axs[i].bar(range(len(percentage_in_emergency_high[i])), percentage_in_emergency_high[i], label="Emergency High")
   axs[i].legend()
   axs[i].set_title(tests[i])
-  axs[i].set_yticks(np.arange(0.0,1.05,0.05))
+  axs[i].set_yticks(np.arange(0.0,0.11,0.01))
   axs[i].set_xticks(range(len(percentage_in_emergency_low[i])), minor=False)
   axs[i].set_xticklabels(names[i], minor=False)
   axs[i].set_xlabel("Clock Freq")
@@ -116,14 +120,14 @@ fig.suptitle("%Execution time in Voltage Emergency; "+pdn_model+" PDN, ["+str(em
 plt.show()
 
 ### Consecutive Picoseconds spent in Emergency Low:
-min_time = 10000000000
-for i in times:
-  for j in i:
-    print(len(j))
-    if len(j) < min_time:
-      min_time = len(j)
-
-print(min_time)
+#min_time = 10000000000
+#for i in times:
+#  for j in i:
+#    print(len(j))
+#    if len(j) < min_time:
+#      min_time = len(j)
+#
+#print(min_time)
 
 histogram_low = []
 histogram_high = []
@@ -136,7 +140,7 @@ for i in apps:
     below = False
     hl = []
     hh = []
-    for i in range(min_time):
+    for i in range(1,len(app),1):
       voltage_prev = app[i-1]
       voltage = app[i]
       if voltage > emergency_above and voltage_prev <= emergency_above:
@@ -164,10 +168,11 @@ for i in apps:
   histogram_low.append(histl)
   histogram_high.append(histh)
 
-n_bins = 50
+n_bins = 10
 
 print(histogram_low)
 
+#fig, axs = plt.subplots(len(apps), len(apps[0]), sharex=True, sharey=True, tight_layout=False)
 fig, axs = plt.subplots(len(apps), len(apps[0]), sharex=True, sharey=True, tight_layout=False)
 fig.set_size_inches(4*len(apps[0]),4*len(apps))
 for i in range(len(apps)):
