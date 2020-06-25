@@ -87,7 +87,10 @@ INPUT="$TEST/input"
 OUTPUT="$TEST/output"
 print_info "TEST $TEST"
 print_info "INPUT $INPUT"
-print_info "INPUT $OUTPUT"
+print_info "OUTPUT $OUTPUT"
+
+TRAINING_ROOT="$OUTPUT_ROOT/training_data"
+print_info "TRAINING_ROOT $TRAINING_ROOT"
 
 
 #--------------------------------------------------------------------
@@ -105,7 +108,8 @@ PDN=("HARVARD")
 #PREDICTOR=("IdealSensor" "Test")
 #PREDICTOR=("IdealSensor" "Test" "DecorOnly" "uArchEventPredictor")
 #PREDICTOR=("IdealSensor" "DecorOnly" "uArchEventPredictor")
-PREDICTOR=("HarvardPowerPredictor")
+#PREDICTOR=("HarvardPowerPredictor")
+PREDICTOR=("PerceptronPredictor")
 #PREDICTOR=("Test")
 
 VOLTAGE="1.0"
@@ -117,16 +121,22 @@ L2=("256kB")
 L3=("16MB")
 #CLK=( "3.5GHz")
 #CLK_=("3500000000")
-CLK=( "3.0GHz"     "4.0GHz")
-CLK_=("3000000000" "4000000000")
-CID=( "3"          "4")
-#CLK=( "4.0GHz")
-#CLK_=("4000000000")
-#CID=( "4")
+#CLK=( "3.0GHz"     "4.0GHz")
+#CLK_=("3000000000" "4000000000")
+#CID=( "3"          "4")
+CLK=( "4.0GHz")
+CLK_=("4000000000")
+CID=( "4")
 
-name=("rijndael_encrypt" "dijkstra" "toast" "fft")
-exe=("rijndael" "dijkstra" "toast" "fft")
-opt=("${INPUT}/rijndael.asc ${OUTPUT}/rijndael.enc e 1234567890abcdeffedcba09876543211234567890abcdeffedcba0987654321" "${INPUT}/dijkstra.dat" "-fps -c ${INPUT}/toast.au" "4 4096")
+#name=("rijndael_encrypt" "dijkstra" "toast" "fft")
+#exe=("rijndael" "dijkstra" "toast" "fft")
+#opt=("${INPUT}/rijndael.asc ${OUTPUT}/rijndael.enc e 1234567890abcdeffedcba09876543211234567890abcdeffedcba0987654321" "${INPUT}/dijkstra.dat" "-fps -c ${INPUT}/toast.au" "4 4096")
+name=("basicmath" "bitcnts" "qsort" "susan_smooth" "susan_edge" "susan_corner" "dijkstra" "blowfish_encrypt" "blowfish_decrypt" "rijndael_encrypt" "rijndael_decrypt" "sha" "crc" "fft" "ffti" "toast" "untoast")
+exe=("basicmath" "bitcnts" "qsort" "susan" "susan" "susan" "dijkstra" "blowfish" "blowfish" "rijndael" "rijndael" "sha" "crc" "fft" "fft" "toast" "untoast")
+opt=("" "1000" "${INPUT}/qsort.dat" "${INPUT}/susan.pgm ${OUTPUT}/susan_s.pgm -s" "${INPUT}/susan.pgm ${OUTPUT}/susan_e.pgm -e" "${INPUT}/susan.pgm ${OUTPUT}/susan_c.pgm -c" "${INPUT}/dijkstra.dat" "e ${INPUT}/blowfish.asc ${OUTPUT}/blowfish.enc 1234567890abcdeffedcba0987654321" "d ${INPUT}/blowfish.enc ${OUTPUT}/blowfish.asc 1234567890abcdeffedcba0987654321" "${INPUT}/rijndael.asc ${OUTPUT}/rijndael.enc e 1234567890abcdeffedcba09876543211234567890abcdeffedcba0987654321" "${INPUT}/rijndael.enc ${OUTPUT}/rijndael.asc d 1234567890abcdeffedcba09876543211234567890abcdeffedcba0987654321" "${INPUT}/sha.asc" "${INPUT}/crc.pcm" "4 4096" "4 8192 -i" "-fps -c ${INPUT}/toast.au" "-fps -c ${INPUT}/untoast.au.run.gsm")
+#name=("blowfish_encrypt")
+#exe=("blowfish")
+#opt=("e ${INPUT}/blowfish.asc ${OUTPUT}/blowfish.enc 1234567890abcdeffedcba0987654321")
 #name=("fft")
 #exe=("fft")
 #opt=("4 4096")

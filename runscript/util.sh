@@ -68,6 +68,7 @@ $GEM5_ROOT/build/X86/gem5.opt \
 --power_pred_voltage=${V} \
 --power_pred_voltage_emergency=0.96 \
 --power_pred_type=${PRED} \
+--power_pred_train_name=${TRAINING_ROOT}/${TN}.csv \
 --num-cpus=1 \
 --cpu-type=DerivO3CPU \
 --l1i_size=${L1I} \
@@ -111,6 +112,7 @@ $GEM5_ROOT/build/X86/gem5.opt \
     --power_pred_voltage=${V} \
     --power_pred_voltage_emergency=0.96 \
     --power_pred_type=${PRED} \
+    --power_pred_train_name=${TRAINING_ROOT}/${TN}.csv \
     --num-cpus=1 \
     --cpu-type=DerivO3CPU \
     --l1i_size=${L1I} \
