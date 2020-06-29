@@ -84,53 +84,139 @@ fi
 #--------------------------------------------------------------------
 # Configure Test Specific Paths
 #--------------------------------------------------------------------
-TEST="$PREDICT_T_ROOT/testbin"
+TEST="$PREDICT_T_ROOT/parsec_testbin_m5"
 INPUT="$TEST/input"
 OUTPUT="$TEST/output"
 print_info "TEST $TEST"
 print_info "INPUT $INPUT"
+print_info "OUTPUT $OUTPUT"
+
+TRAINING_ROOT="$OUTPUT_ROOT/training_data"
+print_info "TRAINING_ROOT $TRAINING_ROOT"
 
 
 #--------------------------------------------------------------------
 # Configure Simulation Parameters
 #--------------------------------------------------------------------
-DURATION=("10000000")
-INTERVAL=("1000000")
-STEP=("1000")
-PROFILE_START=("0")
+DURATION=("-1")
+INSTRUCTIONS=("50000" "100000" "150000" "200000") # Instructions to Simulate
+#INSTRUCTIONS=("200000") # Instructions to Simulate
 
-L1D=("64kB")
-L1I=("32kB")
-L2=("256kB")
-L3=("16MB")
+# When to start ROI, in Sim Ticks, -or- ROI by setting "-1"
+PROFILE_START=("-1") 
 
-NC=("1" "2" "4" "6" "8" "12")
+# Power Distribution Network Type:
+PDN=("HARVARD")
+#PREDICTOR=("DecorOnly" "uArchEventPredictor")
+#PREDICTOR=("IdealSensor" "Test")
+#PREDICTOR=("IdealSensor" "Test" "DecorOnly" "uArchEventPredictor")
+#PREDICTOR=("IdealSensor" "DecorOnly" "uArchEventPredictor")
+#PREDICTOR=("HarvardPowerPredictor")
+#PREDICTOR=("PerceptronPredictor")
+PREDICTOR=("Test")
 
-name=("x264" "swaptions" "freqmine" "fluidanimate" "blackscholes")
-exe=("x264" "swaptions" "freqmine" "fluidanimate" "blackscholes")
-opt=("\055q 0 --threads %s ${OUTPUT}/test.x264 ${INPUT}/x264_%s.y4m" "\055ns 1000 -sm 100000 -nt %s -sd 012384701" "${INPUT}/kosarak_250k.dat 1" "%s 1000 ./inputs/fluidanimate.fluid" "%s ${INPUT}/blackscholes.txt ${OUTPUT}/blackscholes_%s.txt")
+VOLTAGE="1.0"
+CPU_CYCLES=("10")
+
+L1D=("4kB" "16kB" "64kB")
+L1I=("2kB" "8kB" "32kB")
+L2=("64kB" "128kB" "256kB")
+L3=("2MB" "8MB" "16MB")
+CACHE=("SMALL" "MEDIUM" "LARGE")
+
+#L1D=("4kB")
+#L1I=("2kB")
+#L2=("64kB")
+#L3=("2MB")
+#CACHE=("SMALL")
+
+CLK=( "4.0GHz")
+CLK_=("4000000000")
+CID=( "4")
+
+#NC=("8")
+NC=("1" "2" "4" "8")
+
+#LITHOGRAPHY=("22" "28" "32" "45" "65" "90")
+
+#name=("swaptions" "freqmine" "fluidanimate" "blackscholes" "vips" "canneal")
+#exe=("swaptions" "freqmine" "fluidanimate" "blackscholes" "vips" "canneal")
+#opt=( \
+#  "\055ns 1000 -sm 100000 -nt %s -sd 012384701" \
+#  "${INPUT}/freqmine.dat 1" \
+#  "%s 100 ${INPUT}/fluidanimate.fluid" \
+#  "%s ${INPUT}/blackscholes.txt ${OUTPUT}/blackscholes_%s.txt" \
+#  "\055\055vips-concurrency=%s im_benchmark ${INPUT}/vips.v ${OUTPUT}/vips_%s.v" \
+#  "%s 10000 300 ${INPUT}/canneal.nets 30000"
+#)
+name=("swaptions" "fluidanimate" "blackscholes" "canneal")
+exe=("swaptions" "fluidanimate" "blackscholes" "canneal")
+opt=( \
+  "\055ns 1000 -sm 100000 -nt %s -sd 012384701" \
+  "%s 10000 ${INPUT}/fluidanimate.fluid" \
+  "%s ${INPUT}/blackscholes.txt ${OUTPUT}/blackscholes_%s.txt" \
+  "%s 10000 300 ${INPUT}/canneal.nets 30000"
+)
+#name=("swaptions")
+#exe=("swaptions")
+#opt=( \
+#  "\055ns 1000 -sm 100000 -nt %s -sd 012384701" \
+#)
+#name=("freqmine")
+#exe=("freqmine")
+#opt=( \
+#  "${INPUT}/freqmine.dat 1" \
+#)
+#name=("fluidanimate")
+#exe=("fluidanimate")
+#opt=( \
+#  "%s 10000 ${INPUT}/fluidanimate.fluid" \
+#)
+#name=("vips")
+#exe=("vips")
+#opt=( \
+#  "\055\055vips-concurrency=%s im_benchmark ${INPUT}/vips.v ${OUTPUT}/vips_%s.v" \
+#)
+#name=("blackscholes")
+#exe=("blackscholes")
+#opt=( \
+#  "%s ${INPUT}/blackscholes.txt ${OUTPUT}/blackscholes_%s.txt" \
+#)
+#name=("canneal")
+#exe=("canneal")
+#opt=( \
+#  "%s 10000 300 ${INPUT}/canneal.nets 30000"
+#)
 
 #--------------------------------------------------------------------
 # Run
 #--------------------------------------------------------------------
 for j in ${!name[@]}; do 
-  for i in ${!INTERVAL[@]}; do 
+  for i in ${!DURATION[@]}; do 
     for k in ${!L1D[@]}; do 
-      for t in ${!NC[@]}; do
-        # Test Name
-        TN="parsec_${name[$j]}_${NC[$t]}c_ruby_nmp_nncv"
+      for p in ${!PDN[@]}; do
+        for c in ${!CLK[@]}; do 
+          for cs in ${!CPU_CYCLES[@]}; do
+            for pred in ${!PREDICTOR[@]}; do
+              for t in ${!NC[@]}; do
+                # Test Name
+                sleep 0.5
+                TN="${name[$j]}_${INSTRUCTIONS[$t]}_${CPU_CYCLES[${cs}]}_${CID[$c]}_${PDN[$p]}_${PREDICTOR[$pred]}_${NC[$t]}core_${CACHE[$k]}"
 
-        # Format the options with the num cores
-        if [ $(echo "${opt[$j]}" | grep -o "%s" | wc -w) -eq 1 ]; then
-          printf -v OPTIONS "${opt[$j]}" ${NC[$t]}
-        elif [ $(echo "${opt[$j]}" | grep -o "%s" | wc -w) -eq 2 ]; then
-          printf -v OPTIONS "${opt[$j]}" ${NC[$t]} ${NC[$t]}
-        fi
+                # Format the options with the num cores
+                if [ $(echo "${opt[$j]}" | grep -o "%s" | wc -w) -eq 1 ]; then
+                  printf -v OPTIONS "${opt[$j]}" ${NC[$t]}
+                elif [ $(echo "${opt[$j]}" | grep -o "%s" | wc -w) -eq 2 ]; then
+                  printf -v OPTIONS "${opt[$j]}" ${NC[$t]} ${NC[$t]}
+                fi
 
-        # Run on System
-        se_single_core_xeon_e7_8893_ruby_no_mcpat_no_ncverilog $TN ${exe[$j]} "${OPTIONS}" ${NC[$t]}
-        while [ `jobs | wc -l` -ge 32 ]; do
-          sleep 1
+                se_classic_mc_ncv $TN ${DURATION[$i]} ${INSTRUCTIONS[$t]} ${PROFILE_START[$i]} ${exe[$j]} "$OPTIONS" ${CLK[$c]} ${PDN[$p]} ${CLK_[$c]} $VOLTAGE ${CPU_CYCLES[${cs}]} ${PREDICTOR[$pred]} ${NC[$t]} ${L1I[$k]} ${L1D[$k]} ${L2[$k]} ${L3[$k]}
+                while [ `jobs | wc -l` -ge 32 ]; do
+                  sleep 1
+                done
+              done
+            done
+          done
         done
       done
     done

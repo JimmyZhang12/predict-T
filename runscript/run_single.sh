@@ -97,9 +97,7 @@ print_info "TRAINING_ROOT $TRAINING_ROOT"
 # Configure Simulation Parameters
 #--------------------------------------------------------------------
 DURATION=("-1") # Data Points to Simulate
-INSTRUCTIONS=("100000") # Instructions to Simulate
-INTERVAL=("10000") # Sim Cycles
-ROI_INTERVAL=("100")
+INSTRUCTIONS=("1000") # Instructions to Simulate
 # When to start ROI, in Sim Ticks, -or- ROI by setting "-1"
 PROFILE_START=("-1") 
 # Power Distribution Network Type:
@@ -108,8 +106,8 @@ PDN=("HARVARD")
 #PREDICTOR=("IdealSensor" "Test")
 #PREDICTOR=("IdealSensor" "Test" "DecorOnly" "uArchEventPredictor")
 #PREDICTOR=("IdealSensor" "DecorOnly" "uArchEventPredictor")
-#PREDICTOR=("HarvardPowerPredictor")
-PREDICTOR=("PerceptronPredictor")
+PREDICTOR=("HarvardPowerPredictor")
+#PREDICTOR=("PerceptronPredictor")
 #PREDICTOR=("Test")
 
 VOLTAGE="1.0"
@@ -131,15 +129,15 @@ CID=( "4")
 #name=("rijndael_encrypt" "dijkstra" "toast" "fft")
 #exe=("rijndael" "dijkstra" "toast" "fft")
 #opt=("${INPUT}/rijndael.asc ${OUTPUT}/rijndael.enc e 1234567890abcdeffedcba09876543211234567890abcdeffedcba0987654321" "${INPUT}/dijkstra.dat" "-fps -c ${INPUT}/toast.au" "4 4096")
-name=("basicmath" "bitcnts" "qsort" "susan_smooth" "susan_edge" "susan_corner" "dijkstra" "blowfish_encrypt" "blowfish_decrypt" "rijndael_encrypt" "rijndael_decrypt" "sha" "crc" "fft" "ffti" "toast" "untoast")
-exe=("basicmath" "bitcnts" "qsort" "susan" "susan" "susan" "dijkstra" "blowfish" "blowfish" "rijndael" "rijndael" "sha" "crc" "fft" "fft" "toast" "untoast")
-opt=("" "1000" "${INPUT}/qsort.dat" "${INPUT}/susan.pgm ${OUTPUT}/susan_s.pgm -s" "${INPUT}/susan.pgm ${OUTPUT}/susan_e.pgm -e" "${INPUT}/susan.pgm ${OUTPUT}/susan_c.pgm -c" "${INPUT}/dijkstra.dat" "e ${INPUT}/blowfish.asc ${OUTPUT}/blowfish.enc 1234567890abcdeffedcba0987654321" "d ${INPUT}/blowfish.enc ${OUTPUT}/blowfish.asc 1234567890abcdeffedcba0987654321" "${INPUT}/rijndael.asc ${OUTPUT}/rijndael.enc e 1234567890abcdeffedcba09876543211234567890abcdeffedcba0987654321" "${INPUT}/rijndael.enc ${OUTPUT}/rijndael.asc d 1234567890abcdeffedcba09876543211234567890abcdeffedcba0987654321" "${INPUT}/sha.asc" "${INPUT}/crc.pcm" "4 4096" "4 8192 -i" "-fps -c ${INPUT}/toast.au" "-fps -c ${INPUT}/untoast.au.run.gsm")
+#name=("basicmath" "bitcnts" "qsort" "susan_smooth" "susan_edge" "susan_corner" "dijkstra" "blowfish_encrypt" "blowfish_decrypt" "rijndael_encrypt" "rijndael_decrypt" "sha" "crc" "fft" "ffti" "toast" "untoast")
+#exe=("basicmath" "bitcnts" "qsort" "susan" "susan" "susan" "dijkstra" "blowfish" "blowfish" "rijndael" "rijndael" "sha" "crc" "fft" "fft" "toast" "untoast")
+#opt=("" "1000" "${INPUT}/qsort.dat" "${INPUT}/susan.pgm ${OUTPUT}/susan_s.pgm -s" "${INPUT}/susan.pgm ${OUTPUT}/susan_e.pgm -e" "${INPUT}/susan.pgm ${OUTPUT}/susan_c.pgm -c" "${INPUT}/dijkstra.dat" "e ${INPUT}/blowfish.asc ${OUTPUT}/blowfish.enc 1234567890abcdeffedcba0987654321" "d ${INPUT}/blowfish.enc ${OUTPUT}/blowfish.asc 1234567890abcdeffedcba0987654321" "${INPUT}/rijndael.asc ${OUTPUT}/rijndael.enc e 1234567890abcdeffedcba09876543211234567890abcdeffedcba0987654321" "${INPUT}/rijndael.enc ${OUTPUT}/rijndael.asc d 1234567890abcdeffedcba09876543211234567890abcdeffedcba0987654321" "${INPUT}/sha.asc" "${INPUT}/crc.pcm" "4 4096" "4 8192 -i" "-fps -c ${INPUT}/toast.au" "-fps -c ${INPUT}/untoast.au.run.gsm")
 #name=("blowfish_encrypt")
 #exe=("blowfish")
 #opt=("e ${INPUT}/blowfish.asc ${OUTPUT}/blowfish.enc 1234567890abcdeffedcba0987654321")
-#name=("fft")
-#exe=("fft")
-#opt=("4 4096")
+name=("fft")
+exe=("fft")
+opt=("4 4096")
 #name=("rijndael_encrypt")
 #exe=("rijndael")
 #opt=("${INPUT}/rijndael.asc ${OUTPUT}/rijndael.enc e 1234567890abcdeffedcba09876543211234567890abcdeffedcba0987654321")
@@ -158,8 +156,8 @@ for j in ${!name[@]}; do
           for cs in ${!CPU_CYCLES[@]}; do
             for pred in ${!PREDICTOR[@]}; do
               sleep 0.5
-              TN="${name[$j]}_${INSTRUCTIONS[$i]}_${CPU_CYCLES[${cs}]}_${CID[$c]}_${PDN[$p]}_${PREDICTOR[$pred]}"
-              se_sc_classic_mc_ncv $TN ${DURATION[$i]} ${INSTRUCTIONS[$i]} ${INTERVAL[$i]} ${PROFILE_START[$i]} ${exe[$j]} "${opt[$j]}" ${CLK[$c]} ${PDN[$p]} ${CLK_[$c]} $VOLTAGE ${CPU_CYCLES[${cs}]} ${PREDICTOR[$pred]}
+              TN="${name[$j]}_${INSTRUCTIONS[$i]}_${CPU_CYCLES[${cs}]}_${CID[$c]}_${PDN[$p]}_${PREDICTOR[$pred]}_1core"
+              se_classic_mc_ncv $TN ${DURATION[$i]} ${INSTRUCTIONS[$i]} ${PROFILE_START[$i]} ${exe[$j]} "${opt[$j]}" ${CLK[$c]} ${PDN[$p]} ${CLK_[$c]} $VOLTAGE ${CPU_CYCLES[${cs}]} ${PREDICTOR[$pred]} 1 ${L1I[$k]} ${L1D[$k]} ${L2[$k]} ${L3[$k]}
               while [ `jobs | wc -l` -ge 16 ]; do
                 sleep 1
               done
