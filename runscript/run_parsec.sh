@@ -118,24 +118,24 @@ PREDICTOR=("Test")
 VOLTAGE="1.0"
 CPU_CYCLES=("10")
 
-L1D=("4kB" "16kB" "64kB")
-L1I=("2kB" "8kB" "32kB")
-L2=("64kB" "128kB" "256kB")
-L3=("2MB" "8MB" "16MB")
-CACHE=("SMALL" "MEDIUM" "LARGE")
+#L1D=("4kB" "16kB" "64kB")
+#L1I=("2kB" "8kB" "32kB")
+#L2=("64kB" "128kB" "256kB")
+#L3=("2MB" "8MB" "16MB")
+#CACHE=("SMALL" "MEDIUM" "LARGE")
 
-#L1D=("4kB")
-#L1I=("2kB")
-#L2=("64kB")
-#L3=("2MB")
-#CACHE=("SMALL")
+L1D=("4kB")
+L1I=("2kB")
+L2=("64kB")
+L3=("2MB")
+CACHE=("SMALL")
 
 CLK=( "4.0GHz")
 CLK_=("4000000000")
 CID=( "4")
 
-#NC=("8")
-NC=("1" "2" "4" "8")
+NC=("8")
+#NC=("1" "2" "4" "8")
 
 #LITHOGRAPHY=("22" "28" "32" "45" "65" "90")
 
@@ -149,14 +149,14 @@ NC=("1" "2" "4" "8")
 #  "\055\055vips-concurrency=%s im_benchmark ${INPUT}/vips.v ${OUTPUT}/vips_%s.v" \
 #  "%s 10000 300 ${INPUT}/canneal.nets 30000"
 #)
-name=("swaptions" "fluidanimate" "blackscholes" "canneal")
-exe=("swaptions" "fluidanimate" "blackscholes" "canneal")
-opt=( \
-  "\055ns 1000 -sm 100000 -nt %s -sd 012384701" \
-  "%s 10000 ${INPUT}/fluidanimate.fluid" \
-  "%s ${INPUT}/blackscholes.txt ${OUTPUT}/blackscholes_%s.txt" \
-  "%s 10000 300 ${INPUT}/canneal.nets 30000"
-)
+#name=("swaptions" "fluidanimate" "blackscholes" "canneal")
+#exe=("swaptions" "fluidanimate" "blackscholes" "canneal")
+#opt=( \
+#  "\055ns 1000 -sm 100000 -nt %s -sd 012384701" \
+#  "%s 10000 ${INPUT}/fluidanimate.fluid" \
+#  "%s ${INPUT}/blackscholes.txt ${OUTPUT}/blackscholes_%s.txt" \
+#  "%s 10000 300 ${INPUT}/canneal.nets 30000"
+#)
 #name=("swaptions")
 #exe=("swaptions")
 #opt=( \
@@ -177,11 +177,11 @@ opt=( \
 #opt=( \
 #  "\055\055vips-concurrency=%s im_benchmark ${INPUT}/vips.v ${OUTPUT}/vips_%s.v" \
 #)
-#name=("blackscholes")
-#exe=("blackscholes")
-#opt=( \
-#  "%s ${INPUT}/blackscholes.txt ${OUTPUT}/blackscholes_%s.txt" \
-#)
+name=("blackscholes")
+exe=("blackscholes")
+opt=( \
+  "%s ${INPUT}/blackscholes.txt ${OUTPUT}/blackscholes_%s.txt" \
+)
 #name=("canneal")
 #exe=("canneal")
 #opt=( \

@@ -42,6 +42,25 @@ se_classic_mc_ncv() {
   L1D_=${15}
   L2_=${16}
   L3_=${17}
+  CW=${18}     # Core Width (8)
+  FBS=${19}    # Fetch Buffer Size (64)
+  FQS=${20}    # Fetch Queue Size (32)
+  LQS=${21}    # Load Queue Size (32)
+  SQS=${22}    # Store Queue Size (32)
+  NROB=${23}   # Num Reorder Buffers (1)
+  NROBE=${24}  # Num ROB Entries (192)
+  NIPR=${25}   # Num Integer Physical Registers (256)
+  NFPPR=${26}  # Num FP Physical Registers (256)
+  NVR=${27}    # Num Vector Physical Registers (256)
+  NVPR=${28}   # Num Vector Pred Physical Registers (32)
+  IQS=${29}    # Instruction Queue Size (64)
+  IALUC=${30}  # Integer ALU Count (6)
+  IMDC=${31}   # Integer Multiply Divide Unit Count (4)
+  FPALUC=${32} # FP ALU Count (4)
+  FPMDC=${33}  # FP Multiply Divide Unit Count (2)
+  SIMDC=${34}  # SIMD Unit Count (2)
+  MPDT=${35}   # McPAT Device Type, [0,1,2]
+  MPSF=${36}   # McPAT Scaling Factor, HACK, Make MCPAT natively support < 22nm
   
 #$GEM5_ROOT/build/X86/gem5.fast \
 #$GEM5_ROOT/build/X86/gem5.opt \
@@ -52,6 +71,9 @@ $GEM5_ROOT/build/X86/gem5.fast \
 --mcpat_path=${PREDICT_T_ROOT}/mcpat \
 --mcpat_out=${OUTPUT_ROOT}/mcpat_out \
 --mcpat_testname=$TN \
+--mcpat_device_type=$MPDT \
+--mcpat_use_fg_pg \
+--mcpat_scale_factor=$MPSF \
 --power_profile_start=${PS} \
 --power_profile_duration=${DUR} \
 --power_profile_instrs=${INSTRS} \
@@ -69,6 +91,23 @@ $GEM5_ROOT/build/X86/gem5.fast \
 --power_pred_type=${PRED} \
 --power_pred_train_name=${TRAINING_ROOT}/${TN}.csv \
 --num-cpus=${NCORE} \
+--cpu_superscalar_width=$CW \
+--cpu_fetch_buffer_size=$FBS \
+--cpu_fetch_q_size=$FQS \
+--cpu_lq_size=$LQS \
+--cpu_sq_size=$SQS \
+--cpu_num_robs=$NROB \
+--cpu_num_rob_entries=$NROBE \
+--cpu_phys_int_regs=$NIPR \
+--cpu_phys_fp_regs=$NFPPR \
+--cpu_phys_vec_regs=$NVR \
+--cpu_phys_vec_pred_regs=$NVPR \
+--cpu_num_iq_entries=$IQS \
+--cpu_intALUcount=$IALUC \
+--cpu_intMULDIVcount=$IMDC \
+--cpu_fpALUcount=$FPALUC \
+--cpu_fpMULDIVcount=$FPMDC \
+--cpu_simdcount=$SIMDC \
 --cpu-type=DerivO3CPU \
 --l1i_size=${L1I_} \
 --l1d_size=${L1D_} \
@@ -83,17 +122,18 @@ $GEM5_ROOT/build/X86/gem5.fast \
   #--debug-flags=StatEvent \
     #--ncverilog_feedback \
   #gdb --args $GEM5_ROOT/build/X86/gem5.debug \
-    #--l3-hwp-type=TaggedPrefetcher \
   time $GEM5_ROOT/build/X86/gem5.fast \
     --outdir=${OUTPUT_ROOT}/gem5_out/$TN \
     --mcpat_enable \
     --mcpat_path=${MCPAT_ROOT} \
     --mcpat_out=${OUTPUT_ROOT}/mcpat_out \
     --mcpat_testname=$TN \
+    --mcpat_device_type=$MPDT \
+    --mcpat_use_fg_pg \
+    --mcpat_scale_factor=$MPSF \
     --power_profile_start=${PS} \
     --power_profile_duration=${DUR} \
     --power_profile_instrs=${INSTRS} \
-    --ncverilog_enable \
     --ncverilog_warmup=10 \
     --ncverilog_path=${PREDICT_T_ROOT}/circuit_model \
     --power-supply-type=$P \
@@ -107,6 +147,23 @@ $GEM5_ROOT/build/X86/gem5.fast \
     --power_pred_type=${PRED} \
     --power_pred_train_name=${TRAINING_ROOT}/${TN}.csv \
     --num-cpus=${NCORE} \
+    --cpu_superscalar_width=$CW \
+    --cpu_fetch_buffer_size=$FBS \
+    --cpu_fetch_q_size=$FQS \
+    --cpu_lq_size=$LQS \
+    --cpu_sq_size=$SQS \
+    --cpu_num_robs=$NROB \
+    --cpu_num_rob_entries=$NROBE \
+    --cpu_phys_int_regs=$NIPR \
+    --cpu_phys_fp_regs=$NFPPR \
+    --cpu_phys_vec_regs=$NVR \
+    --cpu_phys_vec_pred_regs=$NVPR \
+    --cpu_num_iq_entries=$IQS \
+    --cpu_intALUcount=$IALUC \
+    --cpu_intMULDIVcount=$IMDC \
+    --cpu_fpALUcount=$FPALUC \
+    --cpu_fpMULDIVcount=$FPMDC \
+    --cpu_simdcount=$SIMDC \
     --cpu-type=DerivO3CPU \
     --l1i_size=${L1I_} \
     --l1d_size=${L1D_} \
@@ -138,12 +195,30 @@ se_classic_mc_ncv_debug() {
   CS=${11}
   PRED=${12}
   NCORE=${13}
-  L1I="32kB"
-  L1D="64kB"
-  L2="256kB"
-  L3="16MB"
+  L1I_=${14}
+  L1D_=${15}
+  L2_=${16}
+  L3_=${17}
+  CW=${18}     # Core Width (8)
+  FBS=${19}    # Fetch Buffer Size (64)
+  FQS=${20}    # Fetch Queue Size (32)
+  LQS=${21}    # Load Queue Size (32)
+  SQS=${22}    # Store Queue Size (32)
+  NROB=${23}   # Num Reorder Buffers (1)
+  NROBE=${24}  # Num ROB Entries (192)
+  NIPR=${25}   # Num Integer Physical Registers (256)
+  NFPPR=${26}  # Num FP Physical Registers (256)
+  NVR=${27}    # Num Vector Physical Registers (256)
+  NVPR=${28}   # Num Vector Pred Physical Registers (32)
+  IQS=${29}    # Instruction Queue Size (64)
+  IALUC=${30}  # Integer ALU Count (6)
+  IMDC=${31}   # Integer Multiply Divide Unit Count (4)
+  FPALUC=${32} # FP ALU Count (4)
+  FPMDC=${33}  # FP Multiply Divide Unit Count (2)
+  SIMDC=${34}  # SIMD Unit Count (2)
+  MPDT=${35}   # McPAT Device Type, [0,1,2]
+  MPSF=${36}   # McPAT Scaling Factor, HACK, Make MCPAT natively support < 22nm
   
-#--ncverilog_enable \
   echo "
 gdb --args $GEM5_ROOT/build/X86/gem5.debug \
 --outdir=${OUTPUT_ROOT}/gem5_out/$TN \
@@ -151,9 +226,13 @@ gdb --args $GEM5_ROOT/build/X86/gem5.debug \
 --mcpat_path=${PREDICT_T_ROOT}/mcpat \
 --mcpat_out=${OUTPUT_ROOT}/mcpat_out \
 --mcpat_testname=$TN \
+--mcpat_device_type=$MPDT \
+--mcpat_use_fg_pg \
+--mcpat_scale_factor=$MPSF \
 --power_profile_start=${PS} \
 --power_profile_duration=${DUR} \
 --power_profile_instrs=${INSTRS} \
+--ncverilog_enable \
 --ncverilog_warmup=10 \
 --ncverilog_path=${PREDICT_T_ROOT}/circuit_model \
 --power-supply-type=$P \
@@ -167,6 +246,23 @@ gdb --args $GEM5_ROOT/build/X86/gem5.debug \
 --power_pred_type=${PRED} \
 --power_pred_train_name=${TRAINING_ROOT}/${TN}.csv \
 --num-cpus=${NCORE} \
+--cpu_superscalar_width=$CW \
+--cpu_fetch_buffer_size=$FBS \
+--cpu_fetch_q_size=$FQS \
+--cpu_lq_size=$LQS \
+--cpu_sq_size=$SQS \
+--cpu_num_robs=$NROB \
+--cpu_num_rob_entries=$NROBE \
+--cpu_phys_int_regs=$NIPR \
+--cpu_phys_fp_regs=$NFPPR \
+--cpu_phys_vec_regs=$NVR \
+--cpu_phys_vec_pred_regs=$NVPR \
+--cpu_num_iq_entries=$IQS \
+--cpu_intALUcount=$IALUC \
+--cpu_intMULDIVcount=$IMDC \
+--cpu_fpALUcount=$FPALUC \
+--cpu_fpMULDIVcount=$FPMDC \
+--cpu_simdcount=$SIMDC \
 --cpu-type=DerivO3CPU \
 --l1i_size=${L1I} \
 --l1d_size=${L1D} \
@@ -186,9 +282,13 @@ gdb --args $GEM5_ROOT/build/X86/gem5.debug \
     --mcpat_path=${MCPAT_ROOT} \
     --mcpat_out=${OUTPUT_ROOT}/mcpat_out \
     --mcpat_testname=$TN \
+    --mcpat_device_type=$MPDT \
+    --mcpat_use_fg_pg \
+    --mcpat_scale_factor=$MPSF \
     --power_profile_start=${PS} \
     --power_profile_duration=${DUR} \
     --power_profile_instrs=${INSTRS} \
+    --ncverilog_enable \
     --ncverilog_warmup=10 \
     --ncverilog_path=${PREDICT_T_ROOT}/circuit_model \
     --power-supply-type=$P \
@@ -202,6 +302,23 @@ gdb --args $GEM5_ROOT/build/X86/gem5.debug \
     --power_pred_type=${PRED} \
     --power_pred_train_name=${TRAINING_ROOT}/${TN}.csv \
     --num-cpus=${NCORE} \
+    --cpu_superscalar_width=$CW \
+    --cpu_fetch_buffer_size=$FBS \
+    --cpu_fetch_q_size=$FQS \
+    --cpu_lq_size=$LQS \
+    --cpu_sq_size=$SQS \
+    --cpu_num_robs=$NROB \
+    --cpu_num_rob_entries=$NROBE \
+    --cpu_phys_int_regs=$NIPR \
+    --cpu_phys_fp_regs=$NFPPR \
+    --cpu_phys_vec_regs=$NVR \
+    --cpu_phys_vec_pred_regs=$NVPR \
+    --cpu_num_iq_entries=$IQS \
+    --cpu_intALUcount=$IALUC \
+    --cpu_intMULDIVcount=$IMDC \
+    --cpu_fpALUcount=$FPALUC \
+    --cpu_fpMULDIVcount=$FPMDC \
+    --cpu_simdcount=$SIMDC \
     --cpu-type=DerivO3CPU \
     --l1i_size=${L1I} \
     --l1d_size=${L1D} \

@@ -149,6 +149,8 @@ tests/
 testbin/
 testbin_old/
 parsec/
+parsec_testbin/
+parsec_testbin_m5/
 mcpat_out/
 gem5_out/
 text_out/

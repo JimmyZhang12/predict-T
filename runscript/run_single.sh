@@ -93,39 +93,117 @@ TRAINING_ROOT="$OUTPUT_ROOT/training_data"
 print_info "TRAINING_ROOT $TRAINING_ROOT"
 
 
-#--------------------------------------------------------------------
+#---------------------------------------------------
+# Simulation Params
+#---------------------------------------------------
 # Configure Simulation Parameters
-#--------------------------------------------------------------------
 DURATION=("-1") # Data Points to Simulate
 INSTRUCTIONS=("1000") # Instructions to Simulate
 # When to start ROI, in Sim Ticks, -or- ROI by setting "-1"
 PROFILE_START=("-1") 
-# Power Distribution Network Type:
+
+
+#---------------------------------------------------
+# Device Params:
+#---------------------------------------------------
+#DEVICE_TYPE=("MOBILE" "LAPTOP" "DESKTOP")
+# !!!! MCPAT DEVICE TYPE 2 BROKEN !!!!
+#McPAT_DEVICE_TYPE=("1" "1" "0")
+#McPAT_SCALE_FACTOR=("0.33" "1.0" "1.0")
+DEVICE_TYPE=("MOBILE")
+McPAT_DEVICE_TYPE=("1")
+McPAT_SCALE_FACTOR=("0.33") # This is a HACK, Fix McPAT to support < 22nm planar
+VOLTAGE="1.0"
+
+#---------------------------------------------------
+# Power Delivery Params
+#---------------------------------------------------
+#PDN=("ARM" "INTEL_MOBILE" "INTEL_DT")
 PDN=("HARVARD")
-#PREDICTOR=("DecorOnly" "uArchEventPredictor")
-#PREDICTOR=("IdealSensor" "Test")
+
+#---------------------------------------------------
+# Cache Params:
+#---------------------------------------------------
+#L1D=("4kB" "16kB" "64kB")
+#L1I=("2kB" "8kB" "32kB")
+#L2=("64kB" "128kB" "256kB")
+#L3=("2MB" "8MB" "16MB")
+L1D=("4kB")
+L1I=("2kB")
+L2=("64kB")
+L3=("2MB")
+
+#---------------------------------------------------
+# Predictor Params:
+#---------------------------------------------------
+# Stat Dump Cycles
+CPU_CYCLES=("10")
 #PREDICTOR=("IdealSensor" "Test" "DecorOnly" "uArchEventPredictor")
 #PREDICTOR=("IdealSensor" "DecorOnly" "uArchEventPredictor")
-PREDICTOR=("HarvardPowerPredictor")
-#PREDICTOR=("PerceptronPredictor")
+#PREDICTOR=("IdealSensor" "DecorOnly" "uArchEventPredictor")
+#PREDICTOR=("HarvardPowerPredictor")
+PREDICTOR=("PerceptronPredictor")
 #PREDICTOR=("Test")
 
-VOLTAGE="1.0"
-CPU_CYCLES=("10")
+#---------------------------------------------------
+# CPU Params:
+#---------------------------------------------------
+#CLK=( "2.0GHz"     "3.0GHz"     "4.0GHz")
+#CLK_=("2000000000" "3000000000" "4000000000")
+## Superscalar Core Width
+#CORE_WIDTH=("2" "4" "8")
+## Fetch Params
+#FETCH_BUFFER_SIZE=("16" "32" "64")
+#FETCH_QUEUE_SIZE=("8" "16" "32")
+## LQ/SQ Size
+#LOAD_QUEUE_SIZE=("8" "16" "32")
+#STORE_QUEUE_SIZE=("8" "16" "32")
+## ReorderBuffer Params
+#NUM_ROB=("1" "1" "1")
+#NUM_ROB_ENTRIES=("48" "96" "192")
+## Regfile Params
+#INT_PHYS_REGS=("64" "128" "256")
+#FP_PHYS_REGS=("64" "128" "256")
+#VEC_PHYS_REGS=("64" "128" "256")
+#VEC_PRED_PHYS_REGS=("8" "16" "32")
+## Instruction Queue Size
+#INSTR_QUEUE_SIZE=("16" "32" "64")
+## Functional Unit Counts
+#INT_ALU_COUNT=("6" "6" "8")
+#INT_MULT_DIV_COUNT=("4" "4" "6")
+#FP_ALU_COUNT=("2" "4" "6")
+#FP_MULT_DIV_COUNT=("1" "2" "4")
+#SIMD_UNIT_COUNT=("1" "2" "4")
+CLK=( "2.0GHz")
+CLK_=("2000000000")
+# Superscalar Core Width
+CORE_WIDTH=("2")
+# Fetch Params
+FETCH_BUFFER_SIZE=("16")
+FETCH_QUEUE_SIZE=("8")
+# LQ/SQ Size
+LOAD_QUEUE_SIZE=("8")
+STORE_QUEUE_SIZE=("8")
+# ReorderBuffer Params
+NUM_ROB=("1")
+NUM_ROB_ENTRIES=("48")
+# Regfile Params
+INT_PHYS_REGS=("64")
+FP_PHYS_REGS=("64")
+VEC_PHYS_REGS=("64")
+VEC_PRED_PHYS_REGS=("8")
+# Instruction Queue Size
+INSTR_QUEUE_SIZE=("16")
+# Functional Unit Counts
+INT_ALU_COUNT=("6")
+INT_MULT_DIV_COUNT=("4")
+FP_ALU_COUNT=("2")
+FP_MULT_DIV_COUNT=("1")
+SIMD_UNIT_COUNT=("1")
 
-L1D=("64kB")
-L1I=("32kB")
-L2=("256kB")
-L3=("16MB")
-#CLK=( "3.5GHz")
-#CLK_=("3500000000")
-#CLK=( "3.0GHz"     "4.0GHz")
-#CLK_=("3000000000" "4000000000")
-#CID=( "3"          "4")
-CLK=( "4.0GHz")
-CLK_=("4000000000")
-CID=( "4")
-
+#---------------------------------------------------
+# Test Executables:
+#---------------------------------------------------
 #name=("rijndael_encrypt" "dijkstra" "toast" "fft")
 #exe=("rijndael" "dijkstra" "toast" "fft")
 #opt=("${INPUT}/rijndael.asc ${OUTPUT}/rijndael.enc e 1234567890abcdeffedcba09876543211234567890abcdeffedcba0987654321" "${INPUT}/dijkstra.dat" "-fps -c ${INPUT}/toast.au" "4 4096")
@@ -149,21 +227,47 @@ opt=("4 4096")
 # Run
 #--------------------------------------------------------------------
 for j in ${!name[@]}; do 
-  for i in ${!DURATION[@]}; do 
-    for k in ${!L1D[@]}; do 
-      for p in ${!PDN[@]}; do
-        for c in ${!CLK[@]}; do 
-          for cs in ${!CPU_CYCLES[@]}; do
-            for pred in ${!PREDICTOR[@]}; do
-              sleep 0.5
-              TN="${name[$j]}_${INSTRUCTIONS[$i]}_${CPU_CYCLES[${cs}]}_${CID[$c]}_${PDN[$p]}_${PREDICTOR[$pred]}_1core"
-              se_classic_mc_ncv $TN ${DURATION[$i]} ${INSTRUCTIONS[$i]} ${PROFILE_START[$i]} ${exe[$j]} "${opt[$j]}" ${CLK[$c]} ${PDN[$p]} ${CLK_[$c]} $VOLTAGE ${CPU_CYCLES[${cs}]} ${PREDICTOR[$pred]} 1 ${L1I[$k]} ${L1D[$k]} ${L2[$k]} ${L3[$k]}
-              while [ `jobs | wc -l` -ge 16 ]; do
-                sleep 1
-              done
-            done
-          done
-        done
+  for i in ${!DEVICE_TYPE[@]}; do
+    for pred in ${!PREDICTOR[@]}; do
+      sleep 0.5
+      TN="${name[$j]}_${INSTRUCTIONS[$i]}_${CPU_CYCLES[0]}_${DEVICE_TYPE[$i]}_${PDN[$i]}_${PREDICTOR[$pred]}"
+      se_classic_mc_ncv \
+          $TN ${DURATION[$i]} \
+          ${INSTRUCTIONS[$i]} \
+          ${PROFILE_START[$i]} \
+          ${exe[$j]} \
+          "${opt[$j]}" \
+          ${CLK[$i]} \
+          ${PDN[$i]} \
+          ${CLK_[$c]} \
+          $VOLTAGE \
+          ${CPU_CYCLES[0]} \
+          ${PREDICTOR[$pred]} \
+          1 \
+          ${L1I[$i]} \
+          ${L1D[$i]} \
+          ${L2[$i]} \
+          ${L3[$i]} \
+          ${CORE_WIDTH[$i]} \
+          ${FETCH_BUFFER_SIZE[$i]} \
+          ${FETCH_QUEUE_SIZE[$i]} \
+          ${LOAD_QUEUE_SIZE[$i]} \
+          ${STORE_QUEUE_SIZE[$i]} \
+          ${NUM_ROB[$i]} \
+          ${NUM_ROB_ENTRIES[$i]} \
+          ${INT_PHYS_REGS[$i]} \
+          ${FP_PHYS_REGS[$i]} \
+          ${VEC_PHYS_REGS[$i]} \
+          ${VEC_PRED_PHYS_REGS[$i]} \
+          ${INSTR_QUEUE_SIZE[$i]} \
+          ${INT_ALU_COUNT[$i]} \
+          ${INT_MULT_DIV_COUNT[$i]} \
+          ${FP_ALU_COUNT[$i]} \
+          ${FP_MULT_DIV_COUNT[$i]} \
+          ${SIMD_UNIT_COUNT[$i]} \
+          ${McPAT_DEVICE_TYPE[$i]}
+      while [ `jobs | wc -l` -ge 16 ]; do
+        sleep 1
       done
     done
   done
