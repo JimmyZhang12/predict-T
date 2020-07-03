@@ -134,6 +134,7 @@ $GEM5_ROOT/build/X86/gem5.fast \
     --power_profile_start=${PS} \
     --power_profile_duration=${DUR} \
     --power_profile_instrs=${INSTRS} \
+    --ncverilog_enable \
     --ncverilog_warmup=10 \
     --ncverilog_path=${PREDICT_T_ROOT}/circuit_model \
     --power-supply-type=$P \

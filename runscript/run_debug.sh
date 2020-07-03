@@ -286,9 +286,12 @@ FP_ALU_COUNT=("6")
 FP_MULT_DIV_COUNT=("4")
 SIMD_UNIT_COUNT=("4")
 
-name=("toast")
-exe=("toast")
-opt=("-fps -c ${INPUT}/toast.au")
+#name=("toast")
+#exe=("toast")
+#opt=("-fps -c ${INPUT}/toast.au")
+name=("rijndael_encrypt")
+exe=("rijndael")
+opt=("${INPUT}/rijndael.asc ${OUTPUT}/rijndael.enc e 1234567890abcdeffedcba09876543211234567890abcdeffedcba0987654321")
 
 #--------------------------------------------------------------------
 # Run
