@@ -97,41 +97,67 @@ print_info "TRAINING_ROOT $TRAINING_ROOT"
 # Simulation Params
 #---------------------------------------------------
 # Configure Simulation Parameters
-DURATION=("-1") # Data Points to Simulate
-INSTRUCTIONS=("1000") # Instructions to Simulate
+DURATION=("-1" "-1" "-1") # Data Points to Simulate
+INSTRUCTIONS=("100000" "100000" "100000") # Instructions to Simulate
 # When to start ROI, in Sim Ticks, -or- ROI by setting "-1"
-PROFILE_START=("-1") 
+PROFILE_START=("-1" "-1" "-1") 
 
 
 #---------------------------------------------------
 # Device Params:
 #---------------------------------------------------
-#DEVICE_TYPE=("MOBILE" "LAPTOP" "DESKTOP")
-# !!!! MCPAT DEVICE TYPE 2 BROKEN !!!!
-#McPAT_DEVICE_TYPE=("1" "1" "0")
-#McPAT_SCALE_FACTOR=("0.33" "1.0" "1.0")
-DEVICE_TYPE=("MOBILE")
-McPAT_DEVICE_TYPE=("1")
-McPAT_SCALE_FACTOR=("0.33") # This is a HACK, Fix McPAT to support < 22nm planar
+# All:
+DEVICE_TYPE=("MOBILE" "LAPTOP" "DESKTOP")
+McPAT_DEVICE_TYPE=("1" "1" "0")
+McPAT_SCALE_FACTOR=("0.33" "1.0" "1.0")
+NUM_CORES=("1" "1" "1")
+#NUM_CORES=("4" "4" "8")
+# Mobile:
+#DEVICE_TYPE=("MOBILE")
+#McPAT_DEVICE_TYPE=("1")
+#McPAT_SCALE_FACTOR=("0.33") # This is a HACK, Fix McPAT to support < 22nm planar
+#NUM_CORES=("1")
+# Laptop:
+#DEVICE_TYPE=("LAPTOP")
+#McPAT_DEVICE_TYPE=("1")
+#McPAT_SCALE_FACTOR=("1.0") # This is a HACK, Fix McPAT to support < 22nm planar
+#NUM_CORES=("4")
+# Desktop:
+#DEVICE_TYPE=("DESKTOP")
+#McPAT_DEVICE_TYPE=("0")
+#McPAT_SCALE_FACTOR=("1.0") # This is a HACK, Fix McPAT to support < 22nm planar
+#NUM_CORES=("8")
 VOLTAGE="1.0"
 
 #---------------------------------------------------
 # Power Delivery Params
 #---------------------------------------------------
-#PDN=("ARM" "INTEL_MOBILE" "INTEL_DT")
-PDN=("HARVARD")
+PDN=("ARM" "INTEL_MOBILE" "INTEL_DT")
+#PDN=("HARVARD")
 
 #---------------------------------------------------
 # Cache Params:
 #---------------------------------------------------
-#L1D=("4kB" "16kB" "64kB")
-#L1I=("2kB" "8kB" "32kB")
-#L2=("64kB" "128kB" "256kB")
-#L3=("2MB" "8MB" "16MB")
-L1D=("4kB")
-L1I=("2kB")
-L2=("64kB")
-L3=("2MB")
+# ALL:
+L1D=("4kB" "16kB" "64kB")
+L1I=("2kB" "8kB" "32kB")
+L2=("64kB" "128kB" "256kB")
+L3=("2MB" "8MB" "16MB")
+# Mobile:
+#L1D=("4kB")
+#L1I=("2kB")
+#L2=("64kB")
+#L3=("2MB")
+# Laptop:
+#L1D=("16kB")
+#L1I=("8kB")
+#L2=("128kB")
+#L3=("8MB")
+# Desktop:
+#L1D=("16kB")
+#L1I=("8kB")
+#L2=("128kB")
+#L3=("8MB")
 
 #---------------------------------------------------
 # Predictor Params:
@@ -148,58 +174,116 @@ PREDICTOR=("PerceptronPredictor")
 #---------------------------------------------------
 # CPU Params:
 #---------------------------------------------------
-#CLK=( "2.0GHz"     "3.0GHz"     "4.0GHz")
-#CLK_=("2000000000" "3000000000" "4000000000")
-## Superscalar Core Width
-#CORE_WIDTH=("2" "4" "8")
-## Fetch Params
-#FETCH_BUFFER_SIZE=("16" "32" "64")
-#FETCH_QUEUE_SIZE=("8" "16" "32")
-## LQ/SQ Size
-#LOAD_QUEUE_SIZE=("8" "16" "32")
-#STORE_QUEUE_SIZE=("8" "16" "32")
-## ReorderBuffer Params
-#NUM_ROB=("1" "1" "1")
-#NUM_ROB_ENTRIES=("48" "96" "192")
-## Regfile Params
-#INT_PHYS_REGS=("64" "128" "256")
-#FP_PHYS_REGS=("64" "128" "256")
-#VEC_PHYS_REGS=("64" "128" "256")
-#VEC_PRED_PHYS_REGS=("8" "16" "32")
-## Instruction Queue Size
-#INSTR_QUEUE_SIZE=("16" "32" "64")
-## Functional Unit Counts
-#INT_ALU_COUNT=("6" "6" "8")
-#INT_MULT_DIV_COUNT=("4" "4" "6")
-#FP_ALU_COUNT=("2" "4" "6")
-#FP_MULT_DIV_COUNT=("1" "2" "4")
-#SIMD_UNIT_COUNT=("1" "2" "4")
-CLK=( "2.0GHz")
-CLK_=("2000000000")
+CLK=( "2.0GHz"     "3.0GHz"     "4.0GHz")
+CLK_=("2000000000" "3000000000" "4000000000")
 # Superscalar Core Width
-CORE_WIDTH=("2")
+CORE_WIDTH=("2" "4" "8")
 # Fetch Params
-FETCH_BUFFER_SIZE=("16")
-FETCH_QUEUE_SIZE=("8")
+FETCH_BUFFER_SIZE=("16" "32" "64")
+FETCH_QUEUE_SIZE=("8" "16" "32")
 # LQ/SQ Size
-LOAD_QUEUE_SIZE=("8")
-STORE_QUEUE_SIZE=("8")
+LOAD_QUEUE_SIZE=("8" "16" "32")
+STORE_QUEUE_SIZE=("8" "16" "32")
 # ReorderBuffer Params
-NUM_ROB=("1")
-NUM_ROB_ENTRIES=("48")
+NUM_ROB=("1" "1" "1")
+NUM_ROB_ENTRIES=("48" "96" "192")
 # Regfile Params
-INT_PHYS_REGS=("64")
-FP_PHYS_REGS=("64")
-VEC_PHYS_REGS=("64")
-VEC_PRED_PHYS_REGS=("8")
+INT_PHYS_REGS=("64" "128" "256")
+FP_PHYS_REGS=("64" "128" "256")
+VEC_PHYS_REGS=("64" "128" "256")
+VEC_PRED_PHYS_REGS=("8" "16" "32")
 # Instruction Queue Size
-INSTR_QUEUE_SIZE=("16")
+INSTR_QUEUE_SIZE=("16" "32" "64")
 # Functional Unit Counts
-INT_ALU_COUNT=("6")
-INT_MULT_DIV_COUNT=("4")
-FP_ALU_COUNT=("2")
-FP_MULT_DIV_COUNT=("1")
-SIMD_UNIT_COUNT=("1")
+INT_ALU_COUNT=("6" "6" "8")
+INT_MULT_DIV_COUNT=("4" "4" "6")
+FP_ALU_COUNT=("2" "4" "6")
+FP_MULT_DIV_COUNT=("1" "2" "4")
+SIMD_UNIT_COUNT=("1" "2" "4")
+
+# Mobile
+#CLK=( "2.0GHz")
+#CLK_=("2000000000")
+## Superscalar Core Width
+#CORE_WIDTH=("2")
+## Fetch Params
+#FETCH_BUFFER_SIZE=("16")
+#FETCH_QUEUE_SIZE=("8")
+## LQ/SQ Size
+#LOAD_QUEUE_SIZE=("8")
+#STORE_QUEUE_SIZE=("8")
+## ReorderBuffer Params
+#NUM_ROB=("1")
+#NUM_ROB_ENTRIES=("48")
+## Regfile Params
+#INT_PHYS_REGS=("64")
+#FP_PHYS_REGS=("64")
+#VEC_PHYS_REGS=("64")
+#VEC_PRED_PHYS_REGS=("8")
+## Instruction Queue Size
+#INSTR_QUEUE_SIZE=("16")
+## Functional Unit Counts
+#INT_ALU_COUNT=("6")
+#INT_MULT_DIV_COUNT=("4")
+#FP_ALU_COUNT=("2")
+#FP_MULT_DIV_COUNT=("1")
+#SIMD_UNIT_COUNT=("1")
+
+# Laptop
+#CLK=( "3.0GHz")
+#CLK_=("3000000000")
+## Superscalar Core Width
+#CORE_WIDTH=("4")
+## Fetch Params
+#FETCH_BUFFER_SIZE=("32")
+#FETCH_QUEUE_SIZE=("16")
+## LQ/SQ Size
+#LOAD_QUEUE_SIZE=("16")
+#STORE_QUEUE_SIZE=("16")
+## ReorderBuffer Params
+#NUM_ROB=("1")
+#NUM_ROB_ENTRIES=("96")
+## Regfile Params
+#INT_PHYS_REGS=("128")
+#FP_PHYS_REGS=("128")
+#VEC_PHYS_REGS=("128")
+#VEC_PRED_PHYS_REGS=("16")
+## Instruction Queue Size
+#INSTR_QUEUE_SIZE=("32")
+## Functional Unit Counts
+#INT_ALU_COUNT=("6")
+#INT_MULT_DIV_COUNT=("4")
+#FP_ALU_COUNT=("4")
+#FP_MULT_DIV_COUNT=("2")
+#SIMD_UNIT_COUNT=("1")
+
+# Desktop
+#CLK=( "4.0GHz")
+#CLK_=("4000000000")
+## Superscalar Core Width
+#CORE_WIDTH=("8")
+## Fetch Params
+#FETCH_BUFFER_SIZE=("64")
+#FETCH_QUEUE_SIZE=("32")
+## LQ/SQ Size
+#LOAD_QUEUE_SIZE=("32")
+#STORE_QUEUE_SIZE=("32")
+## ReorderBuffer Params
+#NUM_ROB=("1")
+#NUM_ROB_ENTRIES=("192")
+## Regfile Params
+#INT_PHYS_REGS=("256")
+#FP_PHYS_REGS=("256")
+#VEC_PHYS_REGS=("256")
+#VEC_PRED_PHYS_REGS=("32")
+## Instruction Queue Size
+#INSTR_QUEUE_SIZE=("64")
+## Functional Unit Counts
+#INT_ALU_COUNT=("8")
+#INT_MULT_DIV_COUNT=("6")
+#FP_ALU_COUNT=("6")
+#FP_MULT_DIV_COUNT=("4")
+#SIMD_UNIT_COUNT=("4")
 
 #---------------------------------------------------
 # Test Executables:
@@ -207,15 +291,15 @@ SIMD_UNIT_COUNT=("1")
 #name=("rijndael_encrypt" "dijkstra" "toast" "fft")
 #exe=("rijndael" "dijkstra" "toast" "fft")
 #opt=("${INPUT}/rijndael.asc ${OUTPUT}/rijndael.enc e 1234567890abcdeffedcba09876543211234567890abcdeffedcba0987654321" "${INPUT}/dijkstra.dat" "-fps -c ${INPUT}/toast.au" "4 4096")
-#name=("basicmath" "bitcnts" "qsort" "susan_smooth" "susan_edge" "susan_corner" "dijkstra" "blowfish_encrypt" "blowfish_decrypt" "rijndael_encrypt" "rijndael_decrypt" "sha" "crc" "fft" "ffti" "toast" "untoast")
-#exe=("basicmath" "bitcnts" "qsort" "susan" "susan" "susan" "dijkstra" "blowfish" "blowfish" "rijndael" "rijndael" "sha" "crc" "fft" "fft" "toast" "untoast")
-#opt=("" "1000" "${INPUT}/qsort.dat" "${INPUT}/susan.pgm ${OUTPUT}/susan_s.pgm -s" "${INPUT}/susan.pgm ${OUTPUT}/susan_e.pgm -e" "${INPUT}/susan.pgm ${OUTPUT}/susan_c.pgm -c" "${INPUT}/dijkstra.dat" "e ${INPUT}/blowfish.asc ${OUTPUT}/blowfish.enc 1234567890abcdeffedcba0987654321" "d ${INPUT}/blowfish.enc ${OUTPUT}/blowfish.asc 1234567890abcdeffedcba0987654321" "${INPUT}/rijndael.asc ${OUTPUT}/rijndael.enc e 1234567890abcdeffedcba09876543211234567890abcdeffedcba0987654321" "${INPUT}/rijndael.enc ${OUTPUT}/rijndael.asc d 1234567890abcdeffedcba09876543211234567890abcdeffedcba0987654321" "${INPUT}/sha.asc" "${INPUT}/crc.pcm" "4 4096" "4 8192 -i" "-fps -c ${INPUT}/toast.au" "-fps -c ${INPUT}/untoast.au.run.gsm")
+name=("basicmath" "bitcnts" "qsort" "susan_smooth" "susan_edge" "susan_corner" "dijkstra" "blowfish_encrypt" "blowfish_decrypt" "rijndael_encrypt" "rijndael_decrypt" "sha" "crc" "fft" "ffti" "toast" "untoast")
+exe=("basicmath" "bitcnts" "qsort" "susan" "susan" "susan" "dijkstra" "blowfish" "blowfish" "rijndael" "rijndael" "sha" "crc" "fft" "fft" "toast" "untoast")
+opt=("" "1000" "${INPUT}/qsort.dat" "${INPUT}/susan.pgm ${OUTPUT}/susan_s.pgm -s" "${INPUT}/susan.pgm ${OUTPUT}/susan_e.pgm -e" "${INPUT}/susan.pgm ${OUTPUT}/susan_c.pgm -c" "${INPUT}/dijkstra.dat" "e ${INPUT}/blowfish.asc ${OUTPUT}/blowfish.enc 1234567890abcdeffedcba0987654321" "d ${INPUT}/blowfish.enc ${OUTPUT}/blowfish.asc 1234567890abcdeffedcba0987654321" "${INPUT}/rijndael.asc ${OUTPUT}/rijndael.enc e 1234567890abcdeffedcba09876543211234567890abcdeffedcba0987654321" "${INPUT}/rijndael.enc ${OUTPUT}/rijndael.asc d 1234567890abcdeffedcba09876543211234567890abcdeffedcba0987654321" "${INPUT}/sha.asc" "${INPUT}/crc.pcm" "4 4096" "4 8192 -i" "-fps -c ${INPUT}/toast.au" "-fps -c ${INPUT}/untoast.au.run.gsm")
 #name=("blowfish_encrypt")
 #exe=("blowfish")
 #opt=("e ${INPUT}/blowfish.asc ${OUTPUT}/blowfish.enc 1234567890abcdeffedcba0987654321")
-name=("fft")
-exe=("fft")
-opt=("4 4096")
+#name=("fft")
+#exe=("fft")
+#opt=("4 4096")
 #name=("rijndael_encrypt")
 #exe=("rijndael")
 #opt=("${INPUT}/rijndael.asc ${OUTPUT}/rijndael.enc e 1234567890abcdeffedcba09876543211234567890abcdeffedcba0987654321")
@@ -243,7 +327,7 @@ for j in ${!name[@]}; do
           $VOLTAGE \
           ${CPU_CYCLES[0]} \
           ${PREDICTOR[$pred]} \
-          1 \
+          ${NUM_CORES[$i]} \
           ${L1I[$i]} \
           ${L1D[$i]} \
           ${L2[$i]} \
@@ -265,7 +349,8 @@ for j in ${!name[@]}; do
           ${FP_ALU_COUNT[$i]} \
           ${FP_MULT_DIV_COUNT[$i]} \
           ${SIMD_UNIT_COUNT[$i]} \
-          ${McPAT_DEVICE_TYPE[$i]}
+          ${McPAT_DEVICE_TYPE[$i]} \
+          ${McPAT_SCALE_FACTOR[$i]}
       while [ `jobs | wc -l` -ge 16 ]; do
         sleep 1
       done

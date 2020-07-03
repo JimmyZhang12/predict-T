@@ -95,49 +95,197 @@ TRAINING_ROOT="$OUTPUT_ROOT/training_data"
 print_info "TRAINING_ROOT $TRAINING_ROOT"
 
 
-#--------------------------------------------------------------------
+#---------------------------------------------------
+# Simulation Params
+#---------------------------------------------------
 # Configure Simulation Parameters
-#--------------------------------------------------------------------
-DURATION=("-1")
-INSTRUCTIONS=("50000" "100000" "150000" "200000") # Instructions to Simulate
-#INSTRUCTIONS=("200000") # Instructions to Simulate
-
+DURATION=("-1" "-1" "-1") # Data Points to Simulate
+INSTRUCTIONS=("100000" "100000" "100000") # Instructions to Simulate
 # When to start ROI, in Sim Ticks, -or- ROI by setting "-1"
-PROFILE_START=("-1") 
+PROFILE_START=("-1" "-1" "-1") 
 
-# Power Distribution Network Type:
-PDN=("HARVARD")
-#PREDICTOR=("DecorOnly" "uArchEventPredictor")
-#PREDICTOR=("IdealSensor" "Test")
+
+#---------------------------------------------------
+# Device Params:
+#---------------------------------------------------
+# All:
+DEVICE_TYPE=("MOBILE" "LAPTOP" "DESKTOP")
+McPAT_DEVICE_TYPE=("1" "1" "0")
+McPAT_SCALE_FACTOR=("0.33" "1.0" "1.0")
+NUM_CORES=("1" "1" "1")
+#NUM_CORES=("4" "4" "8")
+# Mobile:
+#DEVICE_TYPE=("MOBILE")
+#McPAT_DEVICE_TYPE=("1")
+#McPAT_SCALE_FACTOR=("0.33") # This is a HACK, Fix McPAT to support < 22nm planar
+#NUM_CORES=("1")
+# Laptop:
+#DEVICE_TYPE=("LAPTOP")
+#McPAT_DEVICE_TYPE=("1")
+#McPAT_SCALE_FACTOR=("1.0") # This is a HACK, Fix McPAT to support < 22nm planar
+#NUM_CORES=("4")
+# Desktop:
+#DEVICE_TYPE=("DESKTOP")
+#McPAT_DEVICE_TYPE=("0")
+#McPAT_SCALE_FACTOR=("1.0") # This is a HACK, Fix McPAT to support < 22nm planar
+#NUM_CORES=("8")
+VOLTAGE="1.0"
+
+#---------------------------------------------------
+# Power Delivery Params
+#---------------------------------------------------
+PDN=("ARM" "INTEL_MOBILE" "INTEL_DT")
+#PDN=("HARVARD")
+
+#---------------------------------------------------
+# Cache Params:
+#---------------------------------------------------
+# ALL:
+L1D=("4kB" "16kB" "64kB")
+L1I=("2kB" "8kB" "32kB")
+L2=("64kB" "128kB" "256kB")
+L3=("2MB" "8MB" "16MB")
+# Mobile:
+#L1D=("4kB")
+#L1I=("2kB")
+#L2=("64kB")
+#L3=("2MB")
+# Laptop:
+#L1D=("16kB")
+#L1I=("8kB")
+#L2=("128kB")
+#L3=("8MB")
+# Desktop:
+#L1D=("16kB")
+#L1I=("8kB")
+#L2=("128kB")
+#L3=("8MB")
+
+#---------------------------------------------------
+# Predictor Params:
+#---------------------------------------------------
+# Stat Dump Cycles
+CPU_CYCLES=("10")
 #PREDICTOR=("IdealSensor" "Test" "DecorOnly" "uArchEventPredictor")
 #PREDICTOR=("IdealSensor" "DecorOnly" "uArchEventPredictor")
+#PREDICTOR=("IdealSensor" "DecorOnly" "uArchEventPredictor")
 #PREDICTOR=("HarvardPowerPredictor")
-#PREDICTOR=("PerceptronPredictor")
-PREDICTOR=("Test")
+PREDICTOR=("PerceptronPredictor")
+#PREDICTOR=("Test")
 
-VOLTAGE="1.0"
-CPU_CYCLES=("10")
+#---------------------------------------------------
+# CPU Params:
+#---------------------------------------------------
+CLK=( "2.0GHz"     "3.0GHz"     "4.0GHz")
+CLK_=("2000000000" "3000000000" "4000000000")
+# Superscalar Core Width
+CORE_WIDTH=("2" "4" "8")
+# Fetch Params
+FETCH_BUFFER_SIZE=("16" "32" "64")
+FETCH_QUEUE_SIZE=("8" "16" "32")
+# LQ/SQ Size
+LOAD_QUEUE_SIZE=("8" "16" "32")
+STORE_QUEUE_SIZE=("8" "16" "32")
+# ReorderBuffer Params
+NUM_ROB=("1" "1" "1")
+NUM_ROB_ENTRIES=("48" "96" "192")
+# Regfile Params
+INT_PHYS_REGS=("64" "128" "256")
+FP_PHYS_REGS=("64" "128" "256")
+VEC_PHYS_REGS=("64" "128" "256")
+VEC_PRED_PHYS_REGS=("8" "16" "32")
+# Instruction Queue Size
+INSTR_QUEUE_SIZE=("16" "32" "64")
+# Functional Unit Counts
+INT_ALU_COUNT=("6" "6" "8")
+INT_MULT_DIV_COUNT=("4" "4" "6")
+FP_ALU_COUNT=("2" "4" "6")
+FP_MULT_DIV_COUNT=("1" "2" "4")
+SIMD_UNIT_COUNT=("1" "2" "4")
 
-#L1D=("4kB" "16kB" "64kB")
-#L1I=("2kB" "8kB" "32kB")
-#L2=("64kB" "128kB" "256kB")
-#L3=("2MB" "8MB" "16MB")
-#CACHE=("SMALL" "MEDIUM" "LARGE")
+# Mobile
+#CLK=( "2.0GHz")
+#CLK_=("2000000000")
+## Superscalar Core Width
+#CORE_WIDTH=("2")
+## Fetch Params
+#FETCH_BUFFER_SIZE=("16")
+#FETCH_QUEUE_SIZE=("8")
+## LQ/SQ Size
+#LOAD_QUEUE_SIZE=("8")
+#STORE_QUEUE_SIZE=("8")
+## ReorderBuffer Params
+#NUM_ROB=("1")
+#NUM_ROB_ENTRIES=("48")
+## Regfile Params
+#INT_PHYS_REGS=("64")
+#FP_PHYS_REGS=("64")
+#VEC_PHYS_REGS=("64")
+#VEC_PRED_PHYS_REGS=("8")
+## Instruction Queue Size
+#INSTR_QUEUE_SIZE=("16")
+## Functional Unit Counts
+#INT_ALU_COUNT=("6")
+#INT_MULT_DIV_COUNT=("4")
+#FP_ALU_COUNT=("2")
+#FP_MULT_DIV_COUNT=("1")
+#SIMD_UNIT_COUNT=("1")
 
-L1D=("4kB")
-L1I=("2kB")
-L2=("64kB")
-L3=("2MB")
-CACHE=("SMALL")
+# Laptop
+#CLK=( "3.0GHz")
+#CLK_=("3000000000")
+## Superscalar Core Width
+#CORE_WIDTH=("4")
+## Fetch Params
+#FETCH_BUFFER_SIZE=("32")
+#FETCH_QUEUE_SIZE=("16")
+## LQ/SQ Size
+#LOAD_QUEUE_SIZE=("16")
+#STORE_QUEUE_SIZE=("16")
+## ReorderBuffer Params
+#NUM_ROB=("1")
+#NUM_ROB_ENTRIES=("96")
+## Regfile Params
+#INT_PHYS_REGS=("128")
+#FP_PHYS_REGS=("128")
+#VEC_PHYS_REGS=("128")
+#VEC_PRED_PHYS_REGS=("16")
+## Instruction Queue Size
+#INSTR_QUEUE_SIZE=("32")
+## Functional Unit Counts
+#INT_ALU_COUNT=("6")
+#INT_MULT_DIV_COUNT=("4")
+#FP_ALU_COUNT=("4")
+#FP_MULT_DIV_COUNT=("2")
+#SIMD_UNIT_COUNT=("1")
 
-CLK=( "4.0GHz")
-CLK_=("4000000000")
-CID=( "4")
-
-NC=("8")
-#NC=("1" "2" "4" "8")
-
-#LITHOGRAPHY=("22" "28" "32" "45" "65" "90")
+# Desktop
+#CLK=( "4.0GHz")
+#CLK_=("4000000000")
+## Superscalar Core Width
+#CORE_WIDTH=("8")
+## Fetch Params
+#FETCH_BUFFER_SIZE=("64")
+#FETCH_QUEUE_SIZE=("32")
+## LQ/SQ Size
+#LOAD_QUEUE_SIZE=("32")
+#STORE_QUEUE_SIZE=("32")
+## ReorderBuffer Params
+#NUM_ROB=("1")
+#NUM_ROB_ENTRIES=("192")
+## Regfile Params
+#INT_PHYS_REGS=("256")
+#FP_PHYS_REGS=("256")
+#VEC_PHYS_REGS=("256")
+#VEC_PRED_PHYS_REGS=("32")
+## Instruction Queue Size
+#INSTR_QUEUE_SIZE=("64")
+## Functional Unit Counts
+#INT_ALU_COUNT=("8")
+#INT_MULT_DIV_COUNT=("6")
+#FP_ALU_COUNT=("6")
+#FP_MULT_DIV_COUNT=("4")
+#SIMD_UNIT_COUNT=("4")
 
 #name=("swaptions" "freqmine" "fluidanimate" "blackscholes" "vips" "canneal")
 #exe=("swaptions" "freqmine" "fluidanimate" "blackscholes" "vips" "canneal")
@@ -192,33 +340,62 @@ opt=( \
 # Run
 #--------------------------------------------------------------------
 for j in ${!name[@]}; do 
-  for i in ${!DURATION[@]}; do 
-    for k in ${!L1D[@]}; do 
-      for p in ${!PDN[@]}; do
-        for c in ${!CLK[@]}; do 
-          for cs in ${!CPU_CYCLES[@]}; do
-            for pred in ${!PREDICTOR[@]}; do
-              for t in ${!NC[@]}; do
-                # Test Name
-                sleep 0.5
-                TN="${name[$j]}_${INSTRUCTIONS[$t]}_${CPU_CYCLES[${cs}]}_${CID[$c]}_${PDN[$p]}_${PREDICTOR[$pred]}_${NC[$t]}core_${CACHE[$k]}"
+  for i in ${!DEVICE_TYPE[@]}; do
+    for pred in ${!PREDICTOR[@]}; do
+      # Test Name
+      sleep 0.5
+      TN="${name[$j]}_${INSTRUCTIONS[$i]}_${CPU_CYCLES[0]}_${DEVICE_TYPE[$i]}_${PDN[$i]}_${PREDICTOR[$pred]}"
 
-                # Format the options with the num cores
-                if [ $(echo "${opt[$j]}" | grep -o "%s" | wc -w) -eq 1 ]; then
-                  printf -v OPTIONS "${opt[$j]}" ${NC[$t]}
-                elif [ $(echo "${opt[$j]}" | grep -o "%s" | wc -w) -eq 2 ]; then
-                  printf -v OPTIONS "${opt[$j]}" ${NC[$t]} ${NC[$t]}
-                fi
+      # Format the options with the num cores
+      if [ $(echo "${opt[$j]}" | grep -o "%s" | wc -w) -eq 1 ]; then
+        printf -v OPTIONS "${opt[$j]}" ${NUM_CORES[$i]}
+      elif [ $(echo "${opt[$j]}" | grep -o "%s" | wc -w) -eq 2 ]; then
+        printf -v OPTIONS "${opt[$j]}" ${NUM_CORES[$i]} ${NUM_CORES[$i]}
+      fi
 
-                se_classic_mc_ncv $TN ${DURATION[$i]} ${INSTRUCTIONS[$t]} ${PROFILE_START[$i]} ${exe[$j]} "$OPTIONS" ${CLK[$c]} ${PDN[$p]} ${CLK_[$c]} $VOLTAGE ${CPU_CYCLES[${cs}]} ${PREDICTOR[$pred]} ${NC[$t]} ${L1I[$k]} ${L1D[$k]} ${L2[$k]} ${L3[$k]}
-                while [ `jobs | wc -l` -ge 32 ]; do
-                  sleep 1
-                done
-              done
-            done
-          done
-        done
+      se_classic_mc_ncv \
+          $TN ${DURATION[$i]} \
+          ${INSTRUCTIONS[$i]} \
+          ${PROFILE_START[$i]} \
+          ${exe[$j]} \
+          "${opt[$j]}" \
+          ${CLK[$i]} \
+          ${PDN[$i]} \
+          ${CLK_[$c]} \
+          $VOLTAGE \
+          ${CPU_CYCLES[0]} \
+          ${PREDICTOR[$pred]} \
+          ${NUM_CORES[$i]} \
+          ${L1I[$i]} \
+          ${L1D[$i]} \
+          ${L2[$i]} \
+          ${L3[$i]} \
+          ${CORE_WIDTH[$i]} \
+          ${FETCH_BUFFER_SIZE[$i]} \
+          ${FETCH_QUEUE_SIZE[$i]} \
+          ${LOAD_QUEUE_SIZE[$i]} \
+          ${STORE_QUEUE_SIZE[$i]} \
+          ${NUM_ROB[$i]} \
+          ${NUM_ROB_ENTRIES[$i]} \
+          ${INT_PHYS_REGS[$i]} \
+          ${FP_PHYS_REGS[$i]} \
+          ${VEC_PHYS_REGS[$i]} \
+          ${VEC_PRED_PHYS_REGS[$i]} \
+          ${INSTR_QUEUE_SIZE[$i]} \
+          ${INT_ALU_COUNT[$i]} \
+          ${INT_MULT_DIV_COUNT[$i]} \
+          ${FP_ALU_COUNT[$i]} \
+          ${FP_MULT_DIV_COUNT[$i]} \
+          ${SIMD_UNIT_COUNT[$i]} \
+          ${McPAT_DEVICE_TYPE[$i]} \
+          ${McPAT_SCALE_FACTOR[$i]}
+      while [ `jobs | wc -l` -ge 32 ]; do
+        sleep 1
       done
     done
   done
+done
+
+while [ `jobs | wc -l` -ne 1 ]; do
+  sleep 1
 done

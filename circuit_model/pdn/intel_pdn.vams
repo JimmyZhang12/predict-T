@@ -35,248 +35,109 @@
 `include "resistor.vams"
 `include "inductor.vams"
 `include "capacitor.vams"
+`include "pdn_stage.vams"
 
 `timescale 1ps/1ps
 
-module pcb_trace(p, n);
-  inout p, n;
-  electrical p, n;
-  electrical n1;
-  parameter real ESL=0;
-  parameter real ESR=1u;
+/*
+ * Module intel_power_distribution_network_m
+ *
+ *  Model of the PCB, Package, and Die Parasitic Inductances and Resistances.
+ *  Modeled as 3 PDN Stages in series. For an Intel "Mobile" processor.
+ *
+ *    vin - Input Voltage (From ideal supply)
+ *    vout - Output Voltage (To Load Model)
+ *    vvrm - Voltage at the output of the vrm model
+ *    vpcb - voltage at the output of the pcb model
+ *    vpack - voltage at the output of the package model
+ *    vdie - voltage at the output of the die model
+ *    gnd - ground net
+ */
+module intel_power_distribution_network_m(vin, vout, vvrm, vpcb, vpack, vdie, iin, iout, gnd);
+	inout vin, vout, gnd;
+  output vvrm, vpcb, vpack, vdie, iin, iout;
+	electrical vin, vout, iin, iout, vvrm, vpcb, vpack, vdie, n1, n2, n3, n4, gnd;
+
+`ifdef FULL_INTEL_PDN
+  // Essential for probing
+  my_res#(.R(1n)) ri(vin, n1);
   
-  my_ind#(.L(ESL)) LESL(p, n1);
-  my_res#(.R(ESR)) RESR(n1, n);
-endmodule
+  pdn_stage#(.C_STAGE(850u),  .N_CAP(1), .L_STAGE(250p),   .R_STAGE(3.5m)) pcb(n1, n2, gnd);
+  pdn_stage#(.C_STAGE(30u),   .N_CAP(1), .L_STAGE(35p),    .R_STAGE(2m))   package(n2, n3, gnd);
+  pdn_stage#(.C_STAGE(1.1u),  .N_CAP(1), .L_STAGE(30p),    .R_STAGE(3m))   die(n3, n4, gnd);
 
+  // Essential for probing
+  my_res#(.R(1n)) ro(n4, vout);
+`else
+  // Essential for probing
+  my_res#(.R(1n)) ri(vin, n1);
+  
+  pdn_stage#(.C_STAGE(0u),    .N_CAP(1), .L_STAGE(0p),     .R_STAGE(1n)) pcb(n1, n2, gnd);
+  pdn_stage#(.C_STAGE(0u),    .N_CAP(1), .L_STAGE(0p),     .R_STAGE(1n)) package(n2, n3, gnd);
+  pdn_stage#(.C_STAGE(1.1u),  .N_CAP(1), .L_STAGE(30p),    .R_STAGE(3m)) die(n3, n4, gnd);
 
-module board_package_intel_server (vin, vout, vsense_in, vsense_out, gnd);
-	inout vin, vout, gnd;
-  output vsense_in, vsense_out;
-	electrical vin, vout, vsense_in, vsense_out, n1, n2, n3, n4, gnd;
-
-//  // Supply Load Resistor
-//  my_res#(.R(1u)) rsupply(vin, n1);
-//
-//  my_res#(.R(200u)) rwire1(n1, n2);
-//
-//  // Ceramic Bulk
-//  my_real_cap#(.C(990u), .ESL(423p), .ESR(2m)) c_electrolytic_bulk(n2, gnd);
-//
-//  // Ceramic Bulk
-//  my_real_cap#(.C(264u), .ESL(45p), .ESR(400u)) c_ceramic_bulk(n2, gnd);
-//
-//  // Ceramic Socket
-//  my_real_cap#(.C(1222u), .ESL(20p), .ESR(150u)) c_ceramic_socket(n3, gnd);
-//
-//  //my_res#(.R(100k)) r1(n3, gnd);
-//  //my_res#(.R(100k)) ra(n2, gnd);
-//  //my_res#(.R(100k)) rb(n4, gnd);
-//
-//  // Motherboard traces
-//  pcb_trace#(.ESL(90p), .ESR(200u)) trace(n2, n3);
-//
-//  // Package
-//  pcb_trace#(.ESL(12p), .ESR(400u)) package(n3, n4);
-//
-//  // output sense resistor
-//  my_res#(.R(1u)) rout(n4, vout);
-
-  // output sense resistor
-  my_res#(.R(1u)) rout(vin, vout);
+  // Essential for probing
+  my_res#(.R(1n)) ro(n4, vout);
+`endif
 
   analog begin
-//    V(vsense_in, gnd) <+ V(n1, gnd);
-//    V(vsense_out, gnd) <+ V(n4, gnd);
-    V(vsense_in, gnd) <+ V(vin, gnd);
-    V(vsense_out, gnd) <+ V(vout, gnd);
+    V(vvrm, gnd) <+ V(n1, gnd);
+    V(vpcb, gnd) <+ V(n2, gnd);
+    V(vpack, gnd) <+ V(n3, gnd);
+    V(vdie, gnd) <+ V(n4, gnd);
+    V(iin, gnd) <+ I(vin, n1);
+    V(iout, gnd) <+ I(n4, vout);
   end
 endmodule
 
-module board_package_laptop (vin, vout, vsense_in, vsense_out, gnd);
+/*
+ * Module intel_power_distribution_network_dt
+ *
+ *  Model of the PCB, Package, and Die Parasitic Inductances and Resistances.
+ *  Modeled as 3 PDN Stages in series. For an Intel "Desktop" processor.
+ *
+ *    vin - Input Voltage (From ideal supply)
+ *    vout - Output Voltage (To Load Model)
+ *    vvrm - Voltage at the output of the vrm model
+ *    vpcb - voltage at the output of the pcb model
+ *    vpack - voltage at the output of the package model
+ *    vdie - voltage at the output of the die model
+ *    gnd - ground net
+ */
+module intel_power_distribution_network_dt(vin, vout, vvrm, vpcb, vpack, vdie, iin, iout, gnd);
 	inout vin, vout, gnd;
-  output vsense_in, vsense_out;
-	electrical vin, vout, vsense_in, vsense_out, n1, n2, n3, n4, gnd;
+  output vvrm, vpcb, vpack, vdie, iin, iout;
+	electrical vin, vout, iin, iout, vvrm, vpcb, vpack, vdie, n1, n2, n3, n4, gnd;
 
-  // Supply Load Resistor
-  my_res#(.R(1u)) rsupply(vin, n1);
+`ifdef FULL_INTEL_PDN
+  // Essential for probing
+  my_res#(.R(1n)) ri(vin, n1);
+  
+  pdn_stage#(.C_STAGE(1400u),  .N_CAP(1), .L_STAGE(400p),   .R_STAGE(1.25m)) pcb(n1, n2, gnd);
+  pdn_stage#(.C_STAGE(60u),    .N_CAP(1), .L_STAGE(35p),    .R_STAGE(1.25m))   package(n2, n3, gnd);
+  pdn_stage#(.C_STAGE(3.025u), .N_CAP(1), .L_STAGE(30p),    .R_STAGE(3m))   die(n3, n4, gnd);
 
-  my_res#(.R(200u)) rwire_1(n1, n2);
+  // Essential for probing
+  my_res#(.R(1n)) ro(n4, vout);
+`else
+  // Essential for probing
+  my_res#(.R(1n)) ri(vin, n1);
+  
+  pdn_stage#(.C_STAGE(0u),      .N_CAP(1), .L_STAGE(0p),     .R_STAGE(1n)) pcb(n1, n2, gnd);
+  pdn_stage#(.C_STAGE(0u),      .N_CAP(1), .L_STAGE(0p),     .R_STAGE(1n)) package(n2, n3, gnd);
+  pdn_stage#(.C_STAGE(3.025u),  .N_CAP(1), .L_STAGE(30p),    .R_STAGE(3m)) die(n3, n4, gnd);
 
-  // Ceramic Bulk
-  my_real_cap#(.C(330u), .ESL(200p), .ESR(2m)) c_electrolytic_bulk(n2, gnd);
-
-  // Ceramic Bulk
-  my_real_cap#(.C(88u), .ESL(135p), .ESR(1200u)) c_ceramic_bulk(n2, gnd);
-
-  // Ceramic Socket
-  my_real_cap#(.C(611u), .ESL(40p), .ESR(300u)) c_ceramic_socket(n3, gnd);
-
-  //my_res#(.R(100k)) r1(n2, gnd);
-  //my_res#(.R(100k)) ra(n1, gnd);
-  //my_res#(.R(100k)) rb(n3, gnd);
-
-  // Motherboard traces
-  pcb_trace#(.ESL(270p), .ESR(1000u)) trace(n2, n3);
-
-  // Package
-  pcb_trace#(.ESL(12p), .ESR(400u)) package(n3, n4);
-
-  // output sense resistor
-  my_res#(.R(1u)) rout(n4, vout);
+  // Essential for probing
+  my_res#(.R(1n)) ro(n4, vout);
+`endif
 
   analog begin
-    V(vsense_in, gnd) <+ V(n1, gnd);
-    V(vsense_out, gnd) <+ V(n4, gnd);
-  end
-endmodule
-
-module board_package_mobile (vin, vout, vsense_in, vsense_out, gnd);
-	inout vin, vout, gnd;
-  output vsense_in, vsense_out;
-	electrical vin, vout, vsense_in, vsense_out, n1, n2, n3, n4, gnd;
-
-  // Supply Load Resistor
-  my_res#(.R(1u)) rsupply(vin, n1);
-
-  my_res#(.R(200u)) rwire(n1, n2);
-
-  // Ceramic Bulk
-  my_real_cap#(.C(100u), .ESL(200p), .ESR(2m)) c_electrolytic_bulk(n2, gnd);
-
-  // Ceramic Bulk
-  my_real_cap#(.C(60u), .ESL(135p), .ESR(1200u)) c_ceramic_bulk(n2, gnd);
-
-  // Ceramic Socket
-  my_real_cap#(.C(10u), .ESL(40p), .ESR(300u)) c_ceramic_socket(n3, gnd);
-
-  //my_res#(.R(100k)) r1(n2, gnd);
-  //my_res#(.R(100k)) ra(n1, gnd);
-  //my_res#(.R(100k)) rb(n3, gnd);
-
-  // Motherboard traces
-  pcb_trace#(.ESL(90p), .ESR(1m)) trace(n2, n3);
-
-  // Package
-  pcb_trace#(.ESL(12p), .ESR(400u)) package(n3, n4);
-
-  // output sense resistor
-  my_res#(.R(1u)) rout(n4, vout);
-
-  analog begin
-    V(vsense_in, gnd) <+ V(n1, gnd);
-    V(vsense_out, gnd) <+ V(n4, gnd);
-  end
-endmodule
-
-module board_package_embedded (vin, vout, vsense_in, vsense_out, gnd);
-	inout vin, vout, gnd;
-  output vsense_in, vsense_out;
-	electrical vin, vout, vsense_in, vsense_out, n1, n2, n3, n4, n5, gnd;
-
-  // Supply Load Resistor
-  my_res#(.R(1u)) rsupply(vin, n1);
-
-  my_res#(.R(200u)) rwire(n1, n2);
-
-  // Supply Bulk Ceramic Caps
-  my_real_cap#(.C(20u), .ESL(275p), .ESR(2.5m)) c_ceramic_supply_bulk(n2, gnd);
-
-  // Ceramic Bulk
-  my_real_cap#(.C(4.7u), .ESL(550p), .ESR(5m)) c_device_bulk(n2, gnd);
-
-  // Ceramic Socket
-  my_real_cap#(.C(1.5u), .ESL(34p), .ESR(267u)) c_ceramic_socket(n3, gnd);
-
-  // Motherboard traces
-  pcb_trace#(.ESL(740p), .ESR(10m)) trace(n2, n3);
-
-  // Motherboard traces
-  pcb_trace#(.ESL(30p), .ESR(1m)) trace_2(n3, n4);
-
-  // Package
-  pcb_trace#(.ESL(12p), .ESR(400u)) package(n4, n5);
-
-  // output sense resistor
-  my_res#(.R(1u)) rout(n5, vout);
-
-  analog begin
-    V(vsense_in, gnd) <+ V(n1, gnd);
-    V(vsense_out, gnd) <+ V(n5, gnd);
-  end
-endmodule
-
-module board_package_perf_uc (vin, vout, vsense_in, vsense_out, gnd);
-	inout vin, vout, gnd;
-  output vsense_in, vsense_out;
-	electrical vin, vout, vsense_in, vsense_out, n1, n2, n3, n4,n5, gnd;
-
-  // Supply Load Resistor
-  my_res#(.R(1u)) rsupply(vin, n1);
-
-  my_res#(.R(200u)) rwire(n1, n2);
-
-  // Supply Bulk Ceramic Caps
-  my_real_cap#(.C(20u), .ESL(275p), .ESR(2.5m)) c_ceramic_supply_bulk(n2, gnd);
-
-  // Ceramic Bulk
-  my_real_cap#(.C(4.7u), .ESL(550p), .ESR(5m)) c_device_bulk(n3, gnd);
-
-  // Ceramic Socket
-  my_real_cap#(.C(1.5u), .ESL(34p), .ESR(267u)) c_ceramic_socket(n4, gnd);
-
-  // Motherboard traces
-  pcb_trace#(.ESL(740p), .ESR(10m)) trace(n2, n3);
-
-  // Motherboard traces
-  pcb_trace#(.ESL(30p), .ESR(1m)) trace_2(n3, n4);
-
-  // Package
-  pcb_trace#(.ESL(12p), .ESR(400u)) package(n4, n5);
-
-  // output sense resistor
-  my_res#(.R(1u)) rout(n5, vout);
-
-  analog begin
-    V(vsense_in, gnd) <+ V(n1, gnd);
-    V(vsense_out, gnd) <+ V(n5, gnd);
-  end
-endmodule
-
-module board_package_lp (vin, vout, vsense_in, vsense_out, gnd);
-	inout vin, vout, gnd;
-  output vsense_in, vsense_out;
-	electrical vin, vout, vsense_in, vsense_out, n1, n2, n3, n4,n5, gnd;
-
-  // Supply Load Resistor
-  my_res#(.R(1u)) rsupply(vin, n1);
-
-  my_res#(.R(200u)) rwire(n1, n2);
-
-  // Supply Bulk Ceramic Caps
-  my_real_cap#(.C(10u), .ESL(275p), .ESR(2.5m)) c_ceramic_supply_bulk(n2, gnd);
-
-  // Ceramic Bulk
-  my_real_cap#(.C(4.7u), .ESL(550p), .ESR(5m)) c_device_bulk(n3, gnd);
-
-  // Ceramic Socket
-  my_real_cap#(.C(800n), .ESL(63p), .ESR(500u)) c_ceramic_socket(n4, gnd);
-
-  // Motherboard traces
-  pcb_trace#(.ESL(12p), .ESR(1m)) trace(n2, n3);
-
-  // Motherboard traces
-  pcb_trace#(.ESL(12p), .ESR(1m)) trace_2(n3, n4);
-
-  // Package
-  pcb_trace#(.ESL(12p), .ESR(400u)) package(n4, n5);
-
-  // output sense resistor
-  my_res#(.R(1u)) rout(n5, vout);
-
-  analog begin
-    V(vsense_in, gnd) <+ V(n1, gnd);
-    V(vsense_out, gnd) <+ V(n5, gnd);
+    V(vvrm, gnd) <+ V(n1, gnd);
+    V(vpcb, gnd) <+ V(n2, gnd);
+    V(vpack, gnd) <+ V(n3, gnd);
+    V(vdie, gnd) <+ V(n4, gnd);
+    V(iin, gnd) <+ I(vin, n1);
+    V(iout, gnd) <+ I(n4, vout);
   end
 endmodule
 
