@@ -100,7 +100,7 @@ print_info "TRAINING_ROOT $TRAINING_ROOT"
 #---------------------------------------------------
 # Configure Simulation Parameters
 DURATION=("-1" "-1" "-1") # Data Points to Simulate
-INSTRUCTIONS=("100000" "100000" "100000") # Instructions to Simulate
+INSTRUCTIONS=("30000" "30000" "30000") # Instructions to Simulate
 # When to start ROI, in Sim Ticks, -or- ROI by setting "-1"
 PROFILE_START=("-1" "-1" "-1") 
 
@@ -297,14 +297,13 @@ SIMD_UNIT_COUNT=("1" "2" "4")
 #  "\055\055vips-concurrency=%s im_benchmark ${INPUT}/vips.v ${OUTPUT}/vips_%s.v" \
 #  "%s 10000 300 ${INPUT}/canneal.nets 30000"
 #)
-#name=("swaptions" "fluidanimate" "blackscholes" "canneal")
-#exe=("swaptions" "fluidanimate" "blackscholes" "canneal")
-#opt=( \
-#  "\055ns 1000 -sm 100000 -nt %s -sd 012384701" \
-#  "%s 10000 ${INPUT}/fluidanimate.fluid" \
-#  "%s ${INPUT}/blackscholes.txt ${OUTPUT}/blackscholes_%s.txt" \
-#  "%s 10000 300 ${INPUT}/canneal.nets 30000"
-#)
+name=("swaptions" "fluidanimate" "blackscholes")
+exe=("swaptions" "fluidanimate" "blackscholes")
+opt=( \
+  "\055ns 1000 -sm 100000 -nt %s -sd 012384701" \
+  "%s 10000 ${INPUT}/fluidanimate.fluid" \
+  "%s ${INPUT}/blackscholes.txt ${OUTPUT}/blackscholes_%s.txt"
+)
 #name=("swaptions")
 #exe=("swaptions")
 #opt=( \
@@ -325,11 +324,11 @@ SIMD_UNIT_COUNT=("1" "2" "4")
 #opt=( \
 #  "\055\055vips-concurrency=%s im_benchmark ${INPUT}/vips.v ${OUTPUT}/vips_%s.v" \
 #)
-name=("blackscholes")
-exe=("blackscholes")
-opt=( \
-  "%s ${INPUT}/blackscholes.txt ${OUTPUT}/blackscholes_%s.txt" \
-)
+#name=("blackscholes")
+#exe=("blackscholes")
+#opt=( \
+#  "%s ${INPUT}/blackscholes.txt ${OUTPUT}/blackscholes_%s.txt" \
+#)
 #name=("canneal")
 #exe=("canneal")
 #opt=( \
@@ -358,7 +357,7 @@ for j in ${!name[@]}; do
           ${INSTRUCTIONS[$i]} \
           ${PROFILE_START[$i]} \
           ${exe[$j]} \
-          "${opt[$j]}" \
+          "$OPTIONS" \
           ${CLK[$i]} \
           ${PDN[$i]} \
           ${CLK_[$c]} \

@@ -61,6 +61,9 @@ se_classic_mc_ncv() {
   SIMDC=${34}  # SIMD Unit Count (2)
   MPDT=${35}   # McPAT Device Type, [0,1,2]
   MPSF=${36}   # McPAT Scaling Factor, HACK, Make MCPAT natively support < 22nm
+  PTM=${37}    # Path to Pretrained Power Predictor Model
+  PPEVENT=${38} # Num Events in DNN/Perceptron/Perceptron UTA
+  PPACTION=${39} # Num Actions in DNN/Perceptron
   
 #$GEM5_ROOT/build/X86/gem5.fast \
 #$GEM5_ROOT/build/X86/gem5.opt \
@@ -90,6 +93,9 @@ $GEM5_ROOT/build/X86/gem5.fast \
 --power_pred_voltage_emergency=0.96 \
 --power_pred_type=${PRED} \
 --power_pred_train_name=${TRAINING_ROOT}/${TN}.csv \
+--power_pred_model=${PTM} \
+--power_pred_events=${PPEVENT} \
+--power_pred_actions=${PPACTION} \
 --num-cpus=${NCORE} \
 --cpu_superscalar_width=$CW \
 --cpu_fetch_buffer_size=$FBS \
@@ -147,6 +153,9 @@ $GEM5_ROOT/build/X86/gem5.fast \
     --power_pred_voltage_emergency=0.96 \
     --power_pred_type=${PRED} \
     --power_pred_train_name=${TRAINING_ROOT}/${TN}.csv \
+    --power_pred_model=${PTM} \
+    --power_pred_events=${PPEVENT} \
+    --power_pred_actions=${PPACTION} \
     --num-cpus=${NCORE} \
     --cpu_superscalar_width=$CW \
     --cpu_fetch_buffer_size=$FBS \
@@ -219,9 +228,13 @@ se_classic_mc_ncv_debug() {
   SIMDC=${34}  # SIMD Unit Count (2)
   MPDT=${35}   # McPAT Device Type, [0,1,2]
   MPSF=${36}   # McPAT Scaling Factor, HACK, Make MCPAT natively support < 22nm
+  PTM=${37}    # Path to Pretrained Power Predictor Model
+  PPEVENT=${38} # Num Events in DNN/Perceptron/Perceptron UTA
+  PPACTION=${39} # Num Actions in DNN/Perceptron
   
   echo "
 gdb --args $GEM5_ROOT/build/X86/gem5.debug \
+--debug-flags=PerceptronPowerPred,PerceptronUTAPowerPred,DNNPowerPred \
 --outdir=${OUTPUT_ROOT}/gem5_out/$TN \
 --mcpat_enable \
 --mcpat_path=${PREDICT_T_ROOT}/mcpat \
@@ -246,6 +259,9 @@ gdb --args $GEM5_ROOT/build/X86/gem5.debug \
 --power_pred_voltage_emergency=0.96 \
 --power_pred_type=${PRED} \
 --power_pred_train_name=${TRAINING_ROOT}/${TN}.csv \
+--power_pred_model=${PTM} \
+--power_pred_events=${PPEVENT} \
+--power_pred_actions=${PPACTION} \
 --num-cpus=${NCORE} \
 --cpu_superscalar_width=$CW \
 --cpu_fetch_buffer_size=$FBS \
@@ -278,6 +294,7 @@ gdb --args $GEM5_ROOT/build/X86/gem5.debug \
     #--debug-flags=PPredStat \
     #--ncverilog_enable \
   gdb --args $GEM5_ROOT/build/X86/gem5.debug \
+    --debug-flags=PerceptronPowerPred,PerceptronUTAPowerPred,DNNPowerPred \
     --outdir=${OUTPUT_ROOT}/gem5_out/$TN \
     --mcpat_enable \
     --mcpat_path=${MCPAT_ROOT} \
@@ -302,6 +319,9 @@ gdb --args $GEM5_ROOT/build/X86/gem5.debug \
     --power_pred_voltage_emergency=0.96 \
     --power_pred_type=${PRED} \
     --power_pred_train_name=${TRAINING_ROOT}/${TN}.csv \
+    --power_pred_model=${PTM} \
+    --power_pred_events=${PPEVENT} \
+    --power_pred_actions=${PPACTION} \
     --num-cpus=${NCORE} \
     --cpu_superscalar_width=$CW \
     --cpu_fetch_buffer_size=$FBS \

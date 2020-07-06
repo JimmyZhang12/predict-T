@@ -54,8 +54,10 @@
 `endif
 
 `ifndef PTIME
-`define PTIME 250
+`define PTIME 2500
 `endif
+
+//`define VERBOSE
 
 
 /*
@@ -164,7 +166,9 @@ module circuit_model();
       last_time = last_time + 1;
       // Write outpput values
       if($time % `PTIME) begin
+`ifdef VERBOSE
         $display("%d,%f,%f,%f,%f,%f,%f,%f,%f,%f,%d,%f,%d,%f", $time, _vvrm, _vpcb, _vpackage, _vdie, _vout_mean, vout_mean, _iin, _iout, _proc_load, prediction_enable, _prediction, time_to_next, `RF_TIME);
+`endif
       end
       #1;
     end

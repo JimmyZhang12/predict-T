@@ -114,7 +114,7 @@ PROFILE_START=("-1")
 DEVICE_TYPE=("MOBILE")
 McPAT_DEVICE_TYPE=("1")
 McPAT_SCALE_FACTOR=("0.33") # This is a HACK, Fix McPAT to support < 22nm planar
-NUM_CORES=("4")
+NUM_CORES=("1")
 # Laptop:
 #DEVICE_TYPE=("LAPTOP")
 #McPAT_DEVICE_TYPE=("1")
@@ -131,10 +131,10 @@ VOLTAGE="1.0"
 # Power Delivery Params
 #---------------------------------------------------
 #PDN=("ARM" "INTEL_M" "INTEL_DT")
-#PDN=("HARVARD")
+PDN=("HARVARD")
 #PDN=("ARM")
 #PDN=("INTEL_M")
-PDN=("INTEL_DT")
+#PDN=("INTEL_DT")
 
 #---------------------------------------------------
 # Cache Params:
@@ -169,8 +169,13 @@ CPU_CYCLES=("10")
 #PREDICTOR=("IdealSensor" "DecorOnly" "uArchEventPredictor")
 #PREDICTOR=("IdealSensor" "DecorOnly" "uArchEventPredictor")
 #PREDICTOR=("HarvardPowerPredictor")
-PREDICTOR=("PerceptronPredictor")
+#PREDICTOR=("PerceptronPredictor")
+PREDICTOR=("DNNPredictor")
 #PREDICTOR=("Test")
+PPRED_TRAINED_MODEL=("${PREDICT_T_ROOT}/dnn_MOBILE_32_2_1_32_8192_STANDARDIZE.txt")
+#PPRED_TRAINED_MODEL=("${PREDICT_T_ROOT}/perceptron_DESKTOP_32_8_512_RAW.txt")
+PPRED_EVENTS=("16")
+PPRED_ACTIONS=("8")
 
 #---------------------------------------------------
 # CPU Params:
@@ -203,32 +208,32 @@ PREDICTOR=("PerceptronPredictor")
 #SIMD_UNIT_COUNT=("1" "2" "4")
 
 # Mobile
-CLK=( "2.0GHz")
-CLK_=("2000000000")
-# Superscalar Core Width
-CORE_WIDTH=("2")
-# Fetch Params
-FETCH_BUFFER_SIZE=("16")
-FETCH_QUEUE_SIZE=("8")
-# LQ/SQ Size
-LOAD_QUEUE_SIZE=("8")
-STORE_QUEUE_SIZE=("8")
-# ReorderBuffer Params
-NUM_ROB=("1")
-NUM_ROB_ENTRIES=("48")
-# Regfile Params
-INT_PHYS_REGS=("64")
-FP_PHYS_REGS=("64")
-VEC_PHYS_REGS=("64")
-VEC_PRED_PHYS_REGS=("8")
-# Instruction Queue Size
-INSTR_QUEUE_SIZE=("16")
-# Functional Unit Counts
-INT_ALU_COUNT=("6")
-INT_MULT_DIV_COUNT=("4")
-FP_ALU_COUNT=("2")
-FP_MULT_DIV_COUNT=("1")
-SIMD_UNIT_COUNT=("1")
+#CLK=( "2.0GHz")
+#CLK_=("2000000000")
+## Superscalar Core Width
+#CORE_WIDTH=("2")
+## Fetch Params
+#FETCH_BUFFER_SIZE=("16")
+#FETCH_QUEUE_SIZE=("8")
+## LQ/SQ Size
+#LOAD_QUEUE_SIZE=("8")
+#STORE_QUEUE_SIZE=("8")
+## ReorderBuffer Params
+#NUM_ROB=("1")
+#NUM_ROB_ENTRIES=("48")
+## Regfile Params
+#INT_PHYS_REGS=("64")
+#FP_PHYS_REGS=("64")
+#VEC_PHYS_REGS=("64")
+#VEC_PRED_PHYS_REGS=("8")
+## Instruction Queue Size
+#INSTR_QUEUE_SIZE=("16")
+## Functional Unit Counts
+#INT_ALU_COUNT=("6")
+#INT_MULT_DIV_COUNT=("4")
+#FP_ALU_COUNT=("2")
+#FP_MULT_DIV_COUNT=("1")
+#SIMD_UNIT_COUNT=("1")
 
 # Laptop
 #CLK=( "3.0GHz")
@@ -286,12 +291,12 @@ FP_ALU_COUNT=("6")
 FP_MULT_DIV_COUNT=("4")
 SIMD_UNIT_COUNT=("4")
 
-#name=("toast")
-#exe=("toast")
-#opt=("-fps -c ${INPUT}/toast.au")
-name=("rijndael_encrypt")
-exe=("rijndael")
-opt=("${INPUT}/rijndael.asc ${OUTPUT}/rijndael.enc e 1234567890abcdeffedcba09876543211234567890abcdeffedcba0987654321")
+name=("toast")
+exe=("toast")
+opt=("-fps -c ${INPUT}/toast.au")
+#name=("rijndael_encrypt")
+#exe=("rijndael")
+#opt=("${INPUT}/rijndael.asc ${OUTPUT}/rijndael.enc e 1234567890abcdeffedcba09876543211234567890abcdeffedcba0987654321")
 
 #--------------------------------------------------------------------
 # Run
@@ -336,7 +341,10 @@ for j in ${!name[@]}; do
           ${FP_MULT_DIV_COUNT[$i]} \
           ${SIMD_UNIT_COUNT[$i]} \
           ${McPAT_DEVICE_TYPE[$i]} \
-          ${McPAT_SCALE_FACTOR[$i]}
+          ${McPAT_SCALE_FACTOR[$i]} \
+          ${PPRED_TRAINED_MODEL[$pred]} \
+          ${PPRED_EVENTS[$pred]} \
+          ${PPRED_ACTIONS[$pred]}
       while [ `jobs | wc -l` -ge 16 ]; do
         sleep 1
       done

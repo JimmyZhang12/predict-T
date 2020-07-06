@@ -160,5 +160,8 @@ text_out/
 
 *.xz
 
+img/
+*.txt
+
 # Executables
 mcpat

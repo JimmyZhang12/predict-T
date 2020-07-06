@@ -313,7 +313,7 @@ opt=("" "1000" "${INPUT}/qsort.dat" "${INPUT}/susan.pgm ${OUTPUT}/susan_s.pgm -s
 for j in ${!name[@]}; do 
   for i in ${!DEVICE_TYPE[@]}; do
     for pred in ${!PREDICTOR[@]}; do
-      sleep 0.5
+      sleep 1
       TN="${name[$j]}_${INSTRUCTIONS[$i]}_${CPU_CYCLES[0]}_${DEVICE_TYPE[$i]}_${PDN[$i]}_${PREDICTOR[$pred]}"
       se_classic_mc_ncv \
           $TN ${DURATION[$i]} \
@@ -351,7 +351,7 @@ for j in ${!name[@]}; do
           ${SIMD_UNIT_COUNT[$i]} \
           ${McPAT_DEVICE_TYPE[$i]} \
           ${McPAT_SCALE_FACTOR[$i]}
-      while [ `jobs | wc -l` -ge 16 ]; do
+      while [ `jobs | wc -l` -ge 24 ]; do
         sleep 1
       done
     done
