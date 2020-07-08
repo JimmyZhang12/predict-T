@@ -64,6 +64,8 @@ se_classic_mc_ncv() {
   PTM=${37}    # Path to Pretrained Power Predictor Model
   PPEVENT=${38} # Num Events in DNN/Perceptron/Perceptron UTA
   PPACTION=${39} # Num Actions in DNN/Perceptron
+  PPVE=${40}   # Voltage Emergency Level
+  PPVTH=${41}  # Voltage Threshold Level; applies to sensor predictor
   
 #$GEM5_ROOT/build/X86/gem5.fast \
 #$GEM5_ROOT/build/X86/gem5.opt \
@@ -76,6 +78,7 @@ $GEM5_ROOT/build/X86/gem5.fast \
 --mcpat_testname=$TN \
 --mcpat_device_type=$MPDT \
 --mcpat_use_fg_pg \
+--mcpat_save_space \
 --mcpat_scale_factor=$MPSF \
 --power_profile_start=${PS} \
 --power_profile_duration=${DUR} \
@@ -90,7 +93,8 @@ $GEM5_ROOT/build/X86/gem5.fast \
 --power_pred_cpu_cycles=${CS} \
 --power_pred_cpu_freq=${F} \
 --power_pred_voltage=${V} \
---power_pred_voltage_emergency=0.96 \
+--power_pred_voltage_emergency=${PPVE} \
+--power_pred_voltage_threshold=${PPVTH} \
 --power_pred_type=${PRED} \
 --power_pred_train_name=${TRAINING_ROOT}/${TN}.csv \
 --power_pred_model=${PTM} \
@@ -136,6 +140,7 @@ $GEM5_ROOT/build/X86/gem5.fast \
     --mcpat_testname=$TN \
     --mcpat_device_type=$MPDT \
     --mcpat_use_fg_pg \
+    --mcpat_save_space \
     --mcpat_scale_factor=$MPSF \
     --power_profile_start=${PS} \
     --power_profile_duration=${DUR} \
@@ -150,7 +155,8 @@ $GEM5_ROOT/build/X86/gem5.fast \
     --power_pred_cpu_cycles=${CS} \
     --power_pred_cpu_freq=${F} \
     --power_pred_voltage=${V} \
-    --power_pred_voltage_emergency=0.96 \
+    --power_pred_voltage_emergency=${PPVE} \
+    --power_pred_voltage_threshold=${PPVTH} \
     --power_pred_type=${PRED} \
     --power_pred_train_name=${TRAINING_ROOT}/${TN}.csv \
     --power_pred_model=${PTM} \

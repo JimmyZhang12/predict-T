@@ -170,9 +170,10 @@ CPU_CYCLES=("10")
 #PREDICTOR=("IdealSensor" "DecorOnly" "uArchEventPredictor")
 #PREDICTOR=("HarvardPowerPredictor")
 #PREDICTOR=("PerceptronPredictor")
-PREDICTOR=("DNNPredictor")
+PREDICTOR=("PerceptronPredictorUTA")
+#PREDICTOR=("DNNPredictor")
 #PREDICTOR=("Test")
-PPRED_TRAINED_MODEL=("${PREDICT_T_ROOT}/dnn_MOBILE_32_2_1_32_8192_STANDARDIZE.txt")
+PPRED_TRAINED_MODEL=("bottom.txt")
 #PPRED_TRAINED_MODEL=("${PREDICT_T_ROOT}/perceptron_DESKTOP_32_8_512_RAW.txt")
 PPRED_EVENTS=("16")
 PPRED_ACTIONS=("8")
@@ -305,7 +306,7 @@ for j in ${!name[@]}; do
   for i in ${!DEVICE_TYPE[@]}; do
     for pred in ${!PREDICTOR[@]}; do
       sleep 0.5
-      TN="${name[$j]}_${INSTRUCTIONS[$i]}_${CPU_CYCLES[0]}_${DEVICE_TYPE[$i]}_${PDN[$i]}_${PREDICTOR[$pred]}"
+      TN="${name[$j]}_${INSTRUCTIONS[$i]}_${CPU_CYCLES[0]}_${DEVICE_TYPE[$i]}_${PDN[$i]}_${PREDICTOR[$pred]}_${PPRED_ACTIONS[$pred]}"
       se_classic_mc_ncv_debug \
           $TN ${DURATION[$i]} \
           ${INSTRUCTIONS[$i]} \
