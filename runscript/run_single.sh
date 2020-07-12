@@ -94,7 +94,7 @@ print_info "INPUT $OUTPUT"
 # Configure Simulation Parameters
 #--------------------------------------------------------------------
 DURATION=("-1") # Data Points to Simulate
-INSTRUCTIONS=("100000") # Instructions to Simulate
+INSTRUCTIONS=("10000") # Instructions to Simulate
 INTERVAL=("10000") # Sim Cycles
 ROI_INTERVAL=("100")
 # When to start ROI, in Sim Ticks, -or- ROI by setting "-1"
