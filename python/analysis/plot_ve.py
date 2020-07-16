@@ -43,7 +43,10 @@ def get_traces(files, stat_name, cycles, freq):
         statline = sstr = re.sub('\s+', ' ', statline).strip()
         if(stat_name in statline):
           #print(statline)
-          trace.append(float(statline.split(" ")[1]))
+          if(stat_name == "state "):
+            trace.append(float(statline.split(" ")[1])-1.0)
+          else:
+            trace.append(float(statline.split(" ")[1]))
           time.append(step*t)
           t+=1
     traces.append(trace)
@@ -60,7 +63,7 @@ print([proc_class, freq, cycles, input])
 files = get_files(input)
 names = get_names(files)
 
-window_small = 500
+window_small = 200
 window_large = 5000
 window_l = 2000
 window_us = window_l + window_small
@@ -71,7 +74,7 @@ times,traces = get_traces(files, "num_ve", cycles, freq)
 fig, axs = plt.subplots(1, 1)
 fig.set_size_inches(8,5)
 for t, s, n in zip(times, traces, names):
-  axs.plot(t[0:7000], s[0:7000], linewidth=1, label=n)
+  axs.plot(t[0:10000], s[0:10000], linewidth=1, label=n)
 axs.legend()
 axs.set_xlabel("Time (ns)")
 axs.set_ylabel("Voltage Emergencies")
@@ -83,12 +86,78 @@ times,traces = get_traces(files, "num_tc", cycles, freq)
 fig, axs = plt.subplots(1, 1)
 fig.set_size_inches(8,5)
 for t, s, n in zip(times, traces, names):
-  axs.plot(t[0:7000], s[0:7000], linewidth=1, label=n)
+  axs.plot(t[0:10000], s[0:10000], linewidth=1, label=n)
 axs.legend()
 axs.set_xlabel("Time (ns)")
 axs.set_ylabel("Threshold Crossings")
 fig.suptitle("Number of Threshold Crossings "+proc_class+" CPU+PDN")
 plt.show()
+
+## Voltage
+#times,traces = get_traces(files, "supply_voltage ", cycles, freq)
+#fig, axs = plt.subplots(1, 1)
+#fig.set_size_inches(8,5)
+#axs.plot(times[0][window_l:window_us], traces[0][window_l:window_us], linewidth=1, color="k", label=names[0])
+#axs.legend()
+#axs.set_xlabel("Time (ns)")
+#axs.set_ylabel("Supply Voltage (V)")
+#fig.suptitle("Supply Voltage "+proc_class+" CPU+PDN")
+#plt.show()
+#
+## Total Instructions Ready
+#times,traces = get_traces(files, "totalInstsReady", cycles, freq)
+#fig, axs = plt.subplots(1, 1)
+#fig.set_size_inches(8,5)
+#axs.plot(times[0][window_l:window_us], traces[0][window_l:window_us], linewidth=1, color="k", label=names[0])
+#axs.legend()
+#axs.set_xlabel("Time (ns)")
+#axs.set_ylabel("# Instructions Ready")
+#fig.suptitle("Instructions Ready "+proc_class+" CPU+PDN")
+#plt.show()
+#
+## ICache Stall
+#times,traces = get_traces(files, "icacheStallCycles", cycles, freq)
+#fig, axs = plt.subplots(1, 1)
+#fig.set_size_inches(8,5)
+#axs.plot(times[0][window_l:window_us], traces[0][window_l:window_us], linewidth=1, color="k", label=names[0])
+#axs.legend()
+#axs.set_xlabel("Time (ns)")
+#axs.set_ylabel("Stall")
+#fig.suptitle("ICache Stall "+proc_class+" CPU+PDN")
+#plt.show()
+
+## DeCoR Event
+#times,traces = get_traces(files, ".state ", cycles, freq)
+#fig, axs = plt.subplots(1, 1)
+#fig.set_size_inches(8,5)
+#axs.plot(times[3][window_l:window_us], traces[3][window_l:window_us], linewidth=1, label=names[3])
+#axs.legend()
+#axs.set_xlabel("Time (ns)")
+#axs.set_ylabel("DeCoR Event")
+#fig.suptitle("DeCoR Event "+proc_class+" CPU+PDN")
+#plt.show()
+
+## Voltage
+#times,traces = get_traces(files, "supply_voltage ", cycles, freq)
+#fig, axs = plt.subplots(1, 1)
+#fig.set_size_inches(8,5)
+#axs.plot(times[3][window_l:window_us], traces[3][window_l:window_us], linewidth=1, label=names[3])
+#axs.legend()
+#axs.set_xlabel("Time (ns)")
+#axs.set_ylabel("Supply Voltage (V)")
+#fig.suptitle("Supply Voltage QSort DeCoR Only "+proc_class+" CPU+PDN")
+#plt.show()
+#
+## Voltage
+#times,traces = get_traces(files, "supply_current ", cycles, freq)
+#fig, axs = plt.subplots(1, 1)
+#fig.set_size_inches(8,5)
+#axs.plot(times[3][window_l:window_us], traces[3][window_l:window_us], linewidth=1, label=names[3])
+#axs.legend()
+#axs.set_xlabel("Time (ns)")
+#axs.set_ylabel("Supply Current (A)")
+#fig.suptitle("Supply Current QSort DeCoR Only "+proc_class+" CPU+PDN")
+#plt.show()
 
 # Voltage
 times,traces = get_traces(files, "supply_voltage ", cycles, freq)
@@ -132,6 +201,10 @@ for t, s, n in zip(times, traces, names):
   axs.plot(t[window_l:window_us], s[window_l:window_us], linewidth=1, label=n)
 axs.legend()
 axs.set_xlabel("Time (ns)")
-axs.set_ylabel("Supply Voltage (V)")
-fig.suptitle("Supply Voltage "+proc_class+" CPU+PDN")
+axs.set_ylabel("Supply Current (A)")
+fig.suptitle("Supply Current "+proc_class+" CPU+PDN")
 plt.show()
+
+# Print out the lengths as a CSV Line
+print(",".join([i for i in names]))
+print(",".join([str(len(i)) for i in traces]))

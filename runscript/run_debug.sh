@@ -111,21 +111,23 @@ PROFILE_START=("-1")
 #McPAT_SCALE_FACTOR=("0.33" "1.0" "1.0")
 #NUM_CORES=("4" "4" "8")
 # Mobile:
-DEVICE_TYPE=("MOBILE")
-McPAT_DEVICE_TYPE=("1")
-McPAT_SCALE_FACTOR=("0.33") # This is a HACK, Fix McPAT to support < 22nm planar
-NUM_CORES=("1")
+#DEVICE_TYPE=("MOBILE")
+#McPAT_DEVICE_TYPE=("1")
+#McPAT_SCALE_FACTOR=("0.33") # This is a HACK, Fix McPAT to support < 22nm planar
+#NUM_CORES=("1")
 # Laptop:
 #DEVICE_TYPE=("LAPTOP")
 #McPAT_DEVICE_TYPE=("1")
 #McPAT_SCALE_FACTOR=("1.0") # This is a HACK, Fix McPAT to support < 22nm planar
 #NUM_CORES=("4")
 # Desktop:
-#DEVICE_TYPE=("DESKTOP")
-#McPAT_DEVICE_TYPE=("0")
-#McPAT_SCALE_FACTOR=("1.0") # This is a HACK, Fix McPAT to support < 22nm planar
-#NUM_CORES=("8")
-VOLTAGE="1.0"
+DEVICE_TYPE=("DESKTOP")
+McPAT_DEVICE_TYPE=("0")
+McPAT_SCALE_FACTOR=("1.0") # This is a HACK, Fix McPAT to support < 22nm planar
+NUM_CORES=("1")
+VOLTAGE=("1.4")
+VOLTAGE_EMERGENCY=("1.358")
+VOLTAGE_THRESHOLD=("1.372")
 
 #---------------------------------------------------
 # Power Delivery Params
@@ -145,38 +147,38 @@ PDN=("HARVARD")
 #L2=("64kB" "128kB" "256kB")
 #L3=("2MB" "8MB" "16MB")
 # Mobile:
-L1D=("4kB")
-L1I=("2kB")
-L2=("64kB")
-L3=("2MB")
+#L1D=("4kB")
+#L1I=("2kB")
+#L2=("64kB")
+#L3=("2MB")
 # Laptop:
 #L1D=("16kB")
 #L1I=("8kB")
 #L2=("128kB")
 #L3=("8MB")
 # Desktop:
-#L1D=("16kB")
-#L1I=("8kB")
-#L2=("128kB")
-#L3=("8MB")
+L1D=("16kB")
+L1I=("8kB")
+L2=("128kB")
+L3=("8MB")
 
 #---------------------------------------------------
 # Predictor Params:
 #---------------------------------------------------
 # Stat Dump Cycles
-CPU_CYCLES=("10")
+CPU_CYCLES=("2")
 #PREDICTOR=("IdealSensor" "Test" "DecorOnly" "uArchEventPredictor")
 #PREDICTOR=("IdealSensor" "DecorOnly" "uArchEventPredictor")
 #PREDICTOR=("IdealSensor" "DecorOnly" "uArchEventPredictor")
 #PREDICTOR=("HarvardPowerPredictor")
 #PREDICTOR=("PerceptronPredictor")
-PREDICTOR=("PerceptronPredictorUTA")
+#PREDICTOR=("IdealSensor")
 #PREDICTOR=("DNNPredictor")
-#PREDICTOR=("Test")
+PREDICTOR=("Test")
 PPRED_TRAINED_MODEL=("bottom.txt")
 #PPRED_TRAINED_MODEL=("${PREDICT_T_ROOT}/perceptron_DESKTOP_32_8_512_RAW.txt")
 PPRED_EVENTS=("16")
-PPRED_ACTIONS=("8")
+PPRED_ACTIONS=("1")
 
 #---------------------------------------------------
 # CPU Params:
@@ -315,7 +317,7 @@ for j in ${!name[@]}; do
           "${opt[$j]}" \
           ${CLK[$i]} \
           ${PDN[$i]} \
-          ${CLK_[$c]} \
+          ${CLK_[$i]} \
           $VOLTAGE \
           ${CPU_CYCLES[0]} \
           ${PREDICTOR[$pred]} \
@@ -345,7 +347,9 @@ for j in ${!name[@]}; do
           ${McPAT_SCALE_FACTOR[$i]} \
           ${PPRED_TRAINED_MODEL[$pred]} \
           ${PPRED_EVENTS[$pred]} \
-          ${PPRED_ACTIONS[$pred]}
+          ${PPRED_ACTIONS[$pred]} \
+          ${VOLTAGE_EMERGENCY[$i]} \
+          ${VOLTAGE_THRESHOLD[$i]}
       while [ `jobs | wc -l` -ge 16 ]; do
         sleep 1
       done

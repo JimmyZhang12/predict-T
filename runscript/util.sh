@@ -237,6 +237,8 @@ se_classic_mc_ncv_debug() {
   PTM=${37}    # Path to Pretrained Power Predictor Model
   PPEVENT=${38} # Num Events in DNN/Perceptron/Perceptron UTA
   PPACTION=${39} # Num Actions in DNN/Perceptron
+  PPVE=${40}   # Voltage Emergency Level
+  PPVTH=${41}  # Voltage Threshold Level; applies to sensor predictor
   
   echo "
 gdb --args $GEM5_ROOT/build/X86/gem5.debug \
@@ -262,7 +264,8 @@ gdb --args $GEM5_ROOT/build/X86/gem5.debug \
 --power_pred_cpu_cycles=${CS} \
 --power_pred_cpu_freq=${F} \
 --power_pred_voltage=${V} \
---power_pred_voltage_emergency=0.96 \
+--power_pred_voltage_emergency=${PPVE} \
+--power_pred_voltage_threshold=${PPVTH} \
 --power_pred_type=${PRED} \
 --power_pred_train_name=${TRAINING_ROOT}/${TN}.csv \
 --power_pred_model=${PTM} \
@@ -300,7 +303,6 @@ gdb --args $GEM5_ROOT/build/X86/gem5.debug \
     #--debug-flags=PPredStat \
     #--ncverilog_enable \
   gdb --args $GEM5_ROOT/build/X86/gem5.debug \
-    --debug-flags=PerceptronPowerPred,PerceptronUTAPowerPred,DNNPowerPred \
     --outdir=${OUTPUT_ROOT}/gem5_out/$TN \
     --mcpat_enable \
     --mcpat_path=${MCPAT_ROOT} \
@@ -322,7 +324,8 @@ gdb --args $GEM5_ROOT/build/X86/gem5.debug \
     --power_pred_cpu_cycles=${CS} \
     --power_pred_cpu_freq=${F} \
     --power_pred_voltage=${V} \
-    --power_pred_voltage_emergency=0.96 \
+    --power_pred_voltage_emergency=${PPVE} \
+    --power_pred_voltage_threshold=${PPVTH} \
     --power_pred_type=${PRED} \
     --power_pred_train_name=${TRAINING_ROOT}/${TN}.csv \
     --power_pred_model=${PTM} \

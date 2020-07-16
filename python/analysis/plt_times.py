@@ -4,34 +4,12 @@ import numpy as np
 import math
 import sys
 import matplotlib.pyplot as plt
-from yellowbrick.style.palettes import PALETTES, SEQUENCES, color_palette
-from yellowbrick.style import set_palette
 import argparse
 
 #strategies = [ "None", "Decor", "IdealSensor", "uArchEvent", "Harvard" ]
 strategies = [ "Decor", "IdealSensor", "uArchEvent", "Signature" ]
 
 names = [ "Dijkstra", "FFT", "Rijndael Encrypt", "Toast" ]
-
-none_3g = [ 736594, 2949705, 5749425, 1313202 ]
-
-none_4g = [ 567500, 2212500, 4312500, 985000 ]
-
-decor_3g = [ 756592, 3049695, 4802853, 1313202 ]
-
-decor_4g= [ 1357500, 2550000, 6170000, 1162500 ]
-
-ideal_sensor_3g = [ 1059895, 3016365, 5412792, 1589841 ]
-
-ideal_sensor_4g = [ 1005000, 2485000, 5237500, 1317500 ]
-
-uarch_3g = [ 756591, 3199680, 4802853, 1313202 ]
-
-uarch_4g= [ 1392500, 2450000, 5650000, 1162500 ]
-
-harvard_3g = [ 803253, 2949705, 4639536, 1299870 ]
-
-harvard_4g = [ 882500, 2602500, 6270000, 1377500 ]
 
 #raw_data_3g = \
 #{
@@ -51,108 +29,158 @@ harvard_4g = [ 882500, 2602500, 6270000, 1377500 ]
 #  "Toast" : [985000/1e3,1162500/1e3,1317500/1e3,1162500/1e3,0/1e3],
 #}
 
-raw_data_3g = \
+raw_data_mobile = \
 {
-	"Type" : strategies,
-	"Dijkstra" : [756592/1e3,1059895/1e3,756591/1e3,803253/1e3],
-	"FFT" : [3049695/1e3,3016365/1e3,3199680/1e3,2949705/1e3],
-  "Rijndael" : [4802853/1e3,5412792/1e3,4802853/1e3,4639536/1e3],
-  "Toast" : [1313202/1e3,1589841/1e3,1313202/1e3,1299870/1e3]
+	"names" : ["dijkstra","fft","ffti","qsort","toast","untoast"],
+	"DecorOnly" : [22493,41334,5603,71196,5628,5883],
+  "IdealSensor" : [22561,41334,5400,70412,5628,5734],
+  "uArchEvent" : [22664,41334,5682,99144,5628,5883],
+  "Signature" : [22440,41851,5383,69103,5530,5668]
 }
 
-raw_data_4g = \
+raw_data_laptop = \
 {
-	"Type" : strategies,
-	"Dijkstra" : [1357500/1e3,1005000/1e3,1392500/1e3,882500/1e3],
-	"FFT" : [2550000/1e3,2485000/1e3,2450000/1e3,2602500/1e3],
-  "Rijndael" : [6170000/1e3,5237500/1e3,5650000/1e3,6270000/1e3],
-  "Toast" : [1162500/1e3,1317500/1e3,1162500/1e3,1377500/1e3]
+	"names" : ["dijkstra","fft","ffti","qsort","toast","untoast"],
+	"DecorOnly" : [12780,36823,4388,83671,4657,4704],
+  "IdealSensor" : [11470,36840,4382,71886,4618,4676],
+  "uArchEvent" : [12617,36823,4388,78488,4730,4704],
+  "Signature" : [14677,36673,4349,70668,4487,4614]
 }
 
-speedup_3g = \
+raw_data_desktop = \
 {
-  "Type" : strategies,
-  "Dijkstra" :  [raw_data_3g["Dijkstra"][0]/i for i in raw_data_3g["Dijkstra"]],
-  "FFT" :       [raw_data_3g["FFT"][0]/i for i in raw_data_3g["FFT"]],
-  "Rijndael" :  [raw_data_3g["Rijndael"][0]/i for i in raw_data_3g["Rijndael"]],
-  "Toast" :     [raw_data_3g["Toast"][0]/i for i in raw_data_3g["Toast"]]
+	"names" : ["dijkstra","fft","ffti","qsort","toast","untoast"],
+	"DecorOnly" : [80320,65381,6593,90318,7040,6946],
+  "IdealSensor" : [47760,45920,5230,76110,5352,5484],
+  "uArchEvent" : [102703,92929,6545,92191,7165,7251],
+  "Signature" : [20779,39395,4749,75880,4643,4847]
 }
 
-speedup_4g = \
+speedup_mobile = \
 {
-  "Type" : strategies,
-  "Dijkstra" :  [raw_data_4g["Dijkstra"][0]/i for i in raw_data_4g["Dijkstra"]],
-  "FFT" :       [raw_data_4g["FFT"][0]/i for i in raw_data_4g["FFT"]],
-  "Rijndael" :  [raw_data_4g["Rijndael"][0]/i for i in raw_data_4g["Rijndael"]],
-  "Toast" :     [raw_data_4g["Toast"][0]/i for i in raw_data_4g["Toast"]]
+	"names" : ["dijkstra","fft","ffti","qsort","toast","untoast"],
+  "DecorOnly" :   [baseline/test for test,baseline in zip(raw_data_mobile["DecorOnly"],raw_data_mobile["DecorOnly"])],
+  "IdealSensor" : [baseline/test for test,baseline in zip(raw_data_mobile["IdealSensor"],raw_data_mobile["DecorOnly"])],
+  "uArchEvent" :      [baseline/test for test,baseline in zip(raw_data_mobile["uArchEvent"],raw_data_mobile["DecorOnly"])],
+  "Signature" :     [baseline/test for test,baseline in zip(raw_data_mobile["Signature"],raw_data_mobile["DecorOnly"])],
 }
 
-set_palette("colorblind")
+speedup_laptop = \
+{
+	"names" : ["dijkstra","fft","ffti","qsort","toast","untoast"],
+  "DecorOnly" :   [baseline/test for test,baseline in zip(raw_data_laptop["DecorOnly"],raw_data_laptop["DecorOnly"])],
+  "IdealSensor" : [baseline/test for test,baseline in zip(raw_data_laptop["IdealSensor"],raw_data_laptop["DecorOnly"])],
+  "uArchEvent" :      [baseline/test for test,baseline in zip(raw_data_laptop["uArchEvent"],raw_data_laptop["DecorOnly"])],
+  "Signature" :     [baseline/test for test,baseline in zip(raw_data_laptop["Signature"],raw_data_laptop["DecorOnly"])],
+}
 
-df_3g = pd.DataFrame(speedup_3g, columns=["Type","Dijkstra","FFT","Rijndael","Toast"])
-df_4g = pd.DataFrame(speedup_4g, columns=["Type","Dijkstra","FFT","Rijndael","Toast"])
+speedup_desktop = \
+{
+	"names" : ["dijkstra","fft","ffti","qsort","toast","untoast"],
+  "DecorOnly" :   [baseline/test for test,baseline in zip(raw_data_desktop["DecorOnly"],raw_data_desktop["DecorOnly"])],
+  "IdealSensor" : [baseline/test for test,baseline in zip(raw_data_desktop["IdealSensor"],raw_data_desktop["DecorOnly"])],
+  "uArchEvent" :      [baseline/test for test,baseline in zip(raw_data_desktop["uArchEvent"],raw_data_desktop["DecorOnly"])],
+  "Signature" :     [baseline/test for test,baseline in zip(raw_data_desktop["Signature"],raw_data_desktop["DecorOnly"])],
+}
+
+#df = [speedup_desktop["DecorOnly"],speedup_desktop["IdealSensor"],speedup_desktop["uArchEvent"],speedup_desktop["Signature"]]
+df = [speedup_laptop["DecorOnly"],speedup_laptop["IdealSensor"],speedup_laptop["uArchEvent"],speedup_laptop["Signature"]]
+#df = [speedup_mobile["DecorOnly"],speedup_mobile["IdealSensor"],speedup_mobile["uArchEvent"],speedup_mobile["Signature"]]
 
 # Setting the positions and width for the bars
-pos = list(range(len(df_3g['Dijkstra'])))
+pos = list(range(4))
 width = 0.1
 
 # Plotting the bars
 fig, ax = plt.subplots(figsize=(10,5))
 
-#plt.bar(pos,
-#        df_3g['Dijkstra'],
-#        width,
-#        label=df_3g['Type'][0])
-#plt.bar([p + width for p in pos],
-#        df_3g['FFT'],
-#        width,
-#        label=df_3g['Type'][1])
-#plt.bar([p + width*2 for p in pos],
-#        df_3g['Rijndael'],
-#        width,
-#        label=df_3g['Type'][2])
-#plt.bar([p + width*3 for p in pos],
-#        df_3g['Toast'],
-#        width,
-#        label=df_3g['Type'][3])
-
-plt.bar([p + width*0 for p in pos],
-        df_4g['Dijkstra'],
+print(pos)
+i=0
+plt.bar([p + width*i for p in pos],
+        [j[i] for j in df],
         width,
-        label=df_4g['Type'][0])
-plt.bar([p + width*1 for p in pos],
-        df_4g['FFT'],
+        label="dijkstra",
+        color="w",
+        hatch="/"*1,
+        fill=True,
+        linewidth=1,
+        edgecolor="k")
+i+=1
+plt.bar([p + width*i for p in pos],
+        [j[i] for j in df],
         width,
-        label=df_4g['Type'][1])
-plt.bar([p + width*2 for p in pos],
-        df_4g['Rijndael'],
+        label="fft",
+        color="w",
+        hatch="o"*2,
+        fill=True,
+        linewidth=1,
+        edgecolor="k")
+i+=1
+plt.bar([p + width*i for p in pos],
+        [j[i] for j in df],
         width,
-        label=df_4g['Type'][2])
-plt.bar([p + width*3 for p in pos],
-        df_4g['Toast'],
+        label="ffti",
+        color="w",
+        hatch="X"*4,
+        fill="False",
+        linewidth=1,
+        edgecolor="k")
+i+=1
+plt.bar([p + width*i for p in pos],
+        [j[i] for j in df],
         width,
-        label=df_4g['Type'][3])
+        label="qsort",
+        color="w",
+        hatch="/"*4,
+        fill=True,
+        linewidth=1,
+        edgecolor="k")
+i+=1
+plt.bar([p + width*i for p in pos],
+        [j[i] for j in df],
+        width,
+        label="toast",
+        color="w",
+        hatch='\\'*4,
+        fill=True,
+        linewidth=1,
+        edgecolor="k")
+i+=1
+plt.bar([p + width*i for p in pos],
+        [j[i] for j in df],
+        width,
+        label="untoast",
+        color="w",
+        hatch="."*4,
+        fill=True,
+        linewidth=1,
+        edgecolor="k")
 
 # Set the y axis label
 #ax.set_ylabel('Time (ns)')
 ax.set_ylabel('Speedup (X)')
 
 # Set the chart's title
-#ax.set_title('Speedup w.r.t DeCoR only for 3000 Instructions @ 3.0GHz')
-ax.set_title('Speedup w.r.t DeCoR only for 3000 Instructions @ 4.0GHz')
-#ax.set_title('Total Execution Time for 3000 Instructions @ 3.0GHz')
-#ax.set_title('Total Execution Time for 3000 Instructions @ 4.0GHz')
+#ax.set_title('Speedup w.r.t DeCoR Only; Desktop Class CPU+PDN')
+ax.set_title('Speedup w.r.t DeCoR Only; Laptop Class CPU+PDN')
+#ax.set_title('Speedup w.r.t DeCoR Only; Mobile Class CPU+PDN')
 
 # Set the position of the x ticks
 ax.set_xticks([p + 1.5 * width for p in pos])
 
-ax.set_yticks(np.arange(0.0,1.6,0.1))
-ax.set_ylim(0.0, 1.6)
+#ax.set_yticks(np.arange(0.0,4,0.5))
+#ax.set_ylim(0.0, 4)
+ax.set_yticks(np.arange(0.0,1.5,0.1))
+ax.set_ylim(0.0, 1.5)
+#ax.set_yticks(np.arange(0.0,1.5,0.1))
+#ax.set_ylim(0.0, 1.5)
+ax.set_axisbelow(True)
+ax.grid(zorder=0, color="#c4c4c4", linestyle="-", linewidth=1, axis="y")
 
 # Set the labels for the x ticks
-ax.set_xticklabels(df_3g['Type'])
+ax.set_xticklabels(["DecorOnly", "IdealSensor", "uArchEvent", "Signature"])
 
 # Adding the legend and showing the plot
-plt.legend(["Dijkstra","FFT","Rijndael Encrypt","Toast"], loc='upper left')
+plt.legend(["dijkstra","fft","ffti","qsort","toast","untoast"], loc='upper left')
 #plt.grid()
 plt.show()

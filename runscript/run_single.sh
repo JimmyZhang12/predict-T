@@ -98,7 +98,8 @@ print_info "TRAINING_ROOT $TRAINING_ROOT"
 #---------------------------------------------------
 # Configure Simulation Parameters
 DURATION=("-1" "-1" "-1" "-1" "-1" "-1" "-1" "-1") # Data Points to Simulate
-INSTRUCTIONS=("50000" "50000" "100000" "100000" "100000" "100000" "100000" "100000") # Instructions to Simulate
+#INSTRUCTIONS=("20000" "20000" "100000" "100000" "100000" "100000" "100000" "100000") # Instructions to Simulate
+INSTRUCTIONS=("10000" "10000" "25000" "25000" "25000" "25000" "25000" "25000") # Instructions to Simulate
 # When to start ROI, in Sim Ticks, -or- ROI by setting "-1"
 PROFILE_START=("-1" "-1" "-1" "-1" "-1" "-1" "-1" "-1") 
 
@@ -113,13 +114,13 @@ PROFILE_START=("-1" "-1" "-1" "-1" "-1" "-1" "-1" "-1")
 # All:
 DEVICE_TYPE=("MOBILE" "LAPTOP" "DESKTOP")
 McPAT_DEVICE_TYPE=("1" "1" "0")
-McPAT_SCALE_FACTOR=("0.75" "1.0" "1.0")
+McPAT_SCALE_FACTOR=("0.5" "1.0" "1.0")
 NUM_CORES=("1" "1" "1")
 #NUM_CORES=("4" "4" "8")
 # Mobile:
 #DEVICE_TYPE=("MOBILE")
 #McPAT_DEVICE_TYPE=("1")
-#McPAT_SCALE_FACTOR=("0.33") # This is a HACK, Fix McPAT to support < 22nm planar
+#McPAT_SCALE_FACTOR=("1") # This is a HACK, Fix McPAT to support < 22nm planar
 #NUM_CORES=("1")
 # Laptop:
 #DEVICE_TYPE=("LAPTOP")
@@ -171,7 +172,7 @@ L3=("2MB" "8MB" "16MB")
 # Predictor Params:
 #---------------------------------------------------
 # Stat Dump Cycles
-CPU_CYCLES=("8")
+CPU_CYCLES=("2")
 #PREDICTOR=(
 #"PerceptronPredictorUTA"
 #)
@@ -224,43 +225,36 @@ CPU_CYCLES=("8")
 #"2"
 #"8"
 #)
+
 PREDICTOR=(
 "IdealSensor" 
-"IdealSensor" 
+"DecorOnly" 
 )
-#PREDICTOR=(
-#"DecorOnly" 
 #"uArchEventPredictor" 
 #"HarvardPowerPredictor"
 #)
-
+#
 # Bottom.txt is a meme; its ok for cringing
 PPRED_TRAINED_MODEL=(
 "bottom.txt"
 "bottom.txt"
 )
-#PPRED_TRAINED_MODEL=(
-#"bottom.txt"
 #"bottom.txt"
 #"bottom.txt"
 #)
-
+#
 PPRED_EVENTS=(
 "16"
 "16"
 )
-#PPRED_EVENTS=(
-#"16"
 #"16"
 #"16"
 #)
-
+#
 PPRED_ACTIONS=(
 "2"
-"8"
+"1"
 )
-#PPRED_ACTIONS=(
-#"1"
 #"1"
 #"1"
 #)
@@ -268,7 +262,6 @@ PPRED_ACTIONS=(
 #PREDICTOR=(
 #"Test" 
 #)
-## Bottom.txt is a meme; its ok for cringing
 #PPRED_TRAINED_MODEL=(
 #"bottom.txt"
 #)
@@ -315,7 +308,7 @@ PPRED_ACTIONS=(
 CLK=( "3.0GHz"     "3.5GHz"     "4.0GHz")
 CLK_=("3000000000" "3500000000" "4000000000")
 # Superscalar Core Width
-CORE_WIDTH=("2" "4" "8")
+CORE_WIDTH=("6" "6" "8")
 # Fetch Params
 FETCH_BUFFER_SIZE=("16" "32" "64")
 FETCH_QUEUE_SIZE=("8" "16" "32")
@@ -455,7 +448,7 @@ for j in ${!name[@]}; do
   for i in ${!DEVICE_TYPE[@]}; do
     for pred in ${!PREDICTOR[@]}; do
       sleep 10
-      TN="${name[$j]}_${INSTRUCTIONS[$j]}_${CPU_CYCLES[0]}_${DEVICE_TYPE[$i]}_${PDN[$i]}_${PREDICTOR[$pred]}_${PPRED_ACTIONS[$pred]}_proper_voltage"
+      TN="${name[$j]}_${INSTRUCTIONS[$j]}_${CPU_CYCLES[0]}_${DEVICE_TYPE[$i]}_${PDN[$i]}_${PREDICTOR[$pred]}_${PPRED_ACTIONS[$pred]}_no_throttle_on_restore"
 #echo "se_classic_mc_ncv \
 #$TN ${DURATION[$i]} \
 #${INSTRUCTIONS[$i]} \
@@ -464,7 +457,7 @@ for j in ${!name[@]}; do
 #"${opt[$j]}" \
 #${CLK[$i]} \
 #${PDN[$i]} \
-#${CLK_[$c]} \
+#${CLK_[$i]} \
 #$VOLTAGE \
 #${CPU_CYCLES[0]} \
 #${PREDICTOR[$pred]} \
@@ -505,7 +498,7 @@ for j in ${!name[@]}; do
           "${opt[$j]}" \
           ${CLK[$i]} \
           ${PDN[$i]} \
-          ${CLK_[$c]} \
+          ${CLK_[$i]} \
           ${VOLTAGE[$i]} \
           ${CPU_CYCLES[0]} \
           ${PREDICTOR[$pred]} \
