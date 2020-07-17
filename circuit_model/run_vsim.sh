@@ -89,4 +89,4 @@ ncverilog \
   -loadvpi ./interprocess.so:register_send_current \
   -loadvpi ./interprocess.so:register_ack_simulation \
   -top circuit_model \
-  -analogcontrol scf.scs > "$OUTPUT_ROOT/circuit_model/log/${1}_out.log"
+  -analogcontrol scf.scs # > "$OUTPUT_ROOT/circuit_model/log/${1}_out.log"

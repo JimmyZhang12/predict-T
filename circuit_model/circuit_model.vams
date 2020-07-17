@@ -42,6 +42,7 @@
 `include "inductor.vams"
 `include "resistor.vams"
 `include "predictive_supply.vams"
+`include "current_shunt.vams"
 
 `timescale 1ps/1ps
 
