@@ -113,6 +113,55 @@ def parse(stalls, instructions_pending, sys_voltage, cycles):
   ml = min(ml, len(stall_duration))
   return stall_duration[0:ml], average_pending_inst[0:ml], minimum_voltage[0:ml]
 
+def parse_decode_stall(stalls, instructions_pending, sys_voltage, cycles):
+  new_stall = False
+  unstall_time = 2
+  stall_time = 0.0
+  min_voltage = 1000
+  pending_inst = 0
+  peak_pending_inst = 0
+  stall_duration = []
+  unstall_duration = []
+  average_pending_inst = []
+  minimum_voltage = []
+  time = 0
+  for i in range(1, len(stalls)):
+    time += cycles
+    if(stalls[i] == 1 and stalls[i-1] != 1):
+      # We are beginning a new ICache Stall
+      print("Stall Begin @ "+str(time))
+      stall_time = 0.0
+      new_stall = True
+      assert(len(minimum_voltage) == len(average_pending_inst))
+      assert(len(minimum_voltage) == len(stall_duration))
+    elif(new_stall == True and stalls[i] != 1):
+      # We are ending a ICache Stall Cycle
+      print("Stall End @ "+str(time))
+      stall_duration.append(stall_time)
+      unstall_duration.append(unstall_time)
+      average_pending_inst.append(pending_inst/unstall_time)
+      minimum_voltage.append(min_voltage)
+      pending_inst = 0
+      peak_pending_inst = 0
+      unstall_time = 0
+      min_voltage = 1000
+      new_stall = False
+
+    if(new_stall):
+      stall_time += cycles
+    if(sys_voltage[i] < min_voltage):
+      min_voltage = sys_voltage[i]
+      print("MinVoltage "+str(min_voltage)+" @ "+str(time))
+    if(not new_stall):
+      unstall_time += cycles
+      pending_inst += instructions_pending[i]
+      if(peak_pending_inst < instructions_pending[i]):
+        peak_pending_inst = instructions_pending[i]
+
+  ml = min(len(minimum_voltage), len(average_pending_inst))
+  ml = min(ml, len(stall_duration))
+  return stall_duration[0:ml], average_pending_inst[0:ml], minimum_voltage[0:ml], unstall_duration[0:ml]
+
 proc_class = args.proc_class
 freq = args.frequency
 cycles = args.cycles
@@ -127,21 +176,26 @@ times, stalls = get_traces(files, "icacheStallCycles", cycles, freq)
 times, instrs = get_traces(files, "instsReadyMax", cycles, freq)
 times, volt = get_traces(files, "supply_voltage ", cycles, freq)
 
+times, stalls = get_traces(files, "decode_idle", cycles, freq)
+times, instrs = get_traces(files, "insts_available", cycles, freq)
+
 total_sd = []
 total_api = []
 total_mv = []
+total_ud = []
 for i in range(len(names)):
-  sd, api, mv = parse(stalls[i], instrs[i], volt[i], cycles)
+  sd, api, mv, ud = parse_decode_stall(stalls[i], instrs[i], volt[i], cycles)
   total_sd += sd
   total_api += api
   total_mv += mv
+  total_ud += ud
 
 print(len(total_sd), len(total_api), len(total_mv))
 
 # Stall Duration v Instructions Pending
 fig, axs = plt.subplots(1, 1)
 fig.set_size_inches(5,5)
-plt.scatter(total_sd, total_api, c="k", alpha=0.5)
+plt.scatter(total_sd, total_api, s=0.75, c="k", alpha=1.0)
 #axs.legend()
 axs.set_xlabel("Stall Duration")
 axs.set_ylabel("Instructions Pending")
@@ -153,7 +207,7 @@ print(stats.pearsonr(total_sd, total_api))
 # Stall Duration v Min Voltage
 fig, axs = plt.subplots(1, 1)
 fig.set_size_inches(5,5)
-plt.scatter(total_sd, total_mv, c="k", alpha=0.5)
+plt.scatter(total_sd, total_mv, s=0.75, c="k", alpha=1.0)
 #axs.legend()
 axs.set_xlabel("Stall Duration")
 axs.set_ylabel("Minimum Voltage")
@@ -164,11 +218,22 @@ print(stats.pearsonr(total_sd, total_mv))
 # Instructions Pending v Min Voltage
 fig, axs = plt.subplots(1, 1)
 fig.set_size_inches(5,5)
-plt.scatter(total_api, total_mv, c="k", alpha=0.5)
+plt.scatter(total_api, total_mv, s=0.75, c="k", alpha=1.0)
 #axs.legend()
 axs.set_xlabel("Instructions Pending")
 axs.set_ylabel("Minimum Voltage")
 fig.suptitle(proc_class)
 plt.show()
 print(stats.pearsonr(total_api, total_mv))
+
+# Instructions Pending v Min Voltage
+fig, axs = plt.subplots(1, 1)
+fig.set_size_inches(5,5)
+plt.scatter(total_api, total_ud, s=0.75, c="k", alpha=1.0)
+#axs.legend()
+axs.set_xlabel("Avg Instructions Pending")
+axs.set_ylabel("Duration")
+fig.suptitle(proc_class)
+plt.show()
+print(stats.pearsonr(total_api, total_ud))
 

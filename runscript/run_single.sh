@@ -60,8 +60,7 @@ if [ -z "$SIM_ROOT" ]; then
   print_error "SIM_ROOT not set; source setup.sh"
   exit 1
 fi
-if [ -z "$VSIM_IMAGE" ]; then
-  print_error "VSIM_IMAGE not set; source setup.sh"
+if [ -z "$VSIM_IMAGE" ]; then print_error "VSIM_IMAGE not set; source setup.sh"
   exit 1
 fi
 print_info "VSIM_TOOLS $VSIM_TOOLS"
@@ -97,11 +96,10 @@ print_info "TRAINING_ROOT $TRAINING_ROOT"
 # Simulation Params
 #---------------------------------------------------
 # Configure Simulation Parameters
-DURATION=("-1" "-1" "-1" "-1" "-1" "-1" "-1" "-1") # Data Points to Simulate
-#INSTRUCTIONS=("20000" "20000" "100000" "100000" "100000" "100000" "100000" "100000") # Instructions to Simulate
-INSTRUCTIONS=("10000" "10000" "25000" "25000" "25000" "25000" "25000" "25000") # Instructions to Simulate
+DURATION=("-1" "-1" "-1" "-1" "-1" "-1" "-1") # Data Points to Simulate
+#INSTRUCTIONS=("10000" "25000" "25000" "25000" "25000" "25000" "25000") # Instructions to Simulate
 # When to start ROI, in Sim Ticks, -or- ROI by setting "-1"
-PROFILE_START=("-1" "-1" "-1" "-1" "-1" "-1" "-1" "-1") 
+PROFILE_START=("-1" "-1" "-1" "-1" "-1" "-1" "-1") 
 
 #DURATION=("-1") # Data Points to Simulate
 #INSTRUCTIONS=("100000") # Instructions to Simulate
@@ -226,51 +224,55 @@ CPU_CYCLES=("2")
 #"8"
 #)
 
-#PREDICTOR=(
-#"uArchEventPredictor" 
-#"HarvardPowerPredictor"
-#)
-#"IdealSensor" 
-#"DecorOnly" 
-#)
-#
-# Bottom.txt is a meme; its ok for cringing
-#PPRED_TRAINED_MODEL=(
-#"bottom.txt"
-#"bottom.txt"
-#)
-#"bottom.txt"
-#"bottom.txt"
-#)
-#
-#PPRED_EVENTS=(
-#"16"
-#"16"
-#)
-#"16"
-#"16"
-#)
-#
-#PPRED_ACTIONS=(
-#"1"
-#"1"
-#)
-#"2"
-#"1"
-#)
-
 PREDICTOR=(
-"Test" 
+"DepAnalysis"
+"ThrottleAfterStall"
+"IdealSensor" 
+"uArchEventPredictor" 
+"HarvardPowerPredictor"
+"DecorOnly" 
 )
+#"Test"
 PPRED_TRAINED_MODEL=(
 "bottom.txt"
+"bottom.txt"
+"bottom.txt"
+"bottom.txt"
+"bottom.txt"
+"bottom.txt"
 )
+#"bottom.txt"
 PPRED_EVENTS=(
-"1"
+"16"
+"16"
+"16"
+"16"
+"16"
+"16"
 )
+#"16"
 PPRED_ACTIONS=(
 "1"
+"1"
+"1"
+"1"
+"1"
+"1"
 )
+#"1"
+
+#PREDICTOR=(
+#"Test" 
+#)
+#PPRED_TRAINED_MODEL=(
+#"bottom.txt"
+#)
+#PPRED_EVENTS=(
+#"1"
+#)
+#PPRED_ACTIONS=(
+#"1"
+#)
 
 #PREDICTOR=(
 #"PerceptronPredictorUTA"
@@ -425,9 +427,12 @@ SIMD_UNIT_COUNT=("1" "2" "4")
 #name=("basicmath" "bitcnts" "qsort" "susan_smooth" "susan_edge" "susan_corner" "dijkstra" "blowfish_encrypt" "blowfish_decrypt" "rijndael_encrypt" "rijndael_decrypt" "sha" "crc" "fft" "ffti" "toast" "untoast")
 #exe=("basicmath" "bitcnts" "qsort" "susan" "susan" "susan" "dijkstra" "blowfish" "blowfish" "rijndael" "rijndael" "sha" "crc" "fft" "fft" "toast" "untoast")
 #opt=("" "1000" "${INPUT}/qsort.dat" "${INPUT}/susan.pgm ${OUTPUT}/susan_s.pgm -s" "${INPUT}/susan.pgm ${OUTPUT}/susan_e.pgm -e" "${INPUT}/susan.pgm ${OUTPUT}/susan_c.pgm -c" "${INPUT}/dijkstra.dat" "e ${INPUT}/blowfish.asc ${OUTPUT}/blowfish.enc 1234567890abcdeffedcba0987654321" "d ${INPUT}/blowfish.enc ${OUTPUT}/blowfish.asc 1234567890abcdeffedcba0987654321" "${INPUT}/rijndael.asc ${OUTPUT}/rijndael.enc e 1234567890abcdeffedcba09876543211234567890abcdeffedcba0987654321" "${INPUT}/rijndael.enc ${OUTPUT}/rijndael.asc d 1234567890abcdeffedcba09876543211234567890abcdeffedcba0987654321" "${INPUT}/sha.asc" "${INPUT}/crc.pcm" "4 4096" "4 8192 -i" "-fps -c ${INPUT}/toast.au" "-fps -c ${INPUT}/untoast.au.run.gsm")
-name=("qsort" "susan_smooth" "dijkstra" "sha" "fft" "ffti" "toast" "untoast")
-exe=("qsort" "susan" "dijkstra" "sha" "fft" "fft" "toast" "untoast")
-opt=("${INPUT}/qsort.dat" "${INPUT}/susan.pgm ${OUTPUT}/susan_s.pgm -s" "${INPUT}/sha.asc" "4 4096" "4 8192 -i" "-fps -c ${INPUT}/toast.au")
+name=("qsort" "dijkstra" "fft" "ffti" "sha" "toast" "untoast")
+exe=("qsort" "dijkstra" "fft" "fft" "sha" "toast" "untoast")
+opt=("${INPUT}/qsort.dat" "${INPUT}/dijkstra.dat" "4 4096" "4 8192 -i" "${INPUT}/sha.asc" "-fps -c ${INPUT}/toast.au" "-fps -c ${INPUT}/untoast.au.run.gsm")
+#name=("sha" "untoast")
+#exe=("sha" "untoast")
+#opt=("${INPUT}/sha.asc" "-fps -c ${INPUT}/untoast.au.run.gsm")
 #name=("blowfish_encrypt")
 #exe=("blowfish")
 #opt=("e ${INPUT}/blowfish.asc ${OUTPUT}/blowfish.enc 1234567890abcdeffedcba0987654321")
@@ -448,7 +453,7 @@ for j in ${!name[@]}; do
   for i in ${!DEVICE_TYPE[@]}; do
     for pred in ${!PREDICTOR[@]}; do
       sleep 10
-      TN="${name[$j]}_${INSTRUCTIONS[$j]}_${CPU_CYCLES[0]}_${DEVICE_TYPE[$i]}_${PDN[$i]}_${PREDICTOR[$pred]}_${PPRED_ACTIONS[$pred]}_no_throttle_on_restore"
+      TN="${name[$j]}_${INSTRUCTIONS[$j]}_${CPU_CYCLES[0]}_${DEVICE_TYPE[$i]}_${PDN[$i]}_${PREDICTOR[$pred]}_${PPRED_ACTIONS[$pred]}_throttle_on_restore_longer_throttle"
 #echo "se_classic_mc_ncv \
 #$TN ${DURATION[$i]} \
 #${INSTRUCTIONS[$i]} \
