@@ -84,7 +84,7 @@ mobile = \
 	"DecorOnly" :   [30698,59109,23523,67372,1,23073,22941],
   "IdealSensor" : [33944,65493,62643,66770,1,40871,24623],
   "uArchEvent" :  [31973,63322,23706,68689,1,23248,18729],
-  "Signature" :   [30765,62660,23571,67223,1,22892,17871]
+  "Signature" :   [30765,62660,23571,67223,1,22892,17871],
   "T.a.S." :      [1,1,1,1,1,1,1],
   "InstPending" : [1,1,1,1,1,1,1]
 }
@@ -95,7 +95,7 @@ laptop = \
 	"DecorOnly" :   [71237,68759,19351,58794,1,120282,20624],
   "IdealSensor" : [68085,56412,53436,63161,1,53859,19636],
   "uArchEvent" :  [32163,51468,19201,64172,1,19929,10803],
-  "Signature" :   [65333,57012,19672,58778,1,20086,10341]
+  "Signature" :   [65333,57012,19672,58778,1,20086,10341],
   "T.a.S." :      [1,1,1,1,1,1,1],
   "InstPending" : [1,1,1,1,1,1,1]
 }
@@ -106,7 +106,7 @@ desktop = \
 	"DecorOnly" :   [58023,62402,22826,68575,1,23706,24211],
   "IdealSensor" : [61854,68579,64148,76647,1,80525,26825],
   "uArchEvent" :  [57656,63043,22891,70047,1,24311,9960],
-  "Signature" :   [58512,62865,22916,68764,1,19180,8250]
+  "Signature" :   [58512,62865,22916,68764,1,19180,8250],
   "T.a.S." :      [1,1,1,1,1,1,1],
   "InstPending" : [1,1,1,1,1,1,1]
 }
@@ -144,15 +144,15 @@ speedup_desktop = \
   "InstPending" :     [baseline/test for test,baseline in zip(desktop["InstPending"],desktop["DecorOnly"])]
 }
 data = [speedup_mobile, speedup_laptop, speedup_desktop]
-name = ["Speedup w.r.t DeCoR Only; Desktop Class CPU+PDN", "Speedup w.r.t DeCoR Only; Desktop Class CPU+PDN", "Speedup w.r.t DeCoR Only; Desktop Class CPU+PDN"]
+name = ["Mobile", "Laptop", "Desktop"]
 tick_labels = ["DecorOnly", "IdealSensor", "uArchEvent", "Signature"]
 benchmarks = ["dijkstra","fft","ffti","qsort","sha","toast","untoast"]
 fname = ["speedup_mobile.png", "speedup_laptop.png", "speedup_desktop.png"]
-bounds = [[0.0,2.5,0.1],[0.0,2.5,0.1],[0.0,2.5,0.1]]
+bounds = [[0.0,3.0,0.1],[0.0,3.0,0.1],[0.0,3.0,0.1]]
 for k in range(len(data)):
   df=[data[k]["DecorOnly"],data[k]["IdealSensor"],data[k]["uArchEvent"],data[k]["Signature"]]
   pos = list(range(len(df)))
-  width = 0.15
+  width = 0.125
   fig, ax = plt.subplots(figsize=(10,5))
   i=0
   plt.bar([p + width*i for p in pos], [j[i] for j in df], width, label="dijkstra", color="w", hatch="/"*1, fill=True, linewidth=1, edgecolor="k")
@@ -256,11 +256,11 @@ speedup_desktop = \
 }
 
 data = [speedup_mobile, speedup_laptop, speedup_desktop]
-name = ["Speedup w.r.t DeCoR Only; Desktop Class CPU+PDN", "Speedup w.r.t DeCoR Only; Desktop Class CPU+PDN", "Speedup w.r.t DeCoR Only; Desktop Class CPU+PDN"]
+name = ["Mobile Throttle on Restore", "Laptop Throttle on Restore", "Desktop Throttle on Restore"]
 tick_labels = ["DecorOnly", "IdealSensor", "uArchEvent", "Signature", "T.a.S", "InstPending"]
 benchmarks = ["dijkstra","fft","ffti","qsort","sha","toast","untoast"]
 fname = ["speedup_mobile_tor.png", "speedup_laptop_tor.png", "speedup_desktop_tor.png"]
-bounds = [[0.0,2.5,0.1],[0.0,2.5,0.1],[0.0,2.5,0.1]]
+bounds = [[0.0,2.0,0.1],[0.0,2.0,0.1],[0.0,2.0,0.1]]
 for k in range(len(data)):
   df=[data[k]["DecorOnly"],data[k]["IdealSensor"],data[k]["uArchEvent"],data[k]["Signature"],data[k]["T.a.S."],data[k]["InstPending"]]
   pos = list(range(len(df)))
@@ -368,11 +368,11 @@ speedup_desktop = \
 }
 
 data = [speedup_mobile, speedup_laptop, speedup_desktop]
-name = ["Speedup w.r.t DeCoR Only; Desktop Class CPU+PDN", "Speedup w.r.t DeCoR Only; Desktop Class CPU+PDN", "Speedup w.r.t DeCoR Only; Desktop Class CPU+PDN"]
+name = ["Mobile Throttle on Restore and Harvard PDN", "Laptop Throttle on Restore and Harvard PDN", "Desktop Throttle on Restore and Harvard PDN"]
 tick_labels = ["DecorOnly", "IdealSensor", "uArchEvent", "Signature", "T.a.S", "InstPending"]
 benchmarks = ["dijkstra","fft","ffti","qsort","sha","toast","untoast"]
 fname = ["speedup_mobile_harvard_tor.png", "speedup_laptop_harvard_tor.png", "speedup_desktop_harvard_tor.png"]
-bounds = [[0.0,2.5,0.1],[0.0,2.5,0.1],[0.0,2.5,0.1]]
+bounds = [[0.0,1.5,0.1],[0.0,1.5,0.1],[0.0,1.5,0.1]]
 for k in range(len(data)):
   df=[data[k]["DecorOnly"],data[k]["IdealSensor"],data[k]["uArchEvent"],data[k]["Signature"],data[k]["T.a.S."],data[k]["InstPending"]]
   pos = list(range(len(df)))
