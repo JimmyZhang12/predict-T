@@ -129,7 +129,7 @@ window_ul = window_l + window_large
 
 times,traces = get_traces(files, "supply_voltage ", cycles, freq)
 times,ves = get_traces(files, "num_voltage_emergency ", cycles, freq)
-times,ves = get_traces(files, "num_ve ", cycles, freq)
+#times,ves = get_traces(files, "num_ve ", cycles, freq)
 rates = [v[-1]/t[-1] for v,t in zip(ves, times)]
 avg_rate = sum(rates)/len(rates)
 print(",".join([str(r) for r in rates]))
