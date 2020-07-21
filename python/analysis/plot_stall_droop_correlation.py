@@ -13,6 +13,7 @@ parser.add_argument('--input', type=str, default="", help="Input Path")
 parser.add_argument('--cycles', type=int, default=8, help="Cycles between stat dumps")
 parser.add_argument('--frequency', type=float, default=3.0e9, help="CPU Frequency")
 parser.add_argument('--proc_class', type=str, default="Desktop", help="CPU Class")
+parser.add_argument('--vnom', type=float, default=0.9)
 args = parser.parse_args()
 
 def get_files(path):
@@ -77,7 +78,7 @@ def parse(stalls, instructions_pending, sys_voltage, cycles):
     time += cycles
     if(stalls[i] == cycles and stalls[i-1] != cycles):
       # We are beginning a new ICache Stall
-      print("Stall Begin @ "+str(time))
+      #print("Stall Begin @ "+str(time))
       if not first:
         #average_pending_inst.append(pending_inst/max(unstall_time, 1))
         average_pending_inst.append(peak_pending_inst)
@@ -93,7 +94,7 @@ def parse(stalls, instructions_pending, sys_voltage, cycles):
       assert(len(minimum_voltage) == len(stall_duration))
     elif(new_stall == True and stalls[i] != cycles):
       # We are ending a ICache Stall Cycle
-      print("Stall End @ "+str(time))
+      #print("Stall End @ "+str(time))
       stall_duration.append(stall_time)
       new_stall = False
 
@@ -102,7 +103,7 @@ def parse(stalls, instructions_pending, sys_voltage, cycles):
     else:
       if(sys_voltage[i] < min_voltage):
         min_voltage = sys_voltage[i]
-        print("MinVoltage "+str(min_voltage)+" @ "+str(time))
+        #print("MinVoltage "+str(min_voltage)+" @ "+str(time))
     if(not new_stall and unstall_time < 12*cycles):
       unstall_time += cycles
       pending_inst += instructions_pending[i]
@@ -139,7 +140,8 @@ def parse_decode_stall(stalls, instructions_pending, sys_voltage, cycles):
       print("Stall End @ "+str(time))
       stall_duration.append(stall_time)
       unstall_duration.append(unstall_time)
-      average_pending_inst.append(pending_inst/unstall_time)
+      #average_pending_inst.append(pending_inst/unstall_time)
+      average_pending_inst.append(pending_inst)
       minimum_voltage.append(min_voltage)
       pending_inst = 0
       peak_pending_inst = 0
@@ -183,6 +185,10 @@ total_sd = []
 total_api = []
 total_mv = []
 total_ud = []
+total_ud_ve = []
+total_ud_nve = []
+total_api_ve = []
+total_api_nve = []
 for i in range(len(names)):
   sd, api, mv, ud = parse_decode_stall(stalls[i], instrs[i], volt[i], cycles)
   total_sd += sd
@@ -192,46 +198,55 @@ for i in range(len(names)):
 
 print(len(total_sd), len(total_api), len(total_mv))
 
-# Stall Duration v Instructions Pending
-fig, axs = plt.subplots(1, 1)
-fig.set_size_inches(5,5)
-plt.scatter(total_sd, total_api, s=0.75, c="k", alpha=1.0)
-#axs.legend()
-axs.set_xlabel("Stall Duration")
-axs.set_ylabel("Instructions Pending")
-fig.suptitle(proc_class)
-plt.show()
+## Stall Duration v Instructions Pending
+#fig, axs = plt.subplots(1, 1)
+#fig.set_size_inches(5,5)
+#plt.scatter(total_sd, total_api, s=0.75, c="k", alpha=1.0)
+##axs.legend()
+#axs.set_xlabel("Stall Duration")
+#axs.set_ylabel("Instructions Pending")
+#fig.suptitle(proc_class)
+#plt.show()
+#
+#print(stats.pearsonr(total_sd, total_api))
+#
+## Stall Duration v Min Voltage
+#fig, axs = plt.subplots(1, 1)
+#fig.set_size_inches(5,5)
+#plt.scatter(total_sd, total_mv, s=0.75, c="k", alpha=1.0)
+##axs.legend()
+#axs.set_xlabel("Stall Duration")
+#axs.set_ylabel("Minimum Voltage")
+#fig.suptitle(proc_class)
+#plt.show()
+#print(stats.pearsonr(total_sd, total_mv))
+#
+## Instructions Pending v Min Voltage
+#fig, axs = plt.subplots(1, 1)
+#fig.set_size_inches(5,5)
+#plt.scatter(total_api, total_mv, s=0.75, c="k", alpha=1.0)
+##axs.legend()
+#axs.set_xlabel("Instructions Pending")
+#axs.set_ylabel("Minimum Voltage")
+#fig.suptitle(proc_class)
+#plt.show()
+#print(stats.pearsonr(total_api, total_mv))
 
-print(stats.pearsonr(total_sd, total_api))
-
-# Stall Duration v Min Voltage
-fig, axs = plt.subplots(1, 1)
-fig.set_size_inches(5,5)
-plt.scatter(total_sd, total_mv, s=0.75, c="k", alpha=1.0)
-#axs.legend()
-axs.set_xlabel("Stall Duration")
-axs.set_ylabel("Minimum Voltage")
-fig.suptitle(proc_class)
-plt.show()
-print(stats.pearsonr(total_sd, total_mv))
+for i in range(len(total_api)):
+  if(total_mv[i] < args.vnom*0.97):
+    total_api_ve.append(total_api[i])
+    total_ud_ve.append(total_ud[i])
+  else:
+    total_api_nve.append(total_api[i])
+    total_ud_nve.append(total_ud[i])
 
 # Instructions Pending v Min Voltage
 fig, axs = plt.subplots(1, 1)
 fig.set_size_inches(5,5)
-plt.scatter(total_api, total_mv, s=0.75, c="k", alpha=1.0)
+plt.scatter(total_api_nve, total_ud_nve, s=1, c="k", alpha=1.0)
+plt.scatter(total_api_ve, total_ud_ve, s=1, c="r", alpha=1.0)
 #axs.legend()
-axs.set_xlabel("Instructions Pending")
-axs.set_ylabel("Minimum Voltage")
-fig.suptitle(proc_class)
-plt.show()
-print(stats.pearsonr(total_api, total_mv))
-
-# Instructions Pending v Min Voltage
-fig, axs = plt.subplots(1, 1)
-fig.set_size_inches(5,5)
-plt.scatter(total_api, total_ud, s=0.75, c="k", alpha=1.0)
-#axs.legend()
-axs.set_xlabel("Avg Instructions Pending")
+axs.set_xlabel("Total Instructions Pending")
 axs.set_ylabel("Duration")
 fig.suptitle(proc_class)
 plt.show()

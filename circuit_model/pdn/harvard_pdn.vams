@@ -105,4 +105,148 @@ module harvard_power_distribution_network(vin, vout, vvrm, vpcb, vpack, vdie, ii
   end
 endmodule
 
+/*
+ * Module harvard_power_distribution_network_mobile
+ *
+ *  This is a model of the harvard power distribution netowrk geared for use
+ *  with the "Mobile Processor" class. It has a peak impdeance of 50mOhm @ 1e8
+ *  and a DC impedance of 1mOhm
+ *
+ *    vin - Input Voltage (From ideal supply)
+ *    vout - Output Voltage (To Load Model)
+ *    vvrm - Voltage at the output of the vrm model
+ *    vdie - voltage at the output of the die model
+ *    gnd - ground net
+ *
+ *    Parameter R_LUMPED - Lumped R Val
+ *    Parameter L_LUMPED - Lumped L Val
+ *    Parameter C_LUMPED - Lumped C Val
+ */
+module harvard_power_distribution_network_mobile(vin, vout, vvrm, vpcb, vpack, vdie, iin, iout, gnd);
+	inout vin, vout, gnd;
+  output vvrm, vpcb, vpack, vdie, iin, iout;
+	electrical vin, vout, iin, iout, vvrm, vpcb, vpack, vdie, n1, n2, n3, gnd;
+
+  parameter real R_LUMPED=1m;
+  parameter real L_LUMPED=15.92p;
+  parameter real C_LUMPED=159.2n;
+
+  // Essential for getting a valid voltage read for some reason...
+  my_res#(.R(1n)) ri(vin, n1);
+
+  // Second Order RLC model of the PDN from Chip−Package Resonance in "Core
+  // Power Supply Structures for a High Power Microprocessor"
+  my_res#(.R(R_LUMPED)) r_lumped(n1, n2);
+  my_ind#(.L(L_LUMPED)) l_lumped(n2, n3);
+  my_cap#(.C(C_LUMPED)) c_lumped(n3, gnd);
+
+  // Essential for getting a valid voltage read for some reason...
+  my_res#(.R(1n)) ro(n3, vout);
+
+  analog begin
+    V(vvrm, gnd) <+ V(n1, gnd);
+    V(vpcb, gnd) <+ 0.0;
+    V(vpack, gnd) <+ 0.0;
+    V(vdie, gnd) <+ V(n3, gnd);
+    V(iin, gnd) <+ I(vin, n1);
+    V(iout, gnd) <+ I(n3, vout);
+  end
+endmodule
+
+/*
+ * Module harvard_power_distribution_network_laptop
+ *
+ *  This is a model of the harvard power distribution netowrk geared for use
+ *  with the "Laptop Processor" class. It has a peak impdeance of 27.5mOhm @
+ *  1e8 Hz and a DC impedance of 1mOhm
+ *
+ *    vin - Input Voltage (From ideal supply)
+ *    vout - Output Voltage (To Load Model)
+ *    vvrm - Voltage at the output of the vrm model
+ *    vdie - voltage at the output of the die model
+ *    gnd - ground net
+ *
+ *    Parameter R_LUMPED - Lumped R Val
+ *    Parameter L_LUMPED - Lumped L Val
+ *    Parameter C_LUMPED - Lumped C Val
+ */
+module harvard_power_distribution_network_laptop(vin, vout, vvrm, vpcb, vpack, vdie, iin, iout, gnd);
+	inout vin, vout, gnd;
+  output vvrm, vpcb, vpack, vdie, iin, iout;
+	electrical vin, vout, iin, iout, vvrm, vpcb, vpack, vdie, n1, n2, n3, gnd;
+
+  parameter real R_LUMPED=1m;
+  parameter real L_LUMPED=8.356p;
+  parameter real C_LUMPED=303.2n;
+
+  // Essential for getting a valid voltage read for some reason...
+  my_res#(.R(1n)) ri(vin, n1);
+
+  // Second Order RLC model of the PDN from Chip−Package Resonance in "Core
+  // Power Supply Structures for a High Power Microprocessor"
+  my_res#(.R(R_LUMPED)) r_lumped(n1, n2);
+  my_ind#(.L(L_LUMPED)) l_lumped(n2, n3);
+  my_cap#(.C(C_LUMPED)) c_lumped(n3, gnd);
+
+  // Essential for getting a valid voltage read for some reason...
+  my_res#(.R(1n)) ro(n3, vout);
+
+  analog begin
+    V(vvrm, gnd) <+ V(n1, gnd);
+    V(vpcb, gnd) <+ 0.0;
+    V(vpack, gnd) <+ 0.0;
+    V(vdie, gnd) <+ V(n3, gnd);
+    V(iin, gnd) <+ I(vin, n1);
+    V(iout, gnd) <+ I(n3, vout);
+  end
+endmodule
+
+/*
+ * Module harvard_power_distribution_network_desktop
+ *
+ *  This is a model of the harvard power distribution netowrk geared for use
+ *  with the "Desktop Processor" class. It has a peak impdeance of 100mOhm @ 1e8
+ *  Hz and a DC impedance of 1mOhm
+ *
+ *    vin - Input Voltage (From ideal supply)
+ *    vout - Output Voltage (To Load Model)
+ *    vvrm - Voltage at the output of the vrm model
+ *    vdie - voltage at the output of the die model
+ *    gnd - ground net
+ *
+ *    Parameter R_LUMPED - Lumped R Val
+ *    Parameter L_LUMPED - Lumped L Val
+ *    Parameter C_LUMPED - Lumped C Val
+ */
+module harvard_power_distribution_network_desktop(vin, vout, vvrm, vpcb, vpack, vdie, iin, iout, gnd);
+	inout vin, vout, gnd;
+  output vvrm, vpcb, vpack, vdie, iin, iout;
+	electrical vin, vout, iin, iout, vvrm, vpcb, vpack, vdie, n1, n2, n3, gnd;
+
+  parameter real R_LUMPED=1m;
+  parameter real L_LUMPED=3.979p;
+  parameter real C_LUMPED=636.6n;
+
+  // Essential for getting a valid voltage read for some reason...
+  my_res#(.R(1n)) ri(vin, n1);
+
+  // Second Order RLC model of the PDN from Chip−Package Resonance in "Core
+  // Power Supply Structures for a High Power Microprocessor"
+  my_res#(.R(R_LUMPED)) r_lumped(n1, n2);
+  my_ind#(.L(L_LUMPED)) l_lumped(n2, n3);
+  my_cap#(.C(C_LUMPED)) c_lumped(n3, gnd);
+
+  // Essential for getting a valid voltage read for some reason...
+  my_res#(.R(1n)) ro(n3, vout);
+
+  analog begin
+    V(vvrm, gnd) <+ V(n1, gnd);
+    V(vpcb, gnd) <+ 0.0;
+    V(vpack, gnd) <+ 0.0;
+    V(vdie, gnd) <+ V(n3, gnd);
+    V(iin, gnd) <+ I(vin, n1);
+    V(iout, gnd) <+ I(n3, vout);
+  end
+endmodule
+
 `endif // HARVARD_PDN_VAMS

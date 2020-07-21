@@ -94,6 +94,15 @@ module circuit_model();
 `elsif HARVARD
   // Harvard PDN Model
   harvard_power_distribution_network pdn(.vin(vin), .vout(vout), .gnd(gnd), .vvrm(vvrm), .vpcb(vpcb), .vpack(vpackage), .vdie(vdie), .iin(iin), .iout(iout));
+`elsif HARVARD_M
+  // Harvard PDN Model
+  harvard_power_distribution_network_mobile pdn(.vin(vin), .vout(vout), .gnd(gnd), .vvrm(vvrm), .vpcb(vpcb), .vpack(vpackage), .vdie(vdie), .iin(iin), .iout(iout));
+`elsif HARVARD_L
+  // Harvard PDN Model
+  harvard_power_distribution_network_laptop pdn(.vin(vin), .vout(vout), .gnd(gnd), .vvrm(vvrm), .vpcb(vpcb), .vpack(vpackage), .vdie(vdie), .iin(iin), .iout(iout));
+`elsif HARVARD_D
+  // Harvard PDN Model
+  harvard_power_distribution_network_desktop pdn(.vin(vin), .vout(vout), .gnd(gnd), .vvrm(vvrm), .vpcb(vpcb), .vpack(vpackage), .vdie(vdie), .iin(iin), .iout(iout));
 `elsif INTEL_M
   // Intel Mobile
   intel_power_distribution_network_m pdn(.vin(vin), .vout(vout), .gnd(gnd), .vvrm(vvrm), .vpcb(vpcb), .vpack(vpackage), .vdie(vdie), .iin(iin), .iout(iout));

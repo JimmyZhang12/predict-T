@@ -128,6 +128,7 @@ window_ul = window_l + window_large
 #plt.show()
 
 times,traces = get_traces(files, "supply_voltage ", cycles, freq)
+times,ves = get_traces(files, "num_voltage_emergency ", cycles, freq)
 # DeCoR Event
 #times,traces = get_traces(files, ".state ", cycles, freq)
 #fig, axs = plt.subplots(1, 1)
@@ -210,3 +211,5 @@ times,traces = get_traces(files, "supply_voltage ", cycles, freq)
 # Print out the lengths as a CSV Line
 print(",".join([i for i in names]))
 print(",".join([str(len(i)) for i in traces]))
+print(",".join([str(i[-1]) for i in ves]))
+
