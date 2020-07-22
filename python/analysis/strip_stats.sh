@@ -5,15 +5,15 @@
 G5_OUT=
 #TESTS=("dijkstra" "sha" "untoast")
 TESTS=("dijkstra" "qsort" "fft" "ffti" "sha" "toast" "untoast")
-TESTS=("dijkstra" "qsort" "fft" "ffti" "sha")
+#TESTS=("dijkstra" "qsort" "fft" "ffti" "sha")
 #TESTS=("toast" "untoast")
 #DURATION=("10000" "25000" "25000")
 DURATION=("25000" "10000" "25000" "25000" "25000" "25000" "25000")
-DURATION=("25000" "10000" "25000" "25000" "25000")
+#DURATION=("25000" "10000" "25000" "25000" "25000")
 #DURATION=("25000" "25000")
 CLASS=("MOBILE" "LAPTOP" "DESKTOP")
-#PDN=("ARM" "INTEL_M" "INTEL_DT")
-PDN=("HARVARD_M" "HARVARD_L" "HARVARD_D")
+PDN=("ARM" "INTEL_M" "INTEL_DT")
+#PDN=("HARVARD_M" "HARVARD_L" "HARVARD_D")
 
 SRC=$1
 TYPE=$2

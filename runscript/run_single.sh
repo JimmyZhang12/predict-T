@@ -101,15 +101,15 @@ INSTRUCTIONS=("10000" "25000" "25000" "25000" "25000" "25000" "25000") # Instruc
 # When to start ROI, in Sim Ticks, -or- ROI by setting "-1"
 PROFILE_START=("-1" "-1" "-1" "-1" "-1" "-1" "-1") 
 
-DURATION=("-1") # Data Points to Simulate
-INSTRUCTIONS=("25000") # Instructions to Simulate
-# When to start ROI, in Sim Ticks, -or- ROI by setting "-1"
-PROFILE_START=("-1") 
+#DURATION=("-1") # Data Points to Simulate
+#INSTRUCTIONS=("25000") # Instructions to Simulate
+## When to start ROI, in Sim Ticks, -or- ROI by setting "-1"
+#PROFILE_START=("-1") 
 
 #---------------------------------------------------
 # Device Params:
 #---------------------------------------------------
-# All:
+# All: 
 DEVICE_TYPE=("MOBILE" "LAPTOP" "DESKTOP")
 McPAT_DEVICE_TYPE=("1" "1" "0")
 McPAT_SCALE_FACTOR=("0.5" "1.0" "1.0")
@@ -139,8 +139,8 @@ VOLTAGE_THRESHOLD=("0.882" "1.176" "1.372")
 #---------------------------------------------------
 # Power Delivery Params
 #---------------------------------------------------
-#PDN=("ARM" "INTEL_M" "INTEL_DT")
-PDN=("HARVARD_M" "HARVARD_L" "HARVARD_D")
+PDN=("ARM" "INTEL_M" "INTEL_DT")
+#PDN=("HARVARD_M" "HARVARD_L" "HARVARD_D")
 #PDN=("HARVARD")
 
 #---------------------------------------------------
@@ -174,40 +174,40 @@ L3=("2MB" "8MB" "16MB")
 CPU_CYCLES=("2")
 
 PREDICTOR=(
-"DepAnalysis"
-"ThrottleAfterStall"
 "IdealSensor" 
 "uArchEventPredictor" 
 "HarvardPowerPredictor"
 "DecorOnly" 
 )
+#"DepAnalysis"
+#"ThrottleAfterStall"
 #"Test"
 PPRED_TRAINED_MODEL=(
 "bottom.txt"
 "bottom.txt"
 "bottom.txt"
 "bottom.txt"
-"bottom.txt"
-"bottom.txt"
 )
+#"bottom.txt"
+#"bottom.txt"
 #"bottom.txt"
 PPRED_EVENTS=(
 "16"
 "16"
 "16"
 "16"
-"16"
-"16"
 )
+#"16"
+#"16"
 #"16"
 PPRED_ACTIONS=(
 "1"
 "1"
 "1"
 "1"
-"1"
-"1"
 )
+#"1"
+#"1"
 #"1"
 
 #PREDICTOR=(
@@ -379,9 +379,9 @@ SIMD_UNIT_COUNT=("1" "2" "4")
 #name=("qsort" "dijkstra" "fft" "ffti" "sha" "toast" "untoast")
 #exe=("qsort" "dijkstra" "fft" "fft" "sha" "toast" "untoast")
 #opt=("${INPUT}/qsort.dat" "${INPUT}/dijkstra.dat" "4 4096" "4 8192 -i" "${INPUT}/sha.asc" "-fps -c ${INPUT}/toast.au" "-fps -c ${INPUT}/untoast.au.run.gsm")
-name=("toast")
-exe=("toast")
-opt=("-fps -c ${INPUT}/toast.au")
+name=("qsort" "dijkstra" "fft" "ffti" "sha")
+exe=("qsort" "dijkstra" "fft" "fft" "sha")
+opt=("${INPUT}/qsort.dat" "${INPUT}/dijkstra.dat" "4 4096" "4 8192 -i" "${INPUT}/sha.asc")
 #name=("sha" "untoast")
 #exe=("sha" "untoast")
 #opt=("${INPUT}/sha.asc" "-fps -c ${INPUT}/untoast.au.run.gsm")
@@ -408,7 +408,7 @@ for j in ${!name[@]}; do
   for i in ${!DEVICE_TYPE[@]}; do
     for pred in ${!PREDICTOR[@]}; do
       sleep 10
-      TN="${name[$j]}_${INSTRUCTIONS[$j]}_${CPU_CYCLES[0]}_${DEVICE_TYPE[$i]}_${PDN[$i]}_${PREDICTOR[$pred]}_${PPRED_ACTIONS[$pred]}_harvard_pdns"
+      TN="${name[$j]}_${INSTRUCTIONS[$j]}_${CPU_CYCLES[0]}_${DEVICE_TYPE[$i]}_${PDN[$i]}_${PREDICTOR[$pred]}_${PPRED_ACTIONS[$pred]}_no_throttle_on_restore"
 #echo "se_classic_mc_ncv \
 #$TN ${DURATION[$i]} \
 #${INSTRUCTIONS[$i]} \
