@@ -15,10 +15,10 @@ import argparse
 mobile = \
 {
   "names" :       ["dijkstra","fft","ffti","qsort","sha","toast","untoast"],
-  "DecorOnly" :   [31090,63448,59109,67372,20112,1,1],
-  "IdealSensor" : [33944,65493,62643,66770,20452,1,1],
-  "uArchEvent" :  [31942,67464,63322,68689,25699,1,1],
-  "Signature" :   [30337,65927,62660,67223,21057,1,1],
+  "DecorOnly" :   [31090,63448,59109,67372,20112,36405,52475],
+  "IdealSensor" : [33944,65493,62643,66770,20452,34114,53154],
+  "uArchEvent" :  [31942,67464,63322,68689,25699,42591,56181],
+  "Signature" :   [30337,65927,62660,67223,21057,37316,52310],
   "T.a.S." :      [1,1,1,1,1,1,1],
   "InstPending" : [1,1,1,1,1,1,1]
 }
@@ -26,10 +26,10 @@ mobile = \
 laptop = \
 {
   "names" :       ["dijkstra","fft","ffti","qsort","sha","toast","untoast"],
-  "DecorOnly" :   [72642,69036,68759,58794,55161,1,1],
-  "IdealSensor" : [68085,56412,53436,63161,29677,1,1],
-  "uArchEvent" :  [57103,53999,51468,64172,28010,1,1],
-  "Signature" :   [53732,60792,57012,58778,41080,1,1],
+  "DecorOnly" :   [72642,69036,68759,58794,55161,78257,100496],
+  "IdealSensor" : [68085,56412,53436,63161,29677,53859,45715],
+  "uArchEvent" :  [57103,53999,51468,64172,28010,49502,50900],
+  "Signature" :   [53732,60792,57012,58778,41080,47613,61685],
   "T.a.S." :      [1,1,1,1,1,1,1],
   "InstPending" : [1,1,1,1,1,1,1]
 }
@@ -37,10 +37,10 @@ laptop = \
 desktop = \
 {
   "names" :       ["dijkstra","fft","ffti","qsort","sha","toast","untoast"],
-  "DecorOnly" :   [57711,64126,62402,68575,51750,1,1],
-  "IdealSensor" : [61854,68579,64148,76647,56137,1,1],
-  "uArchEvent" :  [61218,66537,63043,70047,56806,1,1],
-  "Signature" :   [57071,65799,62865,68764,53216,1,1],
+  "DecorOnly" :   [57711,64126,62402,68575,51750,71038,97944],
+  "IdealSensor" : [61854,68579,64148,76647,56137,80525,110416],
+  "uArchEvent" :  [61218,66537,63043,70047,56806,76683,105944],
+  "Signature" :   [57071,65799,62865,68764,53216,74062,103314],
   "T.a.S." :      [1,1,1,1,1,1,1],
   "InstPending" : [1,1,1,1,1,1,1]
 }
@@ -115,6 +115,56 @@ speedup_desktop = \
 #  plt.subplots_adjust(left=0.1, right=0.8, top=0.9, bottom=0.1)
 #  plt.savefig(fname[k])
 #  plt.show()
+it = \
+{
+  "names" :       ["Mobile","Laptop","Desktop"],
+  "IdealSensor" : [sum(speedup_mobile["IdealSensor"])/len(speedup_mobile["IdealSensor"]), \
+                   sum(speedup_laptop["IdealSensor"])/len(speedup_laptop["IdealSensor"]), \
+                   sum(speedup_desktop["IdealSensor"])/len(speedup_desktop["IdealSensor"])],
+  "uArchEvent" :  [sum(speedup_mobile["uArchEvent"])/len(speedup_mobile["uArchEvent"]), \
+                   sum(speedup_laptop["uArchEvent"])/len(speedup_laptop["uArchEvent"]), \
+                   sum(speedup_desktop["uArchEvent"])/len(speedup_desktop["uArchEvent"])],
+  "Signature" :   [sum(speedup_mobile["Signature"])/len(speedup_mobile["Signature"]), \
+                   sum(speedup_laptop["Signature"])/len(speedup_laptop["Signature"]), \
+                   sum(speedup_desktop["Signature"])/len(speedup_desktop["Signature"])],
+  "T.a.S." :      [sum(speedup_mobile["T.a.S."])/len(speedup_mobile["T.a.S."]), \
+                   sum(speedup_laptop["T.a.S."])/len(speedup_laptop["T.a.S."]), \
+                   sum(speedup_desktop["T.a.S."])/len(speedup_desktop["T.a.S."])],
+  "InstPending" : [sum(speedup_mobile["InstPending"])/len(speedup_mobile["InstPending"]), \
+                   sum(speedup_laptop["InstPending"])/len(speedup_laptop["InstPending"]), \
+                   sum(speedup_desktop["InstPending"])/len(speedup_desktop["InstPending"])],
+}
+
+name = ["Average Speedup Across Systems"]
+tick_labels = ["IdealSensor", "uArchEvent", "Signature"]
+benchmarks = ["Mobile","Latop","Desktop"]
+fname = ["speedup_original.png"]
+bounds = [[0,2,0.1,0]]
+df=[it["IdealSensor"],it["uArchEvent"],it["Signature"]]
+pos = list(range(len(df)))
+width = 0.2
+fig, ax = plt.subplots(figsize=(10,5))
+i=0
+plt.bar([p + width*i for p in pos], [j[i] for j in df], width, label=benchmarks[i], color="w", hatch="/"*4, fill=True, linewidth=1, edgecolor="k")
+i+=1
+plt.bar([p + width*i for p in pos], [j[i] for j in df], width, label=benchmarks[i], color="w", hatch="\\"*4, fill=True, linewidth=1, edgecolor="k")
+i+=1
+plt.bar([p + width*i for p in pos], [j[i] for j in df], width, label=benchmarks[i], color="w", hatch="X"*4, fill="True", linewidth=1, edgecolor="k")
+ax.set_ylabel('Speedup (X)')
+ax.set_title(name[0])
+ax.set_xticks([p + 1.5 * width for p in pos])
+ax.set_yticks(np.arange(bounds[0][0],bounds[0][1],bounds[0][2]))
+ax.set_ylim(bounds[0][0],bounds[0][1])
+ax.set_axisbelow(True)
+ax.grid(zorder=0, color="#c4c4c4", linestyle="-", linewidth=1, axis="y")
+b = ax.get_ygridlines()
+b[bounds[0][3]].set_color('k')
+ax.set_xticklabels(tick_labels)
+#plt.legend(benchmarks, loc='upper left')
+plt.legend(benchmarks, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0.)
+plt.subplots_adjust(left=0.1, right=0.8, top=0.9, bottom=0.1)
+plt.savefig(fname[0])
+plt.show()
 
 
 
