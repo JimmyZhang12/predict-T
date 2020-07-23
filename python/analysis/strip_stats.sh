@@ -20,8 +20,8 @@ TYPE=$2
 
 for i in ${!TESTS[@]}; do 
   for j in ${!CLASS[@]}; do 
-    P="$SRC/${TESTS[$i]}_${DURATION[$i]}_2_${CLASS[$j]}_${PDN[$j]}_${TYPE}_harvard_pdns/stats.txt"
-    D=$SRC/${CLASS[$j]}_${TYPE}_harvard_pdns
+    P="$SRC/${TESTS[$i]}_${DURATION[$i]}_2_${CLASS[$j]}_${PDN[$j]}_${TYPE}_no_throttle_on_restore/stats.txt"
+    D=$SRC/${CLASS[$j]}_${TYPE}_no_throttle_on_restore_2
     echo "$P"
     if [ -f "$P" ]; then 
       echo "mkdir -p $D"

@@ -12,41 +12,41 @@ import argparse
 ## 7 Benchmarks, [dijkstra, fft, ffti, qsort, sha, toast, untoast]
 ## 3 PDN/CPU,    [mobile, laptop, desktop]
 ##------------------------------------------------------------------------------------------------
-#mobile = \
-#{
-#	"names" :       ["dijkstra","fft","ffti","qsort","sha","toast","untoast"],
-#  "None" :        [184.0,1835.0,1692.0,2559.0,205.0,505.0,836.0],
-#	"DecorOnly" :   [1,1,1,1,1,1,1],
-#  "IdealSensor" : [1,1,1,1,1,1,1],
-#  "uArchEvent" :  [1,1,1,1,1,1,1],
-#  "Signature" :   [1,1,1,1,1,1,1],
-#  "T.a.S." :      [1,1,1,1,1,1,1],
-#  "InstPending" : [1,1,1,1,1,1,1]
-#}
-#
-#laptop = \
-#{
-#	"names" :       ["dijkstra","fft","ffti","qsort","sha","toast","untoast"],
-#  "None" :        [190.0,211.0,192.0,402.0,96.0,93.0,116.0],
-#	"DecorOnly" :   [1,1,1,1,1,1,1],
-#  "IdealSensor" : [1,1,1,1,1,1,1],
-#  "uArchEvent" :  [1,1,1,1,1,1,1],
-#  "Signature" :   [1,1,1,1,1,1,1],
-#  "T.a.S." :      [1,1,1,1,1,1,1],
-#  "InstPending" : [1,1,1,1,1,1,1]
-#}
-#
-#desktop = \
-#{
-#	"names" :       ["dijkstra","fft","ffti","qsort","sha","toast","untoast"],
-#  "None" :        [152.0,425.0,402.0,426.0,98.0,170.0,354.0],
-#	"DecorOnly" :   [1,1,1,1,1,1,1],
-#  "IdealSensor" : [1,1,1,1,1,1,1],
-#  "uArchEvent" :  [1,1,1,1,1,1,1],
-#  "Signature" :   [1,1,1,1,1,1,1],
-#  "T.a.S." :      [1,1,1,1,1,1,1],
-#  "InstPending" : [1,1,1,1,1,1,1]
-#}
+mobile = \
+{
+  "names" :       ["dijkstra","fft","ffti","qsort","sha","toast","untoast"],
+  "None" :        [184.0,1835.0,1692.0,2559.0,205.0,505.0,836.0],
+  "DecorOnly" :   [91.0,429.0,411.0,513.0,72.0,1,1],
+  "IdealSensor" : [110.0,428.0,397.0,422.0,68.0,1,1],
+  "uArchEvent" :  [52.0,427.0,400.0,365.0,70.0,1,1],
+  "Signature" :   [76.0,407.0,399.0,511.0,80.0,1,1],
+  "T.a.S." :      [1,1,1,1,1,1,1],
+  "InstPending" : [1,1,1,1,1,1,1]
+}
+
+laptop = \
+{
+  "names" :       ["dijkstra","fft","ffti","qsort","sha","toast","untoast"],
+  "None" :        [190.0,211.0,192.0,402.0,96.0,93.0,116.0],
+  "DecorOnly" :   [635.0,601.0,599.0,414.0,445.0,1,1],
+  "IdealSensor" : [573.0,135.0,126.0,391.0,146.0,1,1],
+  "uArchEvent" :  [456.0,4.0,8.0,276.0,111.0,1,1],
+  "Signature" :   [428.0,429.0,401.0,412.0,297.0,1,1],
+  "T.a.S." :      [1,1,1,1,1,1,1],
+  "InstPending" : [1,1,1,1,1,1,1]
+}
+
+desktop = \
+{
+  "names" :       ["dijkstra","fft","ffti","qsort","sha","toast","untoast"],
+  "None" :        [152.0,425.0,402.0,426.0,98.0,170.0,354.0],
+  "DecorOnly" :   [529.0,447.0,563.0,444.0,447.0,1,1],
+  "IdealSensor" : [535.0,443.0,535.0,435.0,441.0,1,1],
+  "uArchEvent" :  [545.0,444.0,510.0,446.0,470.0,1,1],
+  "Signature" :   [515.0,554.0,555.0,445.0,456.0,1,1],
+  "T.a.S." :      [1,1,1,1,1,1,1],
+  "InstPending" : [1,1,1,1,1,1,1]
+}
 #data = [mobile, laptop, desktop]
 #name = ["Mobile", "Laptop", "Desktop"]
 #tick_labels = ["None","DecorOnly", "IdealSensor", "uArchEvent", "Signature"]
@@ -119,8 +119,8 @@ import argparse
 ##------------------------------------------------------------------------------------------------
 mobile = \
 {
-	"names" :       ["dijkstra","fft","ffti","qsort","sha","toast","untoast"],
-	"DecorOnly" :   [62.0,426.0,409.0,421.0,74.0,188.0,195.0],
+  "names" :       ["dijkstra","fft","ffti","qsort","sha","toast","untoast"],
+  "DecorOnly" :   [62.0,426.0,409.0,421.0,74.0,188.0,195.0],
   "IdealSensor" : [51.0,421.0,398.0,415.0,63.0,186.0,191.0],
   "uArchEvent" :  [51.0,427.0,395.0,399.0,50.0,174.0,192.0],
   "Signature" :   [53.0,428.0,400.0,427.0,64.0,171.0,195.0],
@@ -130,8 +130,8 @@ mobile = \
 
 laptop = \
 {
-	"names" :       ["dijkstra","fft","ffti","qsort","sha","toast","untoast"],
-	"DecorOnly" :   [587.0,535.0,512.0,410.0,411.0,383.0,490.0],
+  "names" :       ["dijkstra","fft","ffti","qsort","sha","toast","untoast"],
+  "DecorOnly" :   [587.0,535.0,512.0,410.0,411.0,383.0,490.0],
   "IdealSensor" : [296.0,113.0,101.0,388.0,110.0,214.0,33.0],
   "uArchEvent" :  [263.0,6.0,7.0,239.0,123.0,219.0,122.0],
   "Signature" :   [520.0,420.0,381.0,409.0,297.0,284.0,266.0],
@@ -141,8 +141,8 @@ laptop = \
 
 desktop = \
 {
-	"names" :       ["dijkstra","fft","ffti","qsort","sha","toast","untoast"],
-	"DecorOnly" :   [525.0,442.0,571.0,471.0,467.0,665.0,830.0],
+  "names" :       ["dijkstra","fft","ffti","qsort","sha","toast","untoast"],
+  "DecorOnly" :   [525.0,442.0,571.0,471.0,467.0,665.0,830.0],
   "IdealSensor" : [530.0,441.0,537.0,435.0,441.0,563.0,778.0],
   "uArchEvent" :  [531.0,438.0,536.0,444.0,448.0,577.0,806.0],
   "Signature" :   [524.0,572.0,532.0,529.0,459.0,616.0,824.0],
@@ -190,7 +190,7 @@ desktop = \
 # Calculate the Improvements in VE
 improvement_mobile = \
 {
-	"names" :       ["dijkstra","fft","ffti","qsort","sha","toast","untoast"],
+  "names" :       ["dijkstra","fft","ffti","qsort","sha","toast","untoast"],
   "DecorOnly" :   [(baseline-test)/baseline*100 for test,baseline in zip(mobile["DecorOnly"],mobile["DecorOnly"])],
   "IdealSensor" : [(baseline-test)/baseline*100 for test,baseline in zip(mobile["IdealSensor"],mobile["DecorOnly"])],
   "uArchEvent" :  [(baseline-test)/baseline*100 for test,baseline in zip(mobile["uArchEvent"],mobile["DecorOnly"])],
@@ -200,7 +200,7 @@ improvement_mobile = \
 }
 improvement_laptop = \
 {
-	"names" :       ["dijkstra","fft","ffti","qsort","sha","toast","untoast"],
+  "names" :       ["dijkstra","fft","ffti","qsort","sha","toast","untoast"],
   "DecorOnly" :   [(baseline-test)/baseline*100 for test,baseline in zip(laptop["DecorOnly"],laptop["DecorOnly"])],
   "IdealSensor" : [(baseline-test)/baseline*100 for test,baseline in zip(laptop["IdealSensor"],laptop["DecorOnly"])],
   "uArchEvent" :  [(baseline-test)/baseline*100 for test,baseline in zip(laptop["uArchEvent"],laptop["DecorOnly"])],
@@ -210,7 +210,7 @@ improvement_laptop = \
 }
 improvement_desktop = \
 {
-	"names" :       ["dijkstra","fft","ffti","qsort","sha","toast","untoast"],
+  "names" :       ["dijkstra","fft","ffti","qsort","sha","toast","untoast"],
   "DecorOnly" :   [(baseline-test)/baseline*100 for test,baseline in zip(desktop["DecorOnly"],desktop["DecorOnly"])],
   "IdealSensor" : [(baseline-test)/baseline*100 for test,baseline in zip(desktop["IdealSensor"],desktop["DecorOnly"])],
   "uArchEvent" :  [(baseline-test)/baseline*100 for test,baseline in zip(desktop["uArchEvent"],desktop["DecorOnly"])],
@@ -220,7 +220,7 @@ improvement_desktop = \
 }
 it = \
 {
-	"names" :       ["Mobile","Laptop","Desktop"],
+  "names" :       ["Mobile","Laptop","Desktop"],
   "IdealSensor" : [sum(improvement_mobile["IdealSensor"])/len(improvement_mobile["IdealSensor"]), \
                    sum(improvement_laptop["IdealSensor"])/len(improvement_laptop["IdealSensor"]), \
                    sum(improvement_desktop["IdealSensor"])/len(improvement_desktop["IdealSensor"])],
@@ -278,8 +278,8 @@ plt.show()
 #------------------------------------------------------------------------------------------------
 mobile = \
 {
-	"names" :       ["dijkstra","fft","ffti","qsort","sha","toast","untoast"],
-	"DecorOnly" :   [97.0,4.0,6.0,397.0,27.0,86.0,83.0],
+  "names" :       ["dijkstra","fft","ffti","qsort","sha","toast","untoast"],
+  "DecorOnly" :   [97.0,4.0,6.0,397.0,27.0,86.0,83.0],
   "IdealSensor" : [166.0,8.0,12.0,424.0,35.0,110.0,125.0],
   "uArchEvent" :  [80.0,29.0,5.0,312.0,32.0,78.0,75.0],
   "Signature" :   [105.0,4.0,7.0,388.0,34.0,84.0,81.0],
@@ -289,8 +289,8 @@ mobile = \
 
 laptop = \
 {
-	"names" :       ["dijkstra","fft","ffti","qsort","sha","toast","untoast"],
-	"DecorOnly" :   [30.0,6.0,1.0,389.0,36.0,47.0,20.0],
+  "names" :       ["dijkstra","fft","ffti","qsort","sha","toast","untoast"],
+  "DecorOnly" :   [30.0,6.0,1.0,389.0,36.0,47.0,20.0],
   "IdealSensor" : [186.0,76.0,102.0,402.0,124.0,158.0,86.0],
   "uArchEvent" :  [100.0,10.0,1.0,10.0,26.0,76.0,21.0],
   "Signature" :   [87.0,3.0,1.0,390.0,35.0,42.0,33.0],
@@ -300,8 +300,8 @@ laptop = \
 
 desktop = \
 {
-	"names" :       ["dijkstra","fft","ffti","qsort","sha","toast","untoast"],
-	"DecorOnly" :   [60.0,200.0,186.0,393.0,84.0,103.0,28.0],
+  "names" :       ["dijkstra","fft","ffti","qsort","sha","toast","untoast"],
+  "DecorOnly" :   [60.0,200.0,186.0,393.0,84.0,103.0,28.0],
   "IdealSensor" : [110.0,209.0,199.0,398.0,81.0,110.0,49.0],
   "uArchEvent" :  [103.0,9.0,6.0,4.0,46.0,84.0,27.0],
   "Signature" :   [171.0,201.0,189.0,394.0,86.0,100.0,22.0],
@@ -351,7 +351,7 @@ desktop = \
 # Calculate the Improvements in VE
 improvement_mobile = \
 {
-	"names" :       ["dijkstra","fft","ffti","qsort","sha","toast","untoast"],
+  "names" :       ["dijkstra","fft","ffti","qsort","sha","toast","untoast"],
   "DecorOnly" :   [(baseline-test)/baseline*100 for test,baseline in zip(mobile["DecorOnly"],mobile["DecorOnly"])],
   "IdealSensor" : [(baseline-test)/baseline*100 for test,baseline in zip(mobile["IdealSensor"],mobile["DecorOnly"])],
   "uArchEvent" :  [(baseline-test)/baseline*100 for test,baseline in zip(mobile["uArchEvent"],mobile["DecorOnly"])],
@@ -361,7 +361,7 @@ improvement_mobile = \
 }
 improvement_laptop = \
 {
-	"names" :       ["dijkstra","fft","ffti","qsort","sha","toast","untoast"],
+  "names" :       ["dijkstra","fft","ffti","qsort","sha","toast","untoast"],
   "DecorOnly" :   [(baseline-test)/baseline*100 for test,baseline in zip(laptop["DecorOnly"],laptop["DecorOnly"])],
   "IdealSensor" : [(baseline-test)/baseline*100 for test,baseline in zip(laptop["IdealSensor"],laptop["DecorOnly"])],
   "uArchEvent" :  [(baseline-test)/baseline*100 for test,baseline in zip(laptop["uArchEvent"],laptop["DecorOnly"])],
@@ -371,7 +371,7 @@ improvement_laptop = \
 }
 improvement_desktop = \
 {
-	"names" :       ["dijkstra","fft","ffti","qsort","sha","toast","untoast"],
+  "names" :       ["dijkstra","fft","ffti","qsort","sha","toast","untoast"],
   "DecorOnly" :   [(baseline-test)/baseline*100 for test,baseline in zip(desktop["DecorOnly"],desktop["DecorOnly"])],
   "IdealSensor" : [(baseline-test)/baseline*100 for test,baseline in zip(desktop["IdealSensor"],desktop["DecorOnly"])],
   "uArchEvent" :  [(baseline-test)/baseline*100 for test,baseline in zip(desktop["uArchEvent"],desktop["DecorOnly"])],
@@ -381,7 +381,7 @@ improvement_desktop = \
 }
 it = \
 {
-	"names" :       ["Mobile","Laptop","Desktop"],
+  "names" :       ["Mobile","Laptop","Desktop"],
   "IdealSensor" : [sum(improvement_mobile["IdealSensor"])/len(improvement_mobile["IdealSensor"]), \
                    sum(improvement_laptop["IdealSensor"])/len(improvement_laptop["IdealSensor"]), \
                    sum(improvement_desktop["IdealSensor"])/len(improvement_desktop["IdealSensor"])],

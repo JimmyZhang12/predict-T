@@ -14,40 +14,40 @@ import argparse
 #------------------------------------------------------------------------------------------------
 mobile = \
 {
-	"names" :       ["dijkstra","fft","ffti","qsort","sha","toast","untoast"],
-	"DecorOnly" :   [30698,59109,23523,67372,1,23073,22941],
-  "IdealSensor" : [33944,65493,62643,66770,1,40871,24623],
-  "uArchEvent" :  [31973,63322,23706,68689,1,23248,18729],
-  "Signature" :   [30765,62660,23571,67223,1,22892,17871],
+  "names" :       ["dijkstra","fft","ffti","qsort","sha","toast","untoast"],
+  "DecorOnly" :   [31090,63448,59109,67372,20112,1,1],
+  "IdealSensor" : [33944,65493,62643,66770,20452,1,1],
+  "uArchEvent" :  [31942,67464,63322,68689,25699,1,1],
+  "Signature" :   [30337,65927,62660,67223,21057,1,1],
   "T.a.S." :      [1,1,1,1,1,1,1],
   "InstPending" : [1,1,1,1,1,1,1]
 }
 
 laptop = \
 {
-	"names" :       ["dijkstra","fft","ffti","qsort","sha","toast","untoast"],
-	"DecorOnly" :   [71237,68759,19351,58794,1,120282,20624],
-  "IdealSensor" : [68085,56412,53436,63161,1,53859,19636],
-  "uArchEvent" :  [32163,51468,19201,64172,1,19929,10803],
-  "Signature" :   [65333,57012,19672,58778,1,20086,10341],
+  "names" :       ["dijkstra","fft","ffti","qsort","sha","toast","untoast"],
+  "DecorOnly" :   [72642,69036,68759,58794,55161,1,1],
+  "IdealSensor" : [68085,56412,53436,63161,29677,1,1],
+  "uArchEvent" :  [57103,53999,51468,64172,28010,1,1],
+  "Signature" :   [53732,60792,57012,58778,41080,1,1],
   "T.a.S." :      [1,1,1,1,1,1,1],
   "InstPending" : [1,1,1,1,1,1,1]
 }
 
 desktop = \
 {
-	"names" :       ["dijkstra","fft","ffti","qsort","sha","toast","untoast"],
-	"DecorOnly" :   [58023,62402,22826,68575,1,23706,24211],
-  "IdealSensor" : [61854,68579,64148,76647,1,80525,26825],
-  "uArchEvent" :  [57656,63043,22891,70047,1,24311,9960],
-  "Signature" :   [58512,62865,22916,68764,1,19180,8250],
+  "names" :       ["dijkstra","fft","ffti","qsort","sha","toast","untoast"],
+  "DecorOnly" :   [57711,64126,62402,68575,51750,1,1],
+  "IdealSensor" : [61854,68579,64148,76647,56137,1,1],
+  "uArchEvent" :  [61218,66537,63043,70047,56806,1,1],
+  "Signature" :   [57071,65799,62865,68764,53216,1,1],
   "T.a.S." :      [1,1,1,1,1,1,1],
   "InstPending" : [1,1,1,1,1,1,1]
 }
 
 speedup_mobile = \
 {
-	"names" : ["dijkstra","fft","ffti","qsort","sha","toast","untoast"],
+  "names" : ["dijkstra","fft","ffti","qsort","sha","toast","untoast"],
   "DecorOnly" :   [baseline/test for test,baseline in zip(mobile["DecorOnly"],mobile["DecorOnly"])],
   "IdealSensor" : [baseline/test for test,baseline in zip(mobile["IdealSensor"],mobile["DecorOnly"])],
   "uArchEvent" :      [baseline/test for test,baseline in zip(mobile["uArchEvent"],mobile["DecorOnly"])],
@@ -58,7 +58,7 @@ speedup_mobile = \
 
 speedup_laptop = \
 {
-	"names" : ["dijkstra","fft","ffti","qsort","sha","toast","untoast"],
+  "names" : ["dijkstra","fft","ffti","qsort","sha","toast","untoast"],
   "DecorOnly" :   [baseline/test for test,baseline in zip(laptop["DecorOnly"],laptop["DecorOnly"])],
   "IdealSensor" : [baseline/test for test,baseline in zip(laptop["IdealSensor"],laptop["DecorOnly"])],
   "uArchEvent" :      [baseline/test for test,baseline in zip(laptop["uArchEvent"],laptop["DecorOnly"])],
@@ -69,7 +69,7 @@ speedup_laptop = \
 
 speedup_desktop = \
 {
-	"names" : ["dijkstra","fft","ffti","qsort","sha","toast","untoast"],
+  "names" : ["dijkstra","fft","ffti","qsort","sha","toast","untoast"],
   "DecorOnly" :   [baseline/test for test,baseline in zip(desktop["DecorOnly"],desktop["DecorOnly"])],
   "IdealSensor" : [baseline/test for test,baseline in zip(desktop["IdealSensor"],desktop["DecorOnly"])],
   "uArchEvent" :      [baseline/test for test,baseline in zip(desktop["uArchEvent"],desktop["DecorOnly"])],
@@ -126,8 +126,8 @@ speedup_desktop = \
 #------------------------------------------------------------------------------------------------
 mobile = \
 {
-	"names" :       ["dijkstra","fft","ffti","qsort","sha","toast","untoast"],
-	"DecorOnly" :   [28098,67612,62139,67636,20724,40895,52236],
+  "names" :       ["dijkstra","fft","ffti","qsort","sha","toast","untoast"],
+  "DecorOnly" :   [28098,67612,62139,67636,20724,40895,52236],
   "IdealSensor" : [28514,66632,63939,68171,19947,42651,54294],
   "uArchEvent" :  [32041,68891,65767,70439,23166,43036,56343],
   "Signature" :   [29793,66790,64205,67635,19823,41566,52882],
@@ -137,8 +137,8 @@ mobile = \
 
 laptop = \
 {
-	"names" :       ["dijkstra","fft","ffti","qsort","sha","toast","untoast"],
-	"DecorOnly" :   [70445,65184,62909,62385,54590,62252,82334],
+  "names" :       ["dijkstra","fft","ffti","qsort","sha","toast","untoast"],
+  "DecorOnly" :   [70445,65184,62909,62385,54590,62252,82334],
   "IdealSensor" : [44243,56213,52974,63043,27914,49397,41887],
   "uArchEvent" :  [40433,53999,51468,64540,29108,50093,47674],
   "Signature" :   [63819,60527,57595,62340,43048,53177,61285],
@@ -148,8 +148,8 @@ laptop = \
 
 desktop = \
 {
-	"names" :       ["dijkstra","fft","ffti","qsort","sha","toast","untoast"],
-	"DecorOnly" :   [60137,61940,63114,70465,54424,77832,105528],
+  "names" :       ["dijkstra","fft","ffti","qsort","sha","toast","untoast"],
+  "DecorOnly" :   [60137,61940,63114,70465,54424,77832,105528],
   "IdealSensor" : [61576,68604,64093,77183,56344,80881,111091],
   "uArchEvent" :  [61624,63859,63581,70383,54852,75369,107261],
   "Signature" :   [60594,67262,62996,72555,55553,77343,106184],
@@ -158,7 +158,7 @@ desktop = \
 }
 speedup_mobile = \
 {
-	"names" : ["dijkstra","fft","ffti","qsort","sha","toast","untoast"],
+  "names" : ["dijkstra","fft","ffti","qsort","sha","toast","untoast"],
   "DecorOnly" :   [baseline/test for test,baseline in zip(mobile["DecorOnly"],mobile["DecorOnly"])],
   "IdealSensor" : [baseline/test for test,baseline in zip(mobile["IdealSensor"],mobile["DecorOnly"])],
   "uArchEvent" :      [baseline/test for test,baseline in zip(mobile["uArchEvent"],mobile["DecorOnly"])],
@@ -169,7 +169,7 @@ speedup_mobile = \
 
 speedup_laptop = \
 {
-	"names" : ["dijkstra","fft","ffti","qsort","sha","toast","untoast"],
+  "names" : ["dijkstra","fft","ffti","qsort","sha","toast","untoast"],
   "DecorOnly" :   [baseline/test for test,baseline in zip(laptop["DecorOnly"],laptop["DecorOnly"])],
   "IdealSensor" : [baseline/test for test,baseline in zip(laptop["IdealSensor"],laptop["DecorOnly"])],
   "uArchEvent" :      [baseline/test for test,baseline in zip(laptop["uArchEvent"],laptop["DecorOnly"])],
@@ -180,7 +180,7 @@ speedup_laptop = \
 
 speedup_desktop = \
 {
-	"names" : ["dijkstra","fft","ffti","qsort","sha","toast","untoast"],
+  "names" : ["dijkstra","fft","ffti","qsort","sha","toast","untoast"],
   "DecorOnly" :   [baseline/test for test,baseline in zip(desktop["DecorOnly"],desktop["DecorOnly"])],
   "IdealSensor" : [baseline/test for test,baseline in zip(desktop["IdealSensor"],desktop["DecorOnly"])],
   "uArchEvent" :      [baseline/test for test,baseline in zip(desktop["uArchEvent"],desktop["DecorOnly"])],
@@ -230,7 +230,7 @@ speedup_desktop = \
 
 it = \
 {
-	"names" :       ["Mobile","Laptop","Desktop"],
+  "names" :       ["Mobile","Laptop","Desktop"],
   "IdealSensor" : [sum(speedup_mobile["IdealSensor"])/len(speedup_mobile["IdealSensor"]), \
                    sum(speedup_laptop["IdealSensor"])/len(speedup_laptop["IdealSensor"]), \
                    sum(speedup_desktop["IdealSensor"])/len(speedup_desktop["IdealSensor"])],
@@ -288,8 +288,8 @@ plt.show()
 #------------------------------------------------------------------------------------------------
 mobile = \
 {
-	"names" :       ["dijkstra","fft","ffti","qsort","sha","toast","untoast"],
-	"DecorOnly" :   [32846,58489,56254,68327,19005,33934,50720],
+  "names" :       ["dijkstra","fft","ffti","qsort","sha","toast","untoast"],
+  "DecorOnly" :   [32846,58489,56254,68327,19005,33934,50720],
   "IdealSensor" : [42124,58621,56386,69668,19580,35955,55040],
   "uArchEvent" :  [38324,59028,56121,68284,19163,37111,51255],
   "Signature" :   [34422,59126,55847,68771,19229,35038,50343],
@@ -299,8 +299,8 @@ mobile = \
 
 laptop = \
 {
-	"names" :       ["dijkstra","fft","ffti","qsort","sha","toast","untoast"],
-	"DecorOnly" :   [14453,53604,50600,61527,17487,28794,36208],
+  "names" :       ["dijkstra","fft","ffti","qsort","sha","toast","untoast"],
+  "DecorOnly" :   [14453,53604,50600,61527,17487,28794,36208],
   "IdealSensor" : [31336,55554,53482,62805,25856,40182,43012],
   "uArchEvent" :  [23599,53906,50600,63586,18579,33920,36303],
   "Signature" :   [21452,53593,49958,61492,17532,28485,37635],
@@ -310,8 +310,8 @@ laptop = \
 
 desktop = \
 {
-	"names" :       ["dijkstra","fft","ffti","qsort","sha","toast","untoast"],
-	"DecorOnly" :   [15520,57650,55070,61485,21185,34999,37827],
+  "names" :       ["dijkstra","fft","ffti","qsort","sha","toast","untoast"],
+  "DecorOnly" :   [15520,57650,55070,61485,21185,34999,37827],
   "IdealSensor" : [22163,57918,55622,62625,22357,36333,41556],
   "uArchEvent" :  [21050,56276,53668,67881,18891,34582,38341],
   "Signature" :   [27095,58104,54685,61782,21687,34974,36409],
@@ -321,7 +321,7 @@ desktop = \
 
 speedup_mobile = \
 {
-	"names" :       ["dijkstra","fft","ffti","qsort","sha","toast","untoast"],
+  "names" :       ["dijkstra","fft","ffti","qsort","sha","toast","untoast"],
   "DecorOnly" :   [baseline/test for test,baseline in zip(mobile["DecorOnly"],mobile["DecorOnly"])],
   "IdealSensor" : [baseline/test for test,baseline in zip(mobile["IdealSensor"],mobile["DecorOnly"])],
   "uArchEvent" :  [baseline/test for test,baseline in zip(mobile["uArchEvent"],mobile["DecorOnly"])],
@@ -332,7 +332,7 @@ speedup_mobile = \
 
 speedup_laptop = \
 {
-	"names" :       ["dijkstra","fft","ffti","qsort","sha","toast","untoast"],
+  "names" :       ["dijkstra","fft","ffti","qsort","sha","toast","untoast"],
   "DecorOnly" :   [baseline/test for test,baseline in zip(laptop["DecorOnly"],laptop["DecorOnly"])],
   "IdealSensor" : [baseline/test for test,baseline in zip(laptop["IdealSensor"],laptop["DecorOnly"])],
   "uArchEvent" :  [baseline/test for test,baseline in zip(laptop["uArchEvent"],laptop["DecorOnly"])],
@@ -343,7 +343,7 @@ speedup_laptop = \
 
 speedup_desktop = \
 {
-	"names" :       ["dijkstra","fft","ffti","qsort","sha","toast","untoast"],
+  "names" :       ["dijkstra","fft","ffti","qsort","sha","toast","untoast"],
   "DecorOnly" :   [baseline/test for test,baseline in zip(desktop["DecorOnly"],desktop["DecorOnly"])],
   "IdealSensor" : [baseline/test for test,baseline in zip(desktop["IdealSensor"],desktop["DecorOnly"])],
   "uArchEvent" :  [baseline/test for test,baseline in zip(desktop["uArchEvent"],desktop["DecorOnly"])],
@@ -393,7 +393,7 @@ speedup_desktop = \
 
 it = \
 {
-	"names" :       ["Mobile","Laptop","Desktop"],
+  "names" :       ["Mobile","Laptop","Desktop"],
   "IdealSensor" : [sum(speedup_mobile["IdealSensor"])/len(speedup_mobile["IdealSensor"]), \
                    sum(speedup_laptop["IdealSensor"])/len(speedup_laptop["IdealSensor"]), \
                    sum(speedup_desktop["IdealSensor"])/len(speedup_desktop["IdealSensor"])],
