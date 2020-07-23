@@ -77,44 +77,44 @@ speedup_desktop = \
   "T.a.S." :      [baseline/test for test,baseline in zip(desktop["T.a.S."],desktop["DecorOnly"])],
   "InstPending" :     [baseline/test for test,baseline in zip(desktop["InstPending"],desktop["DecorOnly"])]
 }
-#data = [speedup_mobile, speedup_laptop, speedup_desktop]
-#name = ["Mobile", "Laptop", "Desktop"]
-#tick_labels = ["DecorOnly", "IdealSensor", "uArchEvent", "Signature"]
-#benchmarks = ["dijkstra","fft","ffti","qsort","sha","toast","untoast"]
-#fname = ["speedup_mobile.png", "speedup_laptop.png", "speedup_desktop.png"]
-#bounds = [[0.0,3.0,0.1],[0.0,3.0,0.1],[0.0,3.0,0.1]]
-#for k in range(len(data)):
-#  df=[data[k]["DecorOnly"],data[k]["IdealSensor"],data[k]["uArchEvent"],data[k]["Signature"]]
-#  pos = list(range(len(df)))
-#  width = 0.125
-#  fig, ax = plt.subplots(figsize=(10,5))
-#  i=0
-#  plt.bar([p + width*i for p in pos], [j[i] for j in df], width, label="dijkstra", color="w", hatch="/"*1, fill=True, linewidth=1, edgecolor="k")
-#  i+=1
-#  plt.bar([p + width*i for p in pos], [j[i] for j in df], width, label="fft", color="w", hatch="o"*2, fill=True, linewidth=1, edgecolor="k")
-#  i+=1
-#  plt.bar([p + width*i for p in pos], [j[i] for j in df], width, label="ffti", color="w", hatch="X"*4, fill="False", linewidth=1, edgecolor="k")
-#  i+=1
-#  plt.bar([p + width*i for p in pos], [j[i] for j in df], width, label="qsort", color="w", hatch="/"*4, fill=True, linewidth=1, edgecolor="k")
-#  i+=1
-#  plt.bar([p + width*i for p in pos], [j[i] for j in df], width, label="sha", color="w", hatch="-"*4, fill=True, linewidth=1, edgecolor="k")
-#  i+=1
-#  plt.bar([p + width*i for p in pos], [j[i] for j in df], width, label="toast", color="w", hatch='\\'*4, fill=True, linewidth=1, edgecolor="k")
-#  i+=1
-#  plt.bar([p + width*i for p in pos], [j[i] for j in df], width, label="untoast", color="w", hatch="."*4, fill=True, linewidth=1, edgecolor="k")
-#  ax.set_ylabel('Speedup (X)')
-#  ax.set_title(name[k])
-#  ax.set_xticks([p + 1.5 * width for p in pos])
-#  ax.set_yticks(np.arange(bounds[k][0],bounds[k][1],bounds[k][2]))
-#  ax.set_ylim(bounds[k][0],bounds[k][1])
-#  ax.set_axisbelow(True)
-#  ax.grid(zorder=0, color="#c4c4c4", linestyle="-", linewidth=1, axis="y")
-#  ax.set_xticklabels(tick_labels)
-#  #plt.legend(benchmarks, loc='upper left')
-#  plt.legend(benchmarks, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0.)
-#  plt.subplots_adjust(left=0.1, right=0.8, top=0.9, bottom=0.1)
-#  plt.savefig(fname[k])
-#  plt.show()
+data = [speedup_mobile, speedup_laptop, speedup_desktop]
+name = ["Mobile", "Laptop", "Desktop"]
+tick_labels = ["DecorOnly", "IdealSensor", "uArchEvent", "Signature"]
+benchmarks = ["dijkstra","fft","ffti","qsort","sha","toast","untoast"]
+fname = ["speedup_mobile.png", "speedup_laptop.png", "speedup_desktop.png"]
+bounds = [[0.0,2.5,0.1],[0.0,2.5,0.1],[0.0,2.5,0.1]]
+for k in range(len(data)):
+  df=[data[k]["DecorOnly"],data[k]["IdealSensor"],data[k]["uArchEvent"],data[k]["Signature"]]
+  pos = list(range(len(df)))
+  width = 0.125
+  fig, ax = plt.subplots(figsize=(10,5))
+  i=0
+  plt.bar([p + width*i for p in pos], [j[i] for j in df], width, label="dijkstra", color="w", hatch="/"*1, fill=True, linewidth=1, edgecolor="k")
+  i+=1
+  plt.bar([p + width*i for p in pos], [j[i] for j in df], width, label="fft", color="w", hatch="o"*2, fill=True, linewidth=1, edgecolor="k")
+  i+=1
+  plt.bar([p + width*i for p in pos], [j[i] for j in df], width, label="ffti", color="w", hatch="X"*4, fill="False", linewidth=1, edgecolor="k")
+  i+=1
+  plt.bar([p + width*i for p in pos], [j[i] for j in df], width, label="qsort", color="w", hatch="/"*4, fill=True, linewidth=1, edgecolor="k")
+  i+=1
+  plt.bar([p + width*i for p in pos], [j[i] for j in df], width, label="sha", color="w", hatch="-"*4, fill=True, linewidth=1, edgecolor="k")
+  i+=1
+  plt.bar([p + width*i for p in pos], [j[i] for j in df], width, label="toast", color="w", hatch='\\'*4, fill=True, linewidth=1, edgecolor="k")
+  i+=1
+  plt.bar([p + width*i for p in pos], [j[i] for j in df], width, label="untoast", color="w", hatch="."*4, fill=True, linewidth=1, edgecolor="k")
+  ax.set_ylabel('Speedup (X)')
+  ax.set_title(name[k])
+  ax.set_xticks([p + 1.5 * width for p in pos])
+  ax.set_yticks(np.arange(bounds[k][0],bounds[k][1],bounds[k][2]))
+  ax.set_ylim(bounds[k][0],bounds[k][1])
+  ax.set_axisbelow(True)
+  ax.grid(zorder=0, color="#c4c4c4", linestyle="-", linewidth=1, axis="y")
+  ax.set_xticklabels(tick_labels)
+  #plt.legend(benchmarks, loc='upper left')
+  plt.legend(benchmarks, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0.)
+  plt.subplots_adjust(left=0.1, right=0.8, top=0.9, bottom=0.1)
+  plt.savefig(fname[k])
+  plt.show()
 it = \
 {
   "names" :       ["Mobile","Laptop","Desktop"],
@@ -239,44 +239,44 @@ speedup_desktop = \
   "InstPending" :     [baseline/test for test,baseline in zip(desktop["InstPending"],desktop["DecorOnly"])]
 }
 
-#data = [speedup_mobile, speedup_laptop, speedup_desktop]
-#name = ["Mobile Throttle on Restore", "Laptop Throttle on Restore", "Desktop Throttle on Restore"]
-#tick_labels = ["DecorOnly", "IdealSensor", "uArchEvent", "Signature", "T.a.S", "InstPending"]
-#benchmarks = ["dijkstra","fft","ffti","qsort","sha","toast","untoast"]
-#fname = ["speedup_mobile_tor.png", "speedup_laptop_tor.png", "speedup_desktop_tor.png"]
-#bounds = [[0.0,2.0,0.1],[0.0,2.0,0.1],[0.0,2.0,0.1]]
-#for k in range(len(data)):
-#  df=[data[k]["DecorOnly"],data[k]["IdealSensor"],data[k]["uArchEvent"],data[k]["Signature"],data[k]["T.a.S."],data[k]["InstPending"]]
-#  pos = list(range(len(df)))
-#  width = 0.125
-#  fig, ax = plt.subplots(figsize=(10,5))
-#  i=0
-#  plt.bar([p + width*i for p in pos], [j[i] for j in df], width, label="dijkstra", color="w", hatch="/"*1, fill=True, linewidth=1, edgecolor="k")
-#  i+=1
-#  plt.bar([p + width*i for p in pos], [j[i] for j in df], width, label="fft", color="w", hatch="o"*2, fill=True, linewidth=1, edgecolor="k")
-#  i+=1
-#  plt.bar([p + width*i for p in pos], [j[i] for j in df], width, label="ffti", color="w", hatch="X"*4, fill="False", linewidth=1, edgecolor="k")
-#  i+=1
-#  plt.bar([p + width*i for p in pos], [j[i] for j in df], width, label="qsort", color="w", hatch="/"*4, fill=True, linewidth=1, edgecolor="k")
-#  i+=1
-#  plt.bar([p + width*i for p in pos], [j[i] for j in df], width, label="sha", color="w", hatch="-"*4, fill=True, linewidth=1, edgecolor="k")
-#  i+=1
-#  plt.bar([p + width*i for p in pos], [j[i] for j in df], width, label="toast", color="w", hatch='\\'*4, fill=True, linewidth=1, edgecolor="k")
-#  i+=1
-#  plt.bar([p + width*i for p in pos], [j[i] for j in df], width, label="untoast", color="w", hatch="."*4, fill=True, linewidth=1, edgecolor="k")
-#  ax.set_ylabel('Num Voltage Emergencies')
-#  ax.set_title(name[k])
-#  ax.set_xticks([p + 1.5 * width for p in pos])
-#  ax.set_yticks(np.arange(bounds[k][0],bounds[k][1],bounds[k][2]))
-#  ax.set_ylim(bounds[k][0],bounds[k][1])
-#  ax.set_axisbelow(True)
-#  ax.grid(zorder=0, color="#c4c4c4", linestyle="-", linewidth=1, axis="y")
-#  ax.set_xticklabels(tick_labels)
-#  #plt.legend(benchmarks, loc='upper left')
-#  plt.legend(benchmarks, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0.)
-#  plt.subplots_adjust(left=0.1, right=0.8, top=0.9, bottom=0.1)
-#  plt.savefig(fname[k])
-#  plt.show()
+data = [speedup_mobile, speedup_laptop, speedup_desktop]
+name = ["Mobile Throttle on Restore", "Laptop Throttle on Restore", "Desktop Throttle on Restore"]
+tick_labels = ["DecorOnly", "IdealSensor", "uArchEvent", "Signature", "T.a.S", "InstPending"]
+benchmarks = ["dijkstra","fft","ffti","qsort","sha","toast","untoast"]
+fname = ["speedup_mobile_tor.png", "speedup_laptop_tor.png", "speedup_desktop_tor.png"]
+bounds = [[0.0,2.0,0.1],[0.0,2.0,0.1],[0.0,2.0,0.1]]
+for k in range(len(data)):
+  df=[data[k]["DecorOnly"],data[k]["IdealSensor"],data[k]["uArchEvent"],data[k]["Signature"],data[k]["T.a.S."],data[k]["InstPending"]]
+  pos = list(range(len(df)))
+  width = 0.125
+  fig, ax = plt.subplots(figsize=(10,5))
+  i=0
+  plt.bar([p + width*i for p in pos], [j[i] for j in df], width, label="dijkstra", color="w", hatch="/"*1, fill=True, linewidth=1, edgecolor="k")
+  i+=1
+  plt.bar([p + width*i for p in pos], [j[i] for j in df], width, label="fft", color="w", hatch="o"*2, fill=True, linewidth=1, edgecolor="k")
+  i+=1
+  plt.bar([p + width*i for p in pos], [j[i] for j in df], width, label="ffti", color="w", hatch="X"*4, fill="False", linewidth=1, edgecolor="k")
+  i+=1
+  plt.bar([p + width*i for p in pos], [j[i] for j in df], width, label="qsort", color="w", hatch="/"*4, fill=True, linewidth=1, edgecolor="k")
+  i+=1
+  plt.bar([p + width*i for p in pos], [j[i] for j in df], width, label="sha", color="w", hatch="-"*4, fill=True, linewidth=1, edgecolor="k")
+  i+=1
+  plt.bar([p + width*i for p in pos], [j[i] for j in df], width, label="toast", color="w", hatch='\\'*4, fill=True, linewidth=1, edgecolor="k")
+  i+=1
+  plt.bar([p + width*i for p in pos], [j[i] for j in df], width, label="untoast", color="w", hatch="."*4, fill=True, linewidth=1, edgecolor="k")
+  ax.set_ylabel('Num Voltage Emergencies')
+  ax.set_title(name[k])
+  ax.set_xticks([p + 1.5 * width for p in pos])
+  ax.set_yticks(np.arange(bounds[k][0],bounds[k][1],bounds[k][2]))
+  ax.set_ylim(bounds[k][0],bounds[k][1])
+  ax.set_axisbelow(True)
+  ax.grid(zorder=0, color="#c4c4c4", linestyle="-", linewidth=1, axis="y")
+  ax.set_xticklabels(tick_labels)
+  #plt.legend(benchmarks, loc='upper left')
+  plt.legend(benchmarks, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0.)
+  plt.subplots_adjust(left=0.1, right=0.8, top=0.9, bottom=0.1)
+  plt.savefig(fname[k])
+  plt.show()
 
 it = \
 {
@@ -402,44 +402,44 @@ speedup_desktop = \
   "InstPending" : [baseline/test for test,baseline in zip(desktop["InstPending"],desktop["DecorOnly"])]
 }
 
-#data = [speedup_mobile, speedup_laptop, speedup_desktop]
-#name = ["Mobile Throttle on Restore and Harvard PDN", "Laptop Throttle on Restore and Harvard PDN", "Desktop Throttle on Restore and Harvard PDN"]
-#tick_labels = ["DecorOnly", "IdealSensor", "uArchEvent", "Signature", "T.a.S", "InstPending"]
-#benchmarks = ["dijkstra","fft","ffti","qsort","sha","toast","untoast"]
-#fname = ["speedup_mobile_harvard_tor.png", "speedup_laptop_harvard_tor.png", "speedup_desktop_harvard_tor.png"]
-#bounds = [[0.0,1.5,0.1],[0.0,1.5,0.1],[0.0,1.5,0.1]]
-#for k in range(len(data)):
-#  df=[data[k]["DecorOnly"],data[k]["IdealSensor"],data[k]["uArchEvent"],data[k]["Signature"],data[k]["T.a.S."],data[k]["InstPending"]]
-#  pos = list(range(len(df)))
-#  width = 0.125
-#  fig, ax = plt.subplots(figsize=(10,5))
-#  i=0
-#  plt.bar([p + width*i for p in pos], [j[i] for j in df], width, label="dijkstra", color="w", hatch="/"*1, fill=True, linewidth=1, edgecolor="k")
-#  i+=1
-#  plt.bar([p + width*i for p in pos], [j[i] for j in df], width, label="fft", color="w", hatch="o"*2, fill=True, linewidth=1, edgecolor="k")
-#  i+=1
-#  plt.bar([p + width*i for p in pos], [j[i] for j in df], width, label="ffti", color="w", hatch="X"*4, fill="False", linewidth=1, edgecolor="k")
-#  i+=1
-#  plt.bar([p + width*i for p in pos], [j[i] for j in df], width, label="qsort", color="w", hatch="/"*4, fill=True, linewidth=1, edgecolor="k")
-#  i+=1
-#  plt.bar([p + width*i for p in pos], [j[i] for j in df], width, label="sha", color="w", hatch="-"*4, fill=True, linewidth=1, edgecolor="k")
-#  i+=1
-#  plt.bar([p + width*i for p in pos], [j[i] for j in df], width, label="toast", color="w", hatch='\\'*4, fill=True, linewidth=1, edgecolor="k")
-#  i+=1
-#  plt.bar([p + width*i for p in pos], [j[i] for j in df], width, label="untoast", color="w", hatch="."*4, fill=True, linewidth=1, edgecolor="k")
-#  ax.set_ylabel('Num Voltage Emergencies')
-#  ax.set_title(name[k])
-#  ax.set_xticks([p + 1.5 * width for p in pos])
-#  ax.set_yticks(np.arange(bounds[k][0],bounds[k][1],bounds[k][2]))
-#  ax.set_ylim(bounds[k][0],bounds[k][1])
-#  ax.set_axisbelow(True)
-#  ax.grid(zorder=0, color="#c4c4c4", linestyle="-", linewidth=1, axis="y")
-#  ax.set_xticklabels(tick_labels)
-#  #plt.legend(benchmarks, loc='upper left')
-#  plt.legend(benchmarks, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0.)
-#  plt.subplots_adjust(left=0.1, right=0.8, top=0.9, bottom=0.1)
-#  plt.savefig(fname[k])
-#  plt.show()
+data = [speedup_mobile, speedup_laptop, speedup_desktop]
+name = ["Mobile Throttle on Restore and Harvard PDN", "Laptop Throttle on Restore and Harvard PDN", "Desktop Throttle on Restore and Harvard PDN"]
+tick_labels = ["DecorOnly", "IdealSensor", "uArchEvent", "Signature", "T.a.S", "InstPending"]
+benchmarks = ["dijkstra","fft","ffti","qsort","sha","toast","untoast"]
+fname = ["speedup_mobile_harvard_tor.png", "speedup_laptop_harvard_tor.png", "speedup_desktop_harvard_tor.png"]
+bounds = [[0.0,1.5,0.1],[0.0,1.5,0.1],[0.0,1.5,0.1]]
+for k in range(len(data)):
+  df=[data[k]["DecorOnly"],data[k]["IdealSensor"],data[k]["uArchEvent"],data[k]["Signature"],data[k]["T.a.S."],data[k]["InstPending"]]
+  pos = list(range(len(df)))
+  width = 0.125
+  fig, ax = plt.subplots(figsize=(10,5))
+  i=0
+  plt.bar([p + width*i for p in pos], [j[i] for j in df], width, label="dijkstra", color="w", hatch="/"*1, fill=True, linewidth=1, edgecolor="k")
+  i+=1
+  plt.bar([p + width*i for p in pos], [j[i] for j in df], width, label="fft", color="w", hatch="o"*2, fill=True, linewidth=1, edgecolor="k")
+  i+=1
+  plt.bar([p + width*i for p in pos], [j[i] for j in df], width, label="ffti", color="w", hatch="X"*4, fill="False", linewidth=1, edgecolor="k")
+  i+=1
+  plt.bar([p + width*i for p in pos], [j[i] for j in df], width, label="qsort", color="w", hatch="/"*4, fill=True, linewidth=1, edgecolor="k")
+  i+=1
+  plt.bar([p + width*i for p in pos], [j[i] for j in df], width, label="sha", color="w", hatch="-"*4, fill=True, linewidth=1, edgecolor="k")
+  i+=1
+  plt.bar([p + width*i for p in pos], [j[i] for j in df], width, label="toast", color="w", hatch='\\'*4, fill=True, linewidth=1, edgecolor="k")
+  i+=1
+  plt.bar([p + width*i for p in pos], [j[i] for j in df], width, label="untoast", color="w", hatch="."*4, fill=True, linewidth=1, edgecolor="k")
+  ax.set_ylabel('Num Voltage Emergencies')
+  ax.set_title(name[k])
+  ax.set_xticks([p + 1.5 * width for p in pos])
+  ax.set_yticks(np.arange(bounds[k][0],bounds[k][1],bounds[k][2]))
+  ax.set_ylim(bounds[k][0],bounds[k][1])
+  ax.set_axisbelow(True)
+  ax.grid(zorder=0, color="#c4c4c4", linestyle="-", linewidth=1, axis="y")
+  ax.set_xticklabels(tick_labels)
+  #plt.legend(benchmarks, loc='upper left')
+  plt.legend(benchmarks, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0.)
+  plt.subplots_adjust(left=0.1, right=0.8, top=0.9, bottom=0.1)
+  plt.savefig(fname[k])
+  plt.show()
 
 it = \
 {
