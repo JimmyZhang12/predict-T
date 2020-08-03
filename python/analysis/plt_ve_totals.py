@@ -49,7 +49,7 @@ desktop = \
 }
 data = [mobile, laptop, desktop]
 name = ["Mobile", "Laptop", "Desktop"]
-tick_labels = ["None","DecorOnly", "IdealSensor", "uArchEvent", "Signature"]
+tick_labels = ["DecorOnly", "IdealSensor", "uArchEvent", "Signature"]
 benchmarks = ["dijkstra","fft","ffti","qsort","sha","toast","untoast"]
 fname = ["num_ve_mobile.png", "num_ve_laptop.png", "num_ve_desktop.png"]
 bounds = [[0.0,600.0,50.0],[0.0,800,50.0],[0.0,900.0,50.0]]

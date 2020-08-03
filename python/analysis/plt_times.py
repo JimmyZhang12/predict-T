@@ -264,7 +264,7 @@ for k in range(len(data)):
   plt.bar([p + width*i for p in pos], [j[i] for j in df], width, label="toast", color="w", hatch='\\'*4, fill=True, linewidth=1, edgecolor="k")
   i+=1
   plt.bar([p + width*i for p in pos], [j[i] for j in df], width, label="untoast", color="w", hatch="."*4, fill=True, linewidth=1, edgecolor="k")
-  ax.set_ylabel('Num Voltage Emergencies')
+  ax.set_ylabel('Speedup (X)')
   ax.set_title(name[k])
   ax.set_xticks([p + 1.5 * width for p in pos])
   ax.set_yticks(np.arange(bounds[k][0],bounds[k][1],bounds[k][2]))
@@ -427,7 +427,7 @@ for k in range(len(data)):
   plt.bar([p + width*i for p in pos], [j[i] for j in df], width, label="toast", color="w", hatch='\\'*4, fill=True, linewidth=1, edgecolor="k")
   i+=1
   plt.bar([p + width*i for p in pos], [j[i] for j in df], width, label="untoast", color="w", hatch="."*4, fill=True, linewidth=1, edgecolor="k")
-  ax.set_ylabel('Num Voltage Emergencies')
+  ax.set_ylabel('Speedup (X)')
   ax.set_title(name[k])
   ax.set_xticks([p + 1.5 * width for p in pos])
   ax.set_yticks(np.arange(bounds[k][0],bounds[k][1],bounds[k][2]))
