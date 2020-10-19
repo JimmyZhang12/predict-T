@@ -73,7 +73,7 @@ se_classic_mc_ncv() {
 $GEM5_ROOT/build/X86/gem5.fast \
 --outdir=${OUTPUT_ROOT}/gem5_out/$TN \
 --mcpat_enable \
---mcpat_path=${PREDICT_T_ROOT}/mcpat \
+--mcpat_path=${MCPAT_ROOT} \
 --mcpat_out=${OUTPUT_ROOT}/mcpat_out \
 --mcpat_testname=$TN \
 --mcpat_device_type=$MPDT \

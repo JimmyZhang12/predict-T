@@ -45,12 +45,12 @@ print_error () {
 #--------------------------------------------------------------------
 # Native Linux
 print_info "Native Linux"
-export VSIM_TOOLS="$HOME/cadence"
-export PREDICT_T_ROOT="$HOME/research/predict-T"
-export GEM5_ROOT="$HOME/research/gem5"
-export OUTPUT_ROOT="$HOME/scratch/predict-T"
+export VSIM_TOOLS="/software/cadence-Aug2016"
+export PREDICT_T_ROOT="$HOME/passat/predict-T"
+export GEM5_ROOT="$HOME/passat/gem5"
+export OUTPUT_ROOT="$HOME/output_10_14"
 #export MCPAT_ROOT="$HOME/research/mcpat"
-export MCPAT_ROOT="$HOME/research/predict-T"
+export MCPAT_ROOT="$HOME/passat/mcpat/build"
 export SIM_ROOT="$PREDICT_T_ROOT/circuit_model"
 
 print_info "export VSIM_TOOLS $VSIM_TOOLS"
@@ -64,7 +64,7 @@ print_info "export SIM_ROOT $SIM_ROOT"
 # Build any requiered Docker Images
 #  ____   ___   ____ _  _______ ____
 # |  _ \ / _ \ / ___| |/ | ____|  _ \
-# | | | | | | | |   | ' /|  _| | |_) |
+# | | | | | | | |   | ' /|  _| | |_ |
 # | |_| | |_| | |___| . \| |___|  _ <
 # |____/ \___/ \____|_|\_|_____|_| \_\
 #

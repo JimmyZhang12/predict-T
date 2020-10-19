@@ -97,7 +97,8 @@ print_info "TRAINING_ROOT $TRAINING_ROOT"
 #---------------------------------------------------
 # Configure Simulation Parameters
 DURATION=("-1" "-1" "-1" "-1" "-1" "-1" "-1") # Data Points to Simulate
-INSTRUCTIONS=("10000" "25000" "25000" "25000" "25000" "25000" "25000") # Instructions to Simulate
+#INSTRUCTIONS=("10000" "25000" "25000" "25000" "25000" "25000" "25000") # Instructions to Simulate
+INSTRUCTIONS=("10000" "10000" "10000")
 # When to start ROI, in Sim Ticks, -or- ROI by setting "-1"
 PROFILE_START=("-1" "-1" "-1" "-1" "-1" "-1" "-1") 
 
@@ -110,6 +111,7 @@ PROFILE_START=("-1" "-1" "-1" "-1" "-1" "-1" "-1")
 # Device Params:
 #---------------------------------------------------
 # All: 
+
 DEVICE_TYPE=("MOBILE" "LAPTOP" "DESKTOP")
 McPAT_DEVICE_TYPE=("1" "1" "0")
 McPAT_SCALE_FACTOR=("0.5" "1.0" "1.0")
@@ -135,6 +137,7 @@ NUM_CORES=("1" "1" "1")
 VOLTAGE=("0.9" "1.2" "1.4")
 VOLTAGE_EMERGENCY=("0.873" "1.164" "1.358")
 VOLTAGE_THRESHOLD=("0.882" "1.176" "1.372")
+
 
 #---------------------------------------------------
 # Power Delivery Params
@@ -174,10 +177,10 @@ L3=("2MB" "8MB" "16MB")
 CPU_CYCLES=("2")
 
 PREDICTOR=(
-"IdealSensor" 
-"uArchEventPredictor" 
+#"IdealSensor" 
+#"uArchEventPredictor" 
 "HarvardPowerPredictor"
-"DecorOnly" 
+#"DecorOnly" 
 )
 #"DepAnalysis"
 #"ThrottleAfterStall"
@@ -256,7 +259,7 @@ PPRED_ACTIONS=(
 #---------------------------------------------------
 # CPU Params:
 #---------------------------------------------------
-CLK=( "3.0GHz"     "3.5GHz"     "4.0GHz")
+CLK=( "3GHz"     "3.5GHz"     "4GHz")
 CLK_=("3000000000" "3500000000" "4000000000")
 # Superscalar Core Width
 CORE_WIDTH=("6" "6" "8")
@@ -379,9 +382,14 @@ SIMD_UNIT_COUNT=("1" "2" "4")
 #name=("qsort" "dijkstra" "fft" "ffti" "sha" "toast" "untoast")
 #exe=("qsort" "dijkstra" "fft" "fft" "sha" "toast" "untoast")
 #opt=("${INPUT}/qsort.dat" "${INPUT}/dijkstra.dat" "4 4096" "4 8192 -i" "${INPUT}/sha.asc" "-fps -c ${INPUT}/toast.au" "-fps -c ${INPUT}/untoast.au.run.gsm")
-name=("qsort" "dijkstra" "fft" "ffti" "sha")
-exe=("qsort" "dijkstra" "fft" "fft" "sha")
-opt=("${INPUT}/qsort.dat" "${INPUT}/dijkstra.dat" "4 4096" "4 8192 -i" "${INPUT}/sha.asc")
+#name=("qsort" "dijkstra")
+#exe=("qsort" "dijkstra")
+#opt=("${INPUT}/qsort.dat" "${INPUT}/dijkstra.dat")
+
+name=("qsort") 
+exe=(qsort)
+opt=("${INPUT}/qsort.dat")
+
 #name=("sha" "untoast")
 #exe=("sha" "untoast")
 #opt=("${INPUT}/sha.asc" "-fps -c ${INPUT}/untoast.au.run.gsm")
@@ -394,7 +402,7 @@ opt=("${INPUT}/qsort.dat" "${INPUT}/dijkstra.dat" "4 4096" "4 8192 -i" "${INPUT}
 #name=("rijndael_encrypt")
 #exe=("rijndael")
 #opt=("${INPUT}/rijndael.asc ${OUTPUT}/rijndael.enc e 1234567890abcdeffedcba09876543211234567890abcdeffedcba0987654321")
-#name=("toast")
+#name=("toast"i)
 #exe=("toast")
 #opt=("-fps -c ${INPUT}/toast.au")
 #name=("dijkstra")
@@ -408,7 +416,7 @@ for j in ${!name[@]}; do
   for i in ${!DEVICE_TYPE[@]}; do
     for pred in ${!PREDICTOR[@]}; do
       sleep 10
-      TN="${name[$j]}_${INSTRUCTIONS[$j]}_${CPU_CYCLES[0]}_${DEVICE_TYPE[$i]}_${PDN[$i]}_${PREDICTOR[$pred]}_${PPRED_ACTIONS[$pred]}_no_throttle_on_restore"
+      TN="${name[$j]}_${INSTRUCTIONS[$j]}_${CPU_CYCLES[0]}_${DEVICE_TYPE[$i]}_${PDN[$i]}_${PREDICTOR[$pred]}_${PPRED_ACTIONS[$pred]}_nodummy"
 #echo "se_classic_mc_ncv \
 #$TN ${DURATION[$i]} \
 #${INSTRUCTIONS[$i]} \
@@ -491,7 +499,7 @@ for j in ${!name[@]}; do
           ${PPRED_ACTIONS[$pred]} \
           ${VOLTAGE_EMERGENCY[$i]} \
           ${VOLTAGE_THRESHOLD[$i]}
-      while [ `jobs | wc -l` -ge 16 ]; do
+      while [ `jobs | wc -l` -ge 9 ]; do
         sleep 1
       done
     done
