@@ -125,7 +125,7 @@ module intel_power_distribution_network_dt(vin, vout, vvrm, vpcb, vpack, vdie, i
   
   pdn_stage#(.C_STAGE(0u),      .N_CAP(1), .L_STAGE(0p),     .R_STAGE(1n)) pcb(n1, n2, gnd);
   pdn_stage#(.C_STAGE(0u),      .N_CAP(1), .L_STAGE(0p),     .R_STAGE(1n)) package(n2, n3, gnd);
-  pdn_stage#(.C_STAGE(1.2u),    .N_CAP(1), .L_STAGE(30p),    .R_STAGE(1.5m)) die(n3, n4, gnd);
+  pdn_stage#(.C_STAGE(1.2u),    .N_CAP(1), .L_STAGE(30p),    .R_STAGE(3m)) die(n3, n4, gnd);
 
   // Essential for probing
   my_res#(.R(1n)) ro(n4, vout);

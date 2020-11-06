@@ -48,7 +48,7 @@ print_info "Native Linux"
 export VSIM_TOOLS="/software/cadence-Aug2016"
 export PREDICT_T_ROOT="$HOME/passat/predict-T"
 export GEM5_ROOT="$HOME/passat/gem5"
-export OUTPUT_ROOT="$HOME/output_10_14"
+export OUTPUT_ROOT="$HOME/output_11_4"
 #export MCPAT_ROOT="$HOME/research/mcpat"
 export MCPAT_ROOT="$HOME/passat/mcpat/build"
 export SIM_ROOT="$PREDICT_T_ROOT/circuit_model"
@@ -115,3 +115,4 @@ if [ ! -d $OUTPUT_ROOT/circuit_model/log ]; then
   print_info "creating $OUTPUT_ROOT/circuit_model/log"
   mkdir -p $OUTPUT_ROOT/circuit_model/log
 fi
+
