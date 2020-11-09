@@ -20,7 +20,7 @@ class Cycle_Dump:
         10:'LOAD_EX',
         11:'LOAD_BLOCK',
         12:'LOAD_CFETCH',
-        13:'DUMMY_EVENT',
+        13:'LOAD_DISPATCH',
         14:'DUMMY_EVENT2'
     }
 
@@ -154,14 +154,14 @@ class Cycle_Dump:
 HOME = os.environ['HOME']
 PREDICTOR = 'HarvardPowerPredictor_1'
 CLASS = 'DESKTOP'
-TEST = 'toast'
+TEST = 'crc'
 
-path = HOME + '/output_11_4/gem5_out/' + CLASS + '_' + PREDICTOR + '/' + TEST + '.txt'
+path = HOME + '/output_10_29/gem5_out/' + CLASS + '_' + PREDICTOR + '/' + TEST + '.txt'
 stats = open(path, 'r')
 print(path)
 #PARAMETERS
 
-CYCLE_START = 5000
+CYCLE_START = 0
 
 line = stats.readline()
 line = stats.readline()
@@ -188,21 +188,22 @@ while line:
         if func:
             func(line)
 
-        line = stats.readline()      
+        line = stats.readline()    
     cycle_dump.update()
 
-    if cycle_dump.table_insert_index!=-1 or cycle_dump.table_insert_index_prev!=-1:
-        cycle_dump.dump()
-        input() 
-    # if cycle_dump.cycle % 1000 < 3:
-    #     print (cycle_dump.cycle)
-    # if cycle_dump.cycle > CYCLE_START:
+    # if cycle_dump.table_insert_index!=-1 or cycle_dump.table_insert_index_prev!=-1:
     #     cycle_dump.dump()
     #     input() 
+    if cycle_dump.cycle % 1000 < 3:
+        print (cycle_dump.cycle)
+    if cycle_dump.cycle > CYCLE_START:
+        cycle_dump.dump()
+        input() 
     # if cycle_dump.ve_flag:
     #     cycle_dump.dump()
     #     input() 
     line = stats.readline()
-print()
+print(cycle_dump.ve_count)
+print(cycle_dump.action_count)
 
         

@@ -6,6 +6,7 @@ matplotlib.use('Agg')
 
 import matplotlib.pyplot as plt
 import numpy as np
+import util
 
 
 #PARAMETERS
@@ -16,7 +17,7 @@ CLASS = 'DESKTOP'
 TEST = 'toast'
 
 
-stats = open(HOME + '/output_11_4/gem5_out/' + CLASS + '_' + PREDICTOR + '/' + TEST + '.txt', 'r')
+stats = open(HOME + '/output_11_6/gem5_out/' + CLASS + '_' + PREDICTOR + '/' + TEST + '.txt', 'r')
 yvar = [0]
 action = [False]
 VE = [False] 
@@ -68,55 +69,13 @@ while line:
 
 LEAD_TIME_CAP = 100
 
-def accuracy(action,VE):
-    bins = dict()
-    act_bins = dict()
- 
-    for i,ve in enumerate(VE):
-        if ve:
-            for j in range(0,LEAD_TIME_CAP):
-                if i-j < 0: break
-                if action[i-j]:
-                    if j in bins.keys(): bins[j] += 1
-                    else: bins[j] = 1
-                    break
-            for j in range(0,LEAD_TIME_CAP):
-                if i-j < 0: break
-                if j in act_bins.keys(): act_bins[j] += 1
-                else: act_bins[j] = 1
 
-    xvar = [-1]
-    hits = [-1]
-    false_neg = [-1]
-    running_sum = 0
-    VE_count = sum(VE)
-    for i in sorted(bins):
-        running_sum += bins[i]
-        false_neg.append(100*(VE_count - running_sum) / VE_count)
-        xvar.append(i)
-        hits.append(100 * running_sum / VE_count)
-
-    false_pos_x = [-1]
-    false_pos = [-1]
-    action_count = act_bins[LEAD_TIME_CAP-1]
-    for i in sorted(act_bins):
-        false_pos.append(100*(action_count - act_bins[i] ) / action_count)
-        false_pos_x.append(i)   
-        
-    for i in range(len(xvar)):
-        xvar[i] = xvar[i] + 1 
-    for i in range(len(false_pos_x)):
-        false_pos_x[i] = false_pos_x[i] + 1
-    print(bins)
-    print(act_bins)
-    return [xvar,hits,false_neg,false_pos_x,false_pos] 
 
 
 f, (ax1, ax2) = plt.subplots(2, 1)
 f.set_size_inches(10.5, 13.5)
 
-xvar,hits,false_neg,false_pos_x,false_pos = accuracy(action,VE)   
-
+xvar,hits,false_neg,false_pos_x,false_pos = util.accuracy(action,VE,100)   
 
 ax1.set_xlim([0,max(xvar)])
 ax1.plot(xvar, hits, color='black', linewidth=1.0, label='hits')
@@ -126,16 +85,65 @@ ax1.legend()
 ax1.set_title('Accuracy Over Lead Time' + '(' + PREDICTOR + ', ' + CLASS + ', ' + TEST + ', CYCLES: ' + str(len(VE)) +')', fontsize=14)
 ax1.set_xlabel('Lead Time', fontsize=14) 
 ax1.set_ylabel('Accuracy (%)', fontsize=14)
+ax1.set_xlim([0,3])
+ax1.set_ylim([0,100])
 
-CYCLE_FROM_END = len(action)//2
-xvar,hits,false_neg,false_pos_x,false_pos = accuracy(action[0:9800],VE[0:9800])   
+# CYCLE_FROM_END = len(action)//2
+# xvar,hits,false_neg,false_pos_x,false_pos = accuracy(action[0:9800],VE[0:9800])   
 
-ax2.set_xlim([0,max(xvar)])
-ax2.plot(xvar, hits, color='black', linewidth=1.0, label='hits')
-ax2.plot(xvar, false_neg, color='red', linewidth=1.0, label='false negatives')
-ax2.plot(false_pos_x, false_pos, color='blue', linewidth=1.0, label='false positives')
-ax2.set_title('second half of cycles', fontsize=14)
-ax2.set_xlabel('Lead Time', fontsize=14) 
-ax2.set_ylabel('Accuracy (%)', fontsize=14)
+# ax2.set_xlim([0,max(xvar)])
+# ax2.plot(xvar, hits, color='black', linewidth=1.0, label='hits')
+# ax2.plot(xvar, false_neg, color='red', linewidth=1.0, label='false negatives')
+# ax2.plot(false_pos_x, false_pos, color='blue', linewidth=1.0, label='false positives')
+# ax2.set_title('second half of cycles', fontsize=14)
+# ax2.set_xlabel('Lead Time', fontsize=14) 
+# ax2.set_ylabel('Accuracy (%)', fontsize=14)
+
+print(VE_count)
+print(action_count)
 
 plt.savefig(HOME+'/plot/11-4_Accuracy_Over_Lead_time' + '_' + PREDICTOR + '_' + CLASS + '_' + TEST +'.png')
+
+
+# def accuracy(action,VE):
+#     bins = dict()
+#     act_bins = dict()
+ 
+#     for i,ve in enumerate(VE):
+#         if ve:
+#             for j in range(0,LEAD_TIME_CAP):
+#                 if i-j < 0: break
+#                 if action[i-j]:
+#                     if j in bins.keys(): bins[j] += 1
+#                     else: bins[j] = 1
+#                     break
+#             for j in range(0,LEAD_TIME_CAP):
+#                 if i-j < 0: break
+#                 if j in act_bins.keys(): act_bins[j] += 1
+#                 else: act_bins[j] = 1
+
+#     xvar = [-1]
+#     hits = [-1]
+#     false_neg = [-1]
+#     running_sum = 0
+#     VE_count = sum(VE)
+#     for i in sorted(bins):
+#         running_sum += bins[i]
+#         false_neg.append(100*(VE_count - running_sum) / VE_count)
+#         xvar.append(i)
+#         hits.append(100 * running_sum / VE_count)
+
+#     false_pos_x = [-1]
+#     false_pos = [-1]
+#     action_count = act_bins[LEAD_TIME_CAP-1]
+#     for i in sorted(act_bins):
+#         false_pos.append(100*(action_count - act_bins[i] ) / action_count)
+#         false_pos_x.append(i)   
+        
+#     for i in range(len(xvar)):
+#         xvar[i] = xvar[i] + 1 
+#     for i in range(len(false_pos_x)):
+#         false_pos_x[i] = false_pos_x[i] + 1
+#     print(bins)
+#     print(act_bins)
+#     return [xvar,hits,false_neg,false_pos_x,false_pos] 

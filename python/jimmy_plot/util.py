@@ -25,13 +25,14 @@ event_map = {
     }
 
 class Cycle_Dump:
-    def __init__(self, stats):
+    def __init__(self, stats, sig_length):
         self.ve_count = 0
         self.action_count = 0
         self.stats = stats
         self.stats.readline()
         self.stats.readline()
         self.EOF = False
+        self.SIGNATURE_LENGTH = sig_length
     def reset(self):
         self.signature = []
         self.signature_prev = []
@@ -82,11 +83,13 @@ class Cycle_Dump:
         while(True):
             line = self.stats.readline()       
             if not line:
-                return False
+                return True
             #one cycle worth of stat dumps    
             if 'Begin Simulation Statistics' in line:
                 self.stats.readline()
-                return True
+                self.signature_prev = self.signature_prev[-1*self.SIGNATURE_LENGTH:]
+                self.signature = self.signature[-1*self.SIGNATURE_LENGTH:]
+                return False
             stat_name = line.split()[0].split('.')[-1].split(':')[0]
             func = getattr(self, stat_name, False)
             if func:
@@ -116,15 +119,20 @@ class Harvard:
         self.STATE = self.State.NORMAL
         self.lru = [0] * TABLE_HEIGHT
         self.h_table =  [([event_map[1]] * SIGNATURE_LENGTH) for _ in range(TABLE_HEIGHT)]
-        self.cycle1_prediction = False
-        self.cycle2_prediction = False
-        self.VEflag = False
+        self.insertIndex_prev = -1
+        self.insertIndex = -1
+        self.prev_cycle_predict = -1
+        self.curr_cycle_predict = -1
         self.sig = []
         self.sig_prev = []
+        self.VEflag = False
 
     def tick(self, cycle_dump):
-        self.insertIndex_prev = False
-        self.insertIndex = False
+        self.insertIndex_prev = -1
+        self.insertIndex = -1
+        self.prev_cycle_predict = -1
+        self.curr_cycle_predict = -1
+        self.VEflag = False
 
         for i in range(self.TABLE_HEIGHT):
             self.lru[i] += 1
@@ -132,18 +140,20 @@ class Harvard:
         #advance two cycles 
         #first cycle
         if (cycle_dump.signature_prev != self.sig_prev):
-            self.cycle1_prediction = self.find(cycle_dump.signature_prev)
-            self.sig_prev = cycle_dump.signature_prev
+            self.prev_cycle_predict = self.find(cycle_dump.signature_prev)
         if (cycle_dump.signature != self.sig):
-            self.cycle2_prediction = self.find(cycle_dump.signature)
-            self.sig = cycle_dump.signature
+            self.curr_cycle_predict = self.find(cycle_dump.signature)
+        self.sig = cycle_dump.signature
+        self.sig_prev = cycle_dump.signature_prev
 
         if self.STATE is self.State.NORMAL:
             if cycle_dump.supply_volt < self.EMERGENCY_V and cycle_dump.supply_volt > 0.01:
+                self.VEflag = True
                 self.STATE = self.State.EMERGENCY
-                self.insertIndex = self.insert(cycle_dump.signature)
-                self.insertIndex_prev = self.insert(cycle_dump.signature_prev)
-
+                if self.curr_cycle_predict == -1:
+                    self.insertIndex = self.insert(cycle_dump.signature)
+                if self.prev_cycle_predict == -1:
+                    self.insertIndex_prev = self.insert(cycle_dump.signature_prev)
         elif self.STATE is self.State.EMERGENCY:
             if cycle_dump.supply_volt > self.EMERGENCY_V + self.HYSTERESIS:
                 self.STATE = self.State.NORMAL
@@ -154,32 +164,28 @@ class Harvard:
             if self.h_table[i] == entry:
                 self.lru[i] = 0
                 return i
-        return False
+        return -1
     def insert(self, entry):
-        index = self.find(entry)
-        if index != False:
-            return index
-
         index = self.lru.index(max(self.lru))
         self.h_table[index] = entry
         self.lru[index] = 0
         return index
+
     def print(self):
-        if self.cycle1_prediction:
-            print('cycle PREDICTION HIGH prev :' + str(self.cycle1_prediction))
-        if self.cycle2_prediction:
-            print('cycle PREDICTION HIGH curr :' + str(self.cycle2_prediction)) 
-        if self.insertIndex_prev:
+        # for i in range(self.TABLE_HEIGHT):
+        #     print(i,':  ', self.h_table[i])
+        if self.prev_cycle_predict != -1:
+            print('cycle PREDICTION HIGH prev :' + str(self.prev_cycle_predict))
+        if self.curr_cycle_predict != -1:
+            print('cycle PREDICTION HIGH curr :' + str(self.curr_cycle_predict)) 
+        if self.insertIndex_prev != -1:
             print('insert ENTRY prev :' + str(self.insertIndex_prev))
-        if self.insertIndex:
+        if self.insertIndex != -1:
             print('insert ENTRY curr :' + str(self.insertIndex)) 
         print(self.STATE)
-        for i in range(self.TABLE_HEIGHT):
-            print(i,':  ', self.h_table[i])
 
 
-def accuracy(action,VE):
-    LEAD_TIME_CAP = 50
+def accuracy(action,VE,LEAD_TIME_CAP):
     bins = dict()
     act_bins = dict()
  
@@ -193,8 +199,12 @@ def accuracy(action,VE):
                     break
             for j in range(0,LEAD_TIME_CAP):
                 if i-j < 0: break
-                if j in act_bins.keys(): act_bins[j] += 1
-                else: act_bins[j] = 1
+                if action[i-j]:
+                    if j in act_bins.keys(): act_bins[j] += 1
+                    else: act_bins[j] = 1
+
+    print(bins)
+    print(act_bins)
 
     xvar = [-1]
     hits = [-1]
@@ -209,15 +219,16 @@ def accuracy(action,VE):
 
     false_pos_x = [-1]
     false_pos = [-1]
-    action_count = act_bins[LEAD_TIME_CAP-1]
+    action_count = sum(action)
+    running_sum = 0
     for i in sorted(act_bins):
-        false_pos.append(100*(action_count - act_bins[i] ) / action_count)
+        running_sum += act_bins[i]
+        false_pos.append(100*(action_count - running_sum ) / action_count)
         false_pos_x.append(i)   
         
     for i in range(len(xvar)):
         xvar[i] = xvar[i] + 1 
     for i in range(len(false_pos_x)):
         false_pos_x[i] = false_pos_x[i] + 1
-    print(bins)
-    print(act_bins)
+
     return [xvar,hits,false_neg,false_pos_x,false_pos] 
