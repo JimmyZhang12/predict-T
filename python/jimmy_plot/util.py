@@ -25,14 +25,13 @@ event_map = {
     }
 
 class Cycle_Dump:
-    def __init__(self, stats, sig_length):
+    def __init__(self, stats):
         self.ve_count = 0
         self.action_count = 0
         self.stats = stats
         self.stats.readline()
         self.stats.readline()
         self.EOF = False
-        self.SIGNATURE_LENGTH = sig_length
     def reset(self):
         self.signature = []
         self.signature_prev = []
@@ -87,8 +86,6 @@ class Cycle_Dump:
             #one cycle worth of stat dumps    
             if 'Begin Simulation Statistics' in line:
                 self.stats.readline()
-                self.signature_prev = self.signature_prev[-1*self.SIGNATURE_LENGTH:]
-                self.signature = self.signature[-1*self.SIGNATURE_LENGTH:]
                 return False
             stat_name = line.split()[0].split('.')[-1].split(':')[0]
             func = getattr(self, stat_name, False)
@@ -126,37 +123,46 @@ class Harvard:
         self.sig = []
         self.sig_prev = []
         self.VEflag = False
+        self.Actionflag = False
 
     def tick(self, cycle_dump):
+        curr_sig = cycle_dump.signature[-1*self.SIGNATURE_LENGTH:]
+        prev_sig = cycle_dump.signature_prev[-1*self.SIGNATURE_LENGTH:]
+
         self.insertIndex_prev = -1
         self.insertIndex = -1
         self.prev_cycle_predict = -1
         self.curr_cycle_predict = -1
         self.VEflag = False
+        self.Actionflag = False
 
         for i in range(self.TABLE_HEIGHT):
             self.lru[i] += 1
 
         #advance two cycles 
         #first cycle
-        if (cycle_dump.signature_prev != self.sig_prev):
-            self.prev_cycle_predict = self.find(cycle_dump.signature_prev)
-        if (cycle_dump.signature != self.sig):
-            self.curr_cycle_predict = self.find(cycle_dump.signature)
-        self.sig = cycle_dump.signature
-        self.sig_prev = cycle_dump.signature_prev
+        if (prev_sig != self.sig_prev):
+            self.prev_cycle_predict = self.find(prev_sig)
+        if (curr_sig != self.sig):
+            self.curr_cycle_predict = self.find(curr_sig)
+        self.sig = curr_sig
+        self.sig_prev = prev_sig
 
         if self.STATE is self.State.NORMAL:
             if cycle_dump.supply_volt < self.EMERGENCY_V and cycle_dump.supply_volt > 0.01:
                 self.VEflag = True
                 self.STATE = self.State.EMERGENCY
                 if self.curr_cycle_predict == -1:
-                    self.insertIndex = self.insert(cycle_dump.signature)
+                    self.insertIndex = self.insert(curr_sig)
                 if self.prev_cycle_predict == -1:
-                    self.insertIndex_prev = self.insert(cycle_dump.signature_prev)
+                    self.insertIndex_prev = self.insert(prev_sig)
         elif self.STATE is self.State.EMERGENCY:
             if cycle_dump.supply_volt > self.EMERGENCY_V + self.HYSTERESIS:
                 self.STATE = self.State.NORMAL
+
+        if (self.prev_cycle_predict != -1) and (self.curr_cycle_predict != -1):
+            self.Actionflag = True
+
         return
         
     def find(self, entry):
@@ -182,7 +188,10 @@ class Harvard:
             print('insert ENTRY prev :' + str(self.insertIndex_prev))
         if self.insertIndex != -1:
             print('insert ENTRY curr :' + str(self.insertIndex)) 
-        print(self.STATE)
+        if self.VEflag:
+            print('Entering EMERGENCY state')
+        else:
+            print(self.STATE)
 
 
 def accuracy(action,VE,LEAD_TIME_CAP):

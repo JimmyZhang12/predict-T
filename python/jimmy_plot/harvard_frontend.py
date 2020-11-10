@@ -11,15 +11,15 @@ from enum import Enum
 HOME = os.environ['HOME']
 PREDICTOR = 'HarvardPowerPredictor_1'
 CLASS = 'DESKTOP'
-TEST = 'crc'
-path = HOME + '/output_10_29/gem5_out/' + CLASS + '_' + PREDICTOR + '/' + TEST + '.txt'
+TEST = 'fft'
+path = HOME + '/output_11_6/gem5_out/' + CLASS + '_' + PREDICTOR + '/' + TEST + '.txt'
 stats = open(path, 'r')
 #PARAMETERS
 
 CYCLE_START = 0
-SIGNATURE_LENGTH = 10
-harvard = util.Harvard(TABLE_HEIGHT=16,SIGNATURE_LENGTH=SIGNATURE_LENGTH,HYSTERESIS=0.005,EMERGENCY_V=1.358)
-cycle_dump = util.Cycle_Dump(stats, SIGNATURE_LENGTH)
+SIGNATURE_LENGTH = 64
+harvard = util.Harvard(TABLE_HEIGHT=128,SIGNATURE_LENGTH=SIGNATURE_LENGTH,HYSTERESIS=0.005,EMERGENCY_V=1.358)
+cycle_dump = util.Cycle_Dump(stats)
 action = [False]
 VE = [False]
 
@@ -32,12 +32,13 @@ while True:
 
     if cycle_dump.cycle % 1000 < 3:
         print (cycle_dump.cycle)
-    if cycle_dump.cycle > CYCLE_START: 
-    #if harvard.prev_cycle_predict!=-1 or harvard.prev_cycle_predict!=-1 or harvard.insertIndex!=-1 or harvard.insertIndex_prev!=-1: 
+    # if cycle_dump.cycle > CYCLE_START: 
+    if harvard.VEflag or harvard.Actionflag: 
         cycle_dump.dump()
-        print('______________________')
         harvard.print()
         input()
+
+    VE.append(False)
     VE.append(harvard.VEflag)
     action.append(harvard.prev_cycle_predict != -1)
     action.append(harvard.curr_cycle_predict != -1)
@@ -45,8 +46,8 @@ while True:
 print(sum(VE))
 print(sum(action))
 
-f, (ax1, ax2) = plt.subplots(2, 1)
-f.set_size_inches(10.5, 13.5)
+f, (ax1) = plt.subplots()
+f.set_size_inches(10.5, 8.5)
 
 xvar,hits,false_neg,false_pos_x,false_pos = util.accuracy(action,VE, LEAD_TIME_CAP=50)   
 
@@ -70,6 +71,6 @@ ax1.set_ylabel('Accuracy (%)', fontsize=14)
 # ax2.set_xlabel('Lead Time', fontsize=14) 
 # ax2.set_ylabel('Accuracy (%)', fontsize=14)
 
-plt.savefig(HOME+'/plot/11-4_frontend_Accuracy_Over_Lead_time' + '_' + PREDICTOR + '_' + CLASS + '_' + TEST +'.png')
+plt.savefig(HOME+'/passat/plot/11-10_frontend_Acc_vs_LT' + '_' + PREDICTOR + '_' + CLASS + '_' + TEST +'.png')
 
         
