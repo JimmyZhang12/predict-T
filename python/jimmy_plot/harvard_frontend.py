@@ -11,13 +11,13 @@ from enum import Enum
 HOME = os.environ['HOME']
 PREDICTOR = 'HarvardPowerPredictor_1'
 CLASS = 'DESKTOP'
-TEST = 'fft'
-path = HOME + '/output_11_6/gem5_out/' + CLASS + '_' + PREDICTOR + '/' + TEST + '.txt'
+TEST = 'different_cycle'
+path = HOME + '/output_11_11_2/gem5_out/' + CLASS + '_' + PREDICTOR + '/' + TEST + '.txt'
 stats = open(path, 'r')
 #PARAMETERS
 
-CYCLE_START = 0
-SIGNATURE_LENGTH = 64
+CYCLE_START = 2000
+SIGNATURE_LENGTH = 32
 harvard = util.Harvard(TABLE_HEIGHT=128,SIGNATURE_LENGTH=SIGNATURE_LENGTH,HYSTERESIS=0.005,EMERGENCY_V=1.358)
 cycle_dump = util.Cycle_Dump(stats)
 action = [False]
@@ -33,7 +33,11 @@ while True:
     if cycle_dump.cycle % 1000 < 3:
         print (cycle_dump.cycle)
     # if cycle_dump.cycle > CYCLE_START: 
-    if harvard.VEflag or harvard.Actionflag: 
+    #     cycle_dump.dump()
+    #     harvard.print()
+    #     input()
+
+    if (harvard.VEflag or harvard.Actionflag) and cycle_dump.cycle > CYCLE_START: 
         cycle_dump.dump()
         harvard.print()
         input()

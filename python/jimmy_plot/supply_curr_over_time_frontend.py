@@ -12,13 +12,13 @@ import util
 HOME = os.environ['HOME']
 PREDICTOR = 'HarvardPowerPredictor_1'
 CLASS = 'DESKTOP'
-TEST = 'fft'
-path = HOME + '/output_11_6/gem5_out/' + CLASS + '_' + PREDICTOR + '/' + TEST + '.txt'
+TEST = 'same_cycle'
+path = HOME + '/output_11_11_2/gem5_out/' + CLASS + '_' + PREDICTOR + '/' + TEST + '.txt'
 stats = open(path, 'r')
 #PARAMETERS
 
 
-fig = plt.figure(figsize=(120,5))
+fig = plt.figure(figsize=(60,5))
 ax = plt.axes()
 fig.suptitle('Supply Voltage Over Time' + '(' + PREDICTOR + ', ' + CLASS + ', ' + TEST + ' )', fontsize=14)
 ax.set_xlabel('Cycle', fontsize=14) 
@@ -29,7 +29,7 @@ voltage = [0]
 current =[0]
 
 CYCLE_START = 0
-SIGNATURE_LENGTH = 600
+SIGNATURE_LENGTH = 512
 harvard = util.Harvard(TABLE_HEIGHT=128,SIGNATURE_LENGTH=SIGNATURE_LENGTH,HYSTERESIS=0.005,EMERGENCY_V=1.358)
 cycle_dump = util.Cycle_Dump(stats)
 action = [False]
@@ -68,6 +68,6 @@ ax2.plot(xvar, current, color='tab:blue')
 ax2.tick_params(axis='y', labelcolor='tab:blue')
 ax2.set_ylim([min(i for i in current if i > 0.8), max(current)])
 
-plt.xlim(left = start_cycle, right = end_cycle)
-plt.savefig(HOME+'/passat/plot/11-10_Vs&Is_vs_time' + '_' + PREDICTOR + '_' + CLASS + '_' + TEST +'_0.5.png', dpi=300)
+plt.xlim(left = start_cycle, right = min(end_cycle,len(xvar)) )
+plt.savefig(HOME+'/passat/plot/11-12_4_Vs&Is_vs_time' + '_' + PREDICTOR + '_' + CLASS + '_' + TEST +'.png', dpi=300)
 
