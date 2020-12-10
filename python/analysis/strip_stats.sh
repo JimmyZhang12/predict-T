@@ -5,19 +5,19 @@
 #G5_OUT=
 #TESTS=("dijkstra" "sha" "untoast")
 #TESTS=("blowfish_encrypt" "rijndael_decrypt" "sha" "crc" "toast" "untoast")
-TESTS=("toast")
-
+#TESTS=("basicmath" "bitcnts" "qsort" "susan_smooth" "susan_edge" "susan_corner" "dijkstra" "blowfish_encrypt" "blowfish_decrypt" "rijndael_encrypt" "rijndael_decrypt" "sha" "crc" "fft" "ffti" "toast" "untoast")
+TESTS=("fft")
 #TESTS=("dijkstra" "qsort" "fft" "ffti" "sha")
 #TESTS=("toast" "untoast")
 #DURATION=("10000" "25000" "25000")
-DURATION=("10000" "4000" "4000" "4000" "4000")
+DURATION=("2000" "30000" "30000" "30000" "30000" "30000" "30000" "30000" "30000" "30000" "30000" "30000" "30000" "30000" "30000" "30000" "30000")
 #DURATION=("25000" "10000" "25000" "25000" "25000")
 #DURATION=("25000" "25000")
 CLASS=("MOBILE" "LAPTOP" "DESKTOP")
 PDN=("ARM" "INTEL_M" "INTEL_DT")
 #PDN=("HARVARD_M" "HARVARD_L" "HARVARD_D")
 
-SRC="$HOME/output_11_4/gem5_out"
+SRC="$HOME/output_12_9/gem5_out"
 #TYPE="DecorOnly_1"
 TYPE="HarvardPowerPredictor_1"
 #TYPE="IdealSensor_1"
@@ -26,7 +26,7 @@ TYPE="HarvardPowerPredictor_1"
 
 for i in ${!TESTS[@]}; do 
   for j in ${!CLASS[@]}; do 
-    P="$SRC/${TESTS[$i]}_${DURATION[$i]}_2_${CLASS[$j]}_${PDN[$j]}_${TYPE}_loadevents/stats.txt"
+    P="$SRC/${TESTS[$i]}_${DURATION[$i]}_2_${CLASS[$j]}_${PDN[$j]}_${TYPE}/stats.txt"
     D="$SRC/${CLASS[$j]}_${TYPE}"
 
     echo "$P"

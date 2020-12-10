@@ -53,7 +53,7 @@ if [ -z "$OUTPUT_ROOT" ]; then
   exit
 fi
 if [ -z "$MCPAT_ROOT" ]; then
-  print_error "OUTPUT_ROOT not set; source setup.sh"
+  print_error "MCPAT not set; source setup.sh"
   exit
 fi
 if [ -z "$SIM_ROOT" ]; then
@@ -96,13 +96,13 @@ print_info "TRAINING_ROOT $TRAINING_ROOT"
 # Simulation Params
 #---------------------------------------------------
 # Configure Simulation Parameters
-DURATION=("-1" "-1" "-1" "-1" "-1" "-1" "-1") # Data Points to Simulate
+DURATION=("-1" "-1" "-1" "-1" "-1" "-1" "-1" "-1" "-1" "-1" "-1" "-1" "-1" "-1" "-1" "-1" "-1") # Data Points to Simulate
 #INSTRUCTIONS=("10000" "25000" "25000" "25000" "25000" "25000" "25000") # Instructions to Simulate
-INSTRUCTIONS=("10000" "4000" "4000" "4000" "4000" "4000" "4000")
-#NSTRUCTIONS=("10000")
+INSTRUCTIONS=("30000" "30000" "30000" "30000" "30000" "30000" "30000" "30000" "30000" "30000" "30000" "30000" "30000" "30000" "30000" "30000" "30000")
+#INSTRUCTIONS=("2000")
 
 # When to start ROI, in Sim Ticks, -or- ROI by setting "-1"
-PROFILE_START=("-1" "-1" "-1" "-1" "-1" "-1" "-1") 
+PROFILE_START=("-1" "-1" "-1" "-1" "-1" "-1" "-1" "-1" "-1" "-1" "-1" "-1" "-1" "-1" "-1" "-1" "-1")  
 
 #DURATION=("-1") # Data Points to Simulate
 #INSTRUCTIONS=("25000") # Instructions to Simulate
@@ -381,9 +381,11 @@ SIMD_UNIT_COUNT=("4")
 #name=("rijndael_encrypt" "dijkstra" "toast" "fft")
 #exe=("rijndael" "dijkstra" "toast" "fft")
 #opt=("${INPUT}/rijndael.asc ${OUTPUT}/rijndael.enc e 1234567890abcdeffedcba09876543211234567890abcdeffedcba0987654321" "${INPUT}/dijkstra.dat" "-fps -c ${INPUT}/toast.au" "4 4096")
-#name=("basicmath" "bitcnts" "qsort" "susan_smooth" "susan_edge" "susan_corner" "dijkstra" "blowfish_encrypt" "blowfish_decrypt" "rijndael_encrypt" "rijndael_decrypt" "sha" "crc" "fft" "ffti" "toast" "untoast")
-#exe=("basicmath" "bitcnts" "qsort" "susan" "susan" "susan" "dijkstra" "blowfish" "blowfish" "rijndael" "rijndael" "sha" "crc" "fft" "fft" "toast" "untoast")
-#opt=("" "1000" "${INPUT}/qsort.dat" "${INPUT}/susan.pgm ${OUTPUT}/susan_s.pgm -s" "${INPUT}/susan.pgm ${OUTPUT}/susan_e.pgm -e" "${INPUT}/susan.pgm ${OUTPUT}/susan_c.pgm -c" "${INPUT}/dijkstra.dat" "e ${INPUT}/blowfish.asc ${OUTPUT}/blowfish.enc 1234567890abcdeffedcba0987654321" "d ${INPUT}/blowfish.enc ${OUTPUT}/blowfish.asc 1234567890abcdeffedcba0987654321" "${INPUT}/rijndael.asc ${OUTPUT}/rijndael.enc e 1234567890abcdeffedcba09876543211234567890abcdeffedcba0987654321" "${INPUT}/rijndael.enc ${OUTPUT}/rijndael.asc d 1234567890abcdeffedcba09876543211234567890abcdeffedcba0987654321" "${INPUT}/sha.asc" "${INPUT}/crc.pcm" "4 4096" "4 8192 -i" "-fps -c ${INPUT}/toast.au" "-fps -c ${INPUT}/untoast.au.run.gsm")
+
+name=("basicmath" "bitcnts" "qsort" "susan_smooth" "susan_edge" "susan_corner" "dijkstra" "blowfish_encrypt" "blowfish_decrypt" "rijndael_encrypt" "rijndael_decrypt" "sha" "crc" "fft" "ffti" "toast" "untoast")
+exe=("basicmath" "bitcnts" "qsort" "susan" "susan" "susan" "dijkstra" "blowfish" "blowfish" "rijndael" "rijndael" "sha" "crc" "fft" "fft" "toast" "untoast")
+opt=("" "1000" "${INPUT}/qsort.dat" "${INPUT}/susan.pgm ${OUTPUT}/susan_s.pgm -s" "${INPUT}/susan.pgm ${OUTPUT}/susan_e.pgm -e" "${INPUT}/susan.pgm ${OUTPUT}/susan_c.pgm -c" "${INPUT}/dijkstra.dat" "e ${INPUT}/blowfish.asc ${OUTPUT}/blowfish.enc 1234567890abcdeffedcba0987654321" "d ${INPUT}/blowfish.enc ${OUTPUT}/blowfish.asc 1234567890abcdeffedcba0987654321" "${INPUT}/rijndael.asc ${OUTPUT}/rijndael.enc e 1234567890abcdeffedcba09876543211234567890abcdeffedcba0987654321" "${INPUT}/rijndael.enc ${OUTPUT}/rijndael.asc d 1234567890abcdeffedcba09876543211234567890abcdeffedcba0987654321" "${INPUT}/sha.asc" "${INPUT}/crc.pcm" "4 4096" "4 8192 -i" "-fps -c ${INPUT}/toast.au" "-fps -c ${INPUT}/untoast.au.run.gsm")
+
 #name=("qsort" "dijkstra" "fft" "ffti" "sha" "toast" "untoast")
 #exe=("qsort" "dijkstra" "fft" "fft" "sha" "toast" "untoast")
 #opt=("${INPUT}/qsort.dat" "${INPUT}/dijkstra.dat" "4 4096" "4 8192 -i" "${INPUT}/sha.asc" "-fps -c ${INPUT}/toast.au" "-fps -c ${INPUT}/untoast.au.run.gsm")
@@ -407,9 +409,18 @@ SIMD_UNIT_COUNT=("4")
 #exe=("toast")
 #opt=("-fps -c ${INPUT}/toast.au")
 
-name=("crc") 
-exe=("crc")
-opt=("${INPUT}/crc.pcm")
+#name=("crc") 
+#exe=("crc")
+#opt=("${INPUT}/crc.pcm")
+
+#name=("different_cycle" "same_cycle") 
+#exe=("different_cycle" "same_cycle")
+#opt=("" "")
+
+#name=("same_cycle") 
+#exe=("same_cycle")
+#opt=("")
+
 
 #name=("sha" "untoast")
 #exe=("sha" "untoast")
@@ -437,7 +448,7 @@ for j in ${!name[@]}; do
   for i in ${!DEVICE_TYPE[@]}; do
     for pred in ${!PREDICTOR[@]}; do
       sleep 10
-      TN="${name[$j]}_${INSTRUCTIONS[$j]}_${CPU_CYCLES[0]}_${DEVICE_TYPE[$i]}_${PDN[$i]}_${PREDICTOR[$pred]}_${PPRED_ACTIONS[$pred]}_loadevents"
+      TN="${name[$j]}_${INSTRUCTIONS[$j]}_${CPU_CYCLES[0]}_${DEVICE_TYPE[$i]}_${PDN[$i]}_${PREDICTOR[$pred]}_${PPRED_ACTIONS[$pred]}"
 #echo "se_classic_mc_ncv \
 #$TN ${DURATION[$i]} \
 #${INSTRUCTIONS[$i]} \
@@ -520,7 +531,7 @@ for j in ${!name[@]}; do
           ${PPRED_ACTIONS[$pred]} \
           ${VOLTAGE_EMERGENCY[$i]} \
           ${VOLTAGE_THRESHOLD[$i]}
-      while [ `jobs | wc -l` -ge 9 ]; do
+      while [ `jobs | wc -l` -ge 4 ]; do
         sleep 1
       done
     done

@@ -46,10 +46,14 @@ print_error () {
 # Native Linux
 print_info "Native Linux"
 export VSIM_TOOLS="/software/cadence-Aug2016"
+#export PREDICT_T_ROOT="/home/kanungo3/predict-T"
+#export GEM5_ROOT="/home/kanungo3/gem5"
+#export OUTPUT_ROOT="$HOME/output_11_10"
+#export MCPAT_ROOT="/home/kanungo3/mcpat/build"
+#export SIM_ROOT="$PREDICT_T_ROOT/circuit_model"
 export PREDICT_T_ROOT="$HOME/passat/predict-T"
 export GEM5_ROOT="$HOME/passat/gem5"
-export OUTPUT_ROOT="$HOME/output_11_6"
-#export MCPAT_ROOT="$HOME/research/mcpat"
+export OUTPUT_ROOT="$HOME/output_12_10"
 export MCPAT_ROOT="$HOME/passat/mcpat/build"
 export SIM_ROOT="$PREDICT_T_ROOT/circuit_model"
 

@@ -62,13 +62,13 @@ class Cycle_Dump:
 HOME = os.environ['HOME']
 PREDICTOR = 'HarvardPowerPredictor_1'
 CLASS = 'DESKTOP'
-TEST = 'crc'
-path = HOME + '/output_10_22/gem5_out/' + CLASS + '_' + PREDICTOR + '/' + TEST + '.txt'
+TEST = 'different_cycle'
+path = HOME + '/output_11_18/gem5_out/' + CLASS + '_' + PREDICTOR + '/' + TEST + '.txt'
 print(path)
 #PARAMETERS
 stats = open(path, 'r')
 
-fig = plt.figure(figsize=(50,5))
+fig = plt.figure(figsize=(10,5))
 ax = plt.axes()
 fig.suptitle('Supply Voltage Over Time' + '(' + PREDICTOR + ', ' + CLASS + ', ' + TEST + ' )', fontsize=14)
 ax.set_xlabel('Cycle', fontsize=14) 
@@ -108,10 +108,12 @@ while line:
     #if cycle_dump.action_flag:
     #    ax.axvspan(len(voltage), len(voltage)+1, color='red', alpha=0.3)
     line = stats.readline()
+    if cycle_dump.cycle > 10000:
+        break
 
 xvar = np.linspace(0,len(voltage),len(voltage))
 start_cycle = 8000
-end_cycle = 17000
+end_cycle = 8500
 ax.plot(xvar, voltage,color='black', linewidth=1.0)
 ax.set_ylim(bottom = min(i for i in voltage if i > 0.8), top = max(voltage))
 
@@ -120,4 +122,4 @@ ax2.tick_params(axis='y', labelcolor='tab:blue')
 ax2.set_ylim([min(i for i in current if i > 0.8), max(current)])
 
 plt.xlim(left = start_cycle, right = end_cycle)
-plt.savefig(HOME +'/plot/11-3_Supply_Volt+Curr_Over_Time' + '_' + PREDICTOR + '_' + CLASS + '_' + TEST +'_0.5.png', dpi=300)
+plt.savefig(HOME +'/passat/plot/11-18_Supply_Volt+Curr_Over_Time' + '_' + PREDICTOR + '_' + CLASS + '_' + TEST +'.png', dpi=300)
