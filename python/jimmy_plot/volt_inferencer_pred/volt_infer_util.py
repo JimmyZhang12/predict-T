@@ -138,12 +138,7 @@ class Cycle_Dump:
 
 
 
-class Dist_Pred:
-
-    class State(Enum):
-        NORMAL = 0
-        EMERGENCY = 1 
-
+class Volt_Infer:
     def __init__(self, HISTORY_WIDTH, HYSTERESIS, EMERGENCY_V, TABLE_HEIGHT, C_THRES, LEAD_TIME):
         self.LEAD_TIME = LEAD_TIME
         self.C_THRES = C_THRES
@@ -153,14 +148,14 @@ class Dist_Pred:
         self.HYSTERESIS = HYSTERESIS
         self.EMERGENCY_V = EMERGENCY_V
 
-        self.STATE = self.State.NORMAL
         self.history = [deque([0]*HISTORY_WIDTH) for _ in range(self.HISTORY_HEIGHT)]
         self.table = [np.zeros((self.HISTORY_HEIGHT, self.HISTORY_WIDTH))]*TABLE_HEIGHT
-        self.convs_over_table = []
+        self.volt_table = [0]*TABLE_HEIGHT
 
         #conv max for this cycle and prev cycle
         self.conv_max = deque([0]*600)
         self.conv_max_norm = deque([0]*600)
+
 
         self.conf_min = 0
         self.LRU = [0]*TABLE_HEIGHT
@@ -169,6 +164,8 @@ class Dist_Pred:
         self.VEflag_prev = False
         self.Actionflag_prev = False
         self.Actionflag_curr = False
+        self.volt_pred_prev = 0
+        self.volt_pred_curr = 0
 
         self.cycles_since_pred = 0
         self.prev_max_conf = 0
@@ -184,7 +181,8 @@ class Dist_Pred:
     def tick(self, cycle_dump):
         self.volt_1_cycles_ago = (self.volt_2_cycles_ago + cycle_dump.supply_volt)/2
         self.curr_1_cycles_ago = (self.curr_2_cycles_ago + cycle_dump.supply_curr)/2
-
+        self.volt_pred_curr = 0
+        self.volt_pred_prev = 0
         #advance two cycles 
         #FIRST cycle
         self.Actionflag_prev = False
@@ -195,11 +193,16 @@ class Dist_Pred:
         #search the table
         self.convs_over_table = self.convolution()
         self.push_convmax(max(self.convs_over_table))
+
         #predict
+        conv_list_index = self.convs_over_table.index(max(self.convs_over_table))
+        self.volt_pred_prev = self.volt_table[conv_list_index]
+
         if self.predict():
             self.Actionflag_prev = True
-            self.LRU[self.convs_over_table.index(max(self.convs_over_table))] = 0
+            self.LRU[conv_list_index] = 0
             self.cycles_since_pred = 0
+            
 
         self.VEflag_prev = False
         #try to insert to table
@@ -207,6 +210,7 @@ class Dist_Pred:
             self.VEflag_prev = True
             if self.cycles_since_pred > self.LEAD_TIME:
                 self.insert_index = self.insert()
+                self.volt_table[self.insert_index] = self.volt_1_cycles_ago
 
 
 
@@ -221,10 +225,12 @@ class Dist_Pred:
         self.convs_over_table = self.convolution()
         self.push_convmax(max(self.convs_over_table))
         #predict
+        conv_list_index = self.convs_over_table.index(max(self.convs_over_table))
+        self.volt_pred_curr = self.volt_table[conv_list_index]
         if self.predict():
+            self.LRU[conv_list_index] = 0
             self.Actionflag_curr = True
             self.cycles_since_pred = 0
-            self.LRU[self.convs_over_table.index(max(self.convs_over_table))] = 0
 
         #try to insert to table
         self.VEflag_curr = False
@@ -232,6 +238,7 @@ class Dist_Pred:
             self.VEflag_curr = True
             if self.cycles_since_pred > self.LEAD_TIME:
                 self.insert_index = self.insert()
+                self.volt_table[self.insert_index] = cycle_dump.supply_volt
 
         self.volt_2_cycles_ago = cycle_dump.supply_volt
         self.curr_2_cycles_ago = cycle_dump.supply_curr
@@ -284,10 +291,10 @@ class Dist_Pred:
             for i,e in enumerate(self.history):
                 print(list(self.table[j][i])," : ", event_map[i])
             print()
+            
         if self.VEflag_curr or self.VEflag_prev:
             print('Entering EMERGENCY state')
-        else:
-            print(self.STATE)
+
         if self.insert_index != -1:
             print("Insert Entry Index: ", self.insert_index)
         for i,e in enumerate(self.history):

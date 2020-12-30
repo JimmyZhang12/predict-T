@@ -5,19 +5,19 @@
 #G5_OUT=
 #TESTS=("dijkstra" "sha" "untoast")
 #TESTS=("blowfish_encrypt" "rijndael_decrypt" "sha" "crc" "toast" "untoast")
-#TESTS=("basicmath" "bitcnts" "qsort" "susan_smooth" "susan_edge" "susan_corner" "dijkstra" "blowfish_encrypt" "blowfish_decrypt" "rijndael_encrypt" "rijndael_decrypt" "sha" "crc" "fft" "ffti" "toast" "untoast")
-TESTS=("fft")
+TESTS=("same_cycle" "different_cycle" "basicmath" "bitcnts" "qsort" "susan_smooth" "susan_edge" "susan_corner" "dijkstra" "rijndael_encrypt" "rijndael_decrypt" "sha" "crc" "fft" "ffti" "toast" "untoast")
+#TESTS=("same_cycle" "different_cycle")
 #TESTS=("dijkstra" "qsort" "fft" "ffti" "sha")
 #TESTS=("toast" "untoast")
 #DURATION=("10000" "25000" "25000")
-DURATION=("2000" "30000" "30000" "30000" "30000" "30000" "30000" "30000" "30000" "30000" "30000" "30000" "30000" "30000" "30000" "30000" "30000")
+DURATION=("30000" "30000" "30000" "30000" "30000" "30000" "30000" "30000" "30000" "30000" "30000" "30000" "30000" "30000" "30000" "30000" "30000" "30000" "30000" "30000" "30000" "30000")
 #DURATION=("25000" "10000" "25000" "25000" "25000")
 #DURATION=("25000" "25000")
 CLASS=("MOBILE" "LAPTOP" "DESKTOP")
 PDN=("ARM" "INTEL_M" "INTEL_DT")
 #PDN=("HARVARD_M" "HARVARD_L" "HARVARD_D")
 
-SRC="$HOME/output_12_9/gem5_out"
+SRC="$HOME/output_12_10/gem5_out"
 #TYPE="DecorOnly_1"
 TYPE="HarvardPowerPredictor_1"
 #TYPE="IdealSensor_1"

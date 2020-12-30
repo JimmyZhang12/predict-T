@@ -33,10 +33,10 @@ while True:
 
     if cycle_dump.cycle % 1000 < 3:
         print (cycle_dump.cycle)
-    # if cycle_dump.cycle > CYCLE_START: 
-    #     cycle_dump.dump()
-    #     harvard.print()
-    #     input()
+    if cycle_dump.cycle > CYCLE_START: 
+        cycle_dump.dump()
+        harvard.print()
+        input()
 
     # if (harvard.VEflag or harvard.Actionflag) and cycle_dump.cycle > CYCLE_START: 
     #     cycle_dump.dump()

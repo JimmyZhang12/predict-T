@@ -4,7 +4,7 @@ matplotlib.use('Agg')
 
 import matplotlib.pyplot as plt
 import numpy as np
-import util_dist_pred as util
+import volt_infer_util as util
 from enum import Enum
 from datetime import datetime
 import math
@@ -14,13 +14,13 @@ def calc_plot_stats(PREDICTOR, CLASS, TEST, OUTPUT_DIR, DATE, CYCLE_START, CYCLE
     path = HOME + '/' + OUTPUT_DIR + '/gem5_out/' + CLASS + '_' + PREDICTOR + '/' + TEST + '.txt'
     stats = open(path, 'r')
 
-    dist_pred = util.Dist_Pred(
+    volt_infer_pred = util.Volt_Infer(
         HISTORY_WIDTH= 10,
         HYSTERESIS=0.005, 
         EMERGENCY_V=1.358, 
         TABLE_HEIGHT=10, 
         C_THRES=0.7,
-        LEAD_TIME = 20)
+        LEAD_TIME = 0)
 
     cycle_dump = util.Cycle_Dump(stats)
 
@@ -29,27 +29,30 @@ def calc_plot_stats(PREDICTOR, CLASS, TEST, OUTPUT_DIR, DATE, CYCLE_START, CYCLE
     conf = []
     action = []
     VE = []
+    volt_pred = []
 
     while True:
         cycle_dump.reset()
         EOF = cycle_dump.parseCycle()
-        dist_pred.tick(cycle_dump)
+        volt_infer_pred.tick(cycle_dump)
         if EOF:
             break
 
-        supply_curr.append(dist_pred.curr_1_cycles_ago)
+        supply_curr.append(volt_infer_pred.curr_1_cycles_ago)
         supply_curr.append(cycle_dump.supply_curr)
-        supply_volt.append(dist_pred.volt_1_cycles_ago)
+        supply_volt.append(volt_infer_pred.volt_1_cycles_ago)
         supply_volt.append(cycle_dump.supply_volt)
-        conf.append(dist_pred.conv_max_norm[-2])
-        conf.append(dist_pred.conv_max_norm[-1])
-        action.append(dist_pred.Actionflag_prev)
-        action.append(dist_pred.Actionflag_curr)
-        VE.append(dist_pred.VEflag_prev)
-        VE.append(dist_pred.VEflag_curr)
+        conf.append(volt_infer_pred.conv_max_norm[-2])
+        conf.append(volt_infer_pred.conv_max_norm[-1])
+        action.append(volt_infer_pred.Actionflag_prev)
+        action.append(volt_infer_pred.Actionflag_curr)
+        VE.append(volt_infer_pred.VEflag_prev)
+        VE.append(volt_infer_pred.VEflag_curr)
+        # volt_pred.append(volt_infer_pred.volt_pred_prev)
+        # volt_pred.append(volt_infer_pred.volt_pred_curr)
 
-        # print(dist_pred.VEflag_prev)
-        # print(dist_pred.VEflag_curr)
+        # print(volt_infer_pred.VEflag_prev)
+        # print(volt_infer_pred.VEflag_curr)
         if cycle_dump.cycle % 1000 < 3:
             print (cycle_dump.cycle)
 
@@ -57,22 +60,23 @@ def calc_plot_stats(PREDICTOR, CLASS, TEST, OUTPUT_DIR, DATE, CYCLE_START, CYCLE
             break
         # if cycle_dump.cycle > CYCLE_START: 
         #     cycle_dump.dump()
-        #     dist_pred.print()
+        #     volt_infer_pred.print()
         #     input()
 
-        # if (dist_pred.VEflag or dist_pred.Actionflag) and cycle_dump.cycle > CYCLE_START: 
+        # if (volt_infer_pred.VEflag or volt_infer_pred.Actionflag) and cycle_dump.cycle > CYCLE_START: 
         #     cycle_dump.dump()
-        #     dist_pred.print()
+        #     volt_infer_pred.print()
         #     input()
     #print how many events 
     for k,v in cycle_dump.event_count.items():
         print(util.event_map[k], ": ", v)
 
-    np.save('plot/data/conv'+DATE+'_supply_curr_'  + TEST, np.array(supply_curr))
-    np.save('plot/data/conv'+DATE+'_supply_volt_'  + TEST, np.array(supply_volt))
-    np.save('plot/data/conv'+DATE+'_conf_'  + TEST, np.array(conf))
-    np.save('plot/data/conv'+DATE+'_action_'+ TEST, np.array(action))
-    np.save('plot/data/conv'+DATE+'_VE_'+ TEST, np.array(VE))
+    np.save('plot/data/volt_infer_'+DATE+'_supply_curr_'  + TEST, np.array(supply_curr))
+    np.save('plot/data/volt_infer_'+DATE+'_supply_volt_'  + TEST, np.array(supply_volt))
+    np.save('plot/data/volt_infer_'+DATE+'_conf_'  + TEST, np.array(conf))
+    np.save('plot/data/volt_infer_'+DATE+'_action_'+ TEST, np.array(action))
+    np.save('plot/data/volt_infer_'+DATE+'_VE_'+ TEST, np.array(VE))
+    # np.save('plot/data/volt_infer_'+DATE+'_volt_pred_'+ TEST, np.array(volt_pred))
 
 
 def plot(TEST, DATE, start_cycle, end_cycle):
@@ -81,14 +85,35 @@ def plot(TEST, DATE, start_cycle, end_cycle):
     FONTSIZE = 18
     HOME = os.environ['HOME']
 
-    supply_curr = np.load('plot/data/conv'+DATE+'_supply_curr_'  +TEST +'.npy')
-    supply_volt = np.load('plot/data/conv'+DATE+'_supply_volt_'  +TEST +'.npy')
-    conf =        np.load('plot/data/conv'+DATE+'_conf_'+TEST +'.npy')
-    action =      np.load('plot/data/conv'+DATE+'_action_'+TEST +'.npy')
-    VE =          np.load('plot/data/conv'+DATE+'_VE_'+TEST +'.npy')
+    supply_curr = np.load('plot/data/volt_infer_'+DATE+'_supply_curr_'  +TEST +'.npy')
+    supply_volt = np.load('plot/data/volt_infer_'+DATE+'_supply_volt_'  +TEST +'.npy')
+    conf =        np.load('plot/data/volt_infer_'+DATE+'_conf_'+TEST +'.npy')
+    action =      np.load('plot/data/volt_infer_'+DATE+'_action_'+TEST +'.npy')
+    VE =          np.load('plot/data/volt_infer_'+DATE+'_VE_'+TEST +'.npy')
+    # volt_pred =   np.load('plot/data/volt_infer_'+DATE+'_volt_pred_'+TEST +'.npy')
 
-    print(len(supply_curr))
-    print(len(supply_volt))
+
+    #for FFT
+    volt_pred = []
+    phase = 270
+    amp = 0.06
+    cycles_since_reset = 0
+    for i in range(len(supply_curr)):
+        if(conf[i] > 0.6):
+            phase = 270
+            amp = 0.06
+            cycles_since_reset = 0
+        else:
+            phase += 2.5
+            amp *= 0.999
+            cycles_since_reset += 1
+
+        val = 1.38 + amp*math.e**(-1*cycles_since_reset/250) * math.sin(math.radians(phase)) 
+        volt_pred.append(val)
+
+
+
+
 
     end_cycle = min(end_cycle,len(supply_curr))
 
@@ -115,31 +140,20 @@ def plot(TEST, DATE, start_cycle, end_cycle):
     ax2.tick_params(axis='y', labelcolor='tab:blue')
     ax2.set_ylim([min(i for i in supply_curr if i > 0.8), max(supply_curr)])
 
-    #nonlinearity test
-    # deriv = np.gradient(conf)
-    # conf = np.true_divide(conf,max(conf))
-    # conf = conf + np.true_divide(deriv,max(deriv))
-
-    # #conf = np.sin(conf)
-    # f = lambda x: (x**3)
-    # conf = conf
-    # conf = f(conf)
-
-
     axb.set_title('Convolution output', fontsize=FONTSIZE)
     axb.plot(xvar, conf)
     # axb.set_ylim([0,2])
     axb.set_xlabel('Cycle', fontsize=FONTSIZE) 
     axb.set_xlim(left = start_cycle, right = end_cycle)
-    axb.set_ylabel('Convolution Max', fontsize=FONTSIZE)  # we already handled the x-label with ax1
+    axb.set_ylabel('Convolution Max', fontsize=FONTSIZE)  
 
     
-    deriv = np.gradient(conf)
-    axd.set_title('Convolution Deriv', fontsize=FONTSIZE)
-    axd.plot(xvar, deriv)
-    axd.set_ylim([-1,1])
-    axd.set_xlabel('Cycle', fontsize=FONTSIZE) 
+    axd.set_title('Voltage Pred', fontsize=FONTSIZE)
+    axd.plot(xvar, supply_volt,color='black', linewidth=1.0)
+    axd.plot(xvar, volt_pred)
     axd.set_xlim(left = start_cycle, right = end_cycle)
+    axd.set_ylim(bottom = min(i for i in supply_volt if i > 0.8), top = max(supply_volt))
+
 
 
     # action = []
@@ -169,8 +183,8 @@ def plot(TEST, DATE, start_cycle, end_cycle):
     axc.set_xlabel('Lead Time', fontsize=14) 
     axc.set_ylabel('(%)', fontsize=14)
 
-    plt.savefig(HOME+ '/passat/plot/' + DATE + '_Vs&Is_vs_time' + '_dist_pred_' + TEST +'.png', dpi=300)
-    print(HOME+ '/passat/plot/' + DATE + '_Vs&Is_vs_time' + '_dist_pred_' + TEST +'.png')
+    plt.savefig(HOME+ '/passat/plot/' + DATE + '_Vs&Is_vs_time' + 'volt_infer_' + TEST +'.png', dpi=300)
+    print(HOME+ '/passat/plot/' + DATE + '_Vs&Is_vs_time' + 'volt_infer_' + TEST +'.png')
 
 def plot_all(TEST_LIST, DATE):
     #PARAMETERS
@@ -214,8 +228,8 @@ def plot_all(TEST_LIST, DATE):
 
     for x,TEST in enumerate(TEST_LIST):
         print("Plotting: ",TEST)
-        action =      np.load('plot/data/conv'+DATE+'_action_'+TEST +'.npy')
-        VE =          np.load('plot/data/conv'+DATE+'_VE_'+TEST +'.npy')
+        action =      np.load('plot/data/volt_infer_'+DATE+'_action_'+TEST +'.npy')
+        VE =          np.load('plot/data/volt_infer_'+DATE+'_VE_'+TEST +'.npy')
 
         #correct stat dump being not every cycle
         action = np.roll(action,-1)
@@ -236,24 +250,24 @@ def plot_all(TEST_LIST, DATE):
     ax_fp.set_title('False Pos (Min) Average = '+ str(fp_avg), fontsize=FONTSIZE)
     ax_fn.set_title('False Neg (Min) Average = '+ str(fn_avg), fontsize=FONTSIZE)
 
-    plt.savefig(HOME+ '/passat/plot/conv' + DATE + 'all_tests.png', dpi=300)
-    print(HOME+ '/passat/plot/conv' + DATE + 'all_tests.png')
+    plt.savefig(HOME+ '/passat/plot/volt_infer_' + DATE + 'all_tests.png', dpi=300)
+    print(HOME+ '/passat/plot/volt_infer_' + DATE + 'all_tests.png')
 
 if __name__ == "__main__":
     PREDICTOR = 'HarvardPowerPredictor_1'
     CLASS = 'DESKTOP'
     OUTPUT_DIR = 'output_12_10'
-    DATE = '12-17'
+    DATE = '12-18'
     START_CYCLE = 1
-    END_CYCLE = 30000  
+    END_CYCLE = 13000  
 
-    TEST = 'different_cycle'
+    TEST = 'fft'
     # calc_plot_stats(PREDICTOR, CLASS, TEST, OUTPUT_DIR, DATE, START_CYCLE, END_CYCLE)
 
-    PLOT_START_CYCLE = 10000
-    PLOT_END_CYCLE = 15000
+    PLOT_START_CYCLE = 8000
+    PLOT_END_CYCLE = 13000
     plot(TEST, DATE, PLOT_START_CYCLE, PLOT_END_CYCLE)
-
+    
     # TEST_LIST =["same_cycle", "different_cycle", "basicmath", "bitcnts", 
     #     "qsort", "susan_smooth", "susan_edge", "susan_corner", "dijkstra", "rijndael_decrypt", "sha", "crc", "fft", "ffti", 
     #     "toast", "untoast"]
