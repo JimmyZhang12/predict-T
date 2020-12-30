@@ -18,7 +18,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-script_name="run_single.sh"
+script_name="run_single_desk.sh"
 
 print_info () {
   green="\e[32m"
@@ -96,18 +96,18 @@ print_info "TRAINING_ROOT $TRAINING_ROOT"
 # Simulation Params
 #---------------------------------------------------
 # Configure Simulation Parameters
-DURATION=("-1" "-1" "-1" "-1" "-1" "-1" "-1" "-1" "-1" "-1" "-1" "-1" "-1" "-1" "-1" "-1" "-1") # Data Points to Simulate
+#DURATION=("-1" "-1" "-1" "-1" "-1" "-1" "-1" "-1" "-1" "-1" "-1" "-1" "-1" "-1" "-1" "-1" "-1") # Data Points to Simulate
 #INSTRUCTIONS=("10000" "25000" "25000" "25000" "25000" "25000" "25000") # Instructions to Simulate
-INSTRUCTIONS=("30000" "30000" "30000" "30000" "30000" "30000" "30000" "30000" "30000" "30000" "30000" "30000" "30000" "30000" "30000" "30000" "30000")
+#INSTRUCTIONS=("30000" "30000" "30000" "30000" "30000" "30000" "30000" "30000" "30000" "30000" "30000" "30000" "30000" "30000" "30000" "30000" "30000")
 #INSTRUCTIONS=("2000")
 
 # When to start ROI, in Sim Ticks, -or- ROI by setting "-1"
-PROFILE_START=("-1" "-1" "-1" "-1" "-1" "-1" "-1" "-1" "-1" "-1" "-1" "-1" "-1" "-1" "-1" "-1" "-1")  
+#PROFILE_START=("-1" "-1" "-1" "-1" "-1" "-1" "-1" "-1" "-1" "-1" "-1" "-1" "-1" "-1" "-1" "-1" "-1")  
 
-#DURATION=("-1") # Data Points to Simulate
-#INSTRUCTIONS=("25000") # Instructions to Simulate
+DURATION=("-1") # Data Points to Simulate
+INSTRUCTIONS=("25000") # Instructions to Simulate
 ## When to start ROI, in Sim Ticks, -or- ROI by setting "-1"
-#PROFILE_START=("-1") 
+PROFILE_START=("0") 
 
 #---------------------------------------------------
 # Device Params:
@@ -264,88 +264,6 @@ PPRED_ACTIONS=(
 #---------------------------------------------------
 # CPU Params:
 #---------------------------------------------------
-#CLK=( "3GHz"     "3.5GHz"     "4GHz")
-#CLK_=("3000000000" "3500000000" "4000000000")
-# Superscalar Core Width
-#CORE_WIDTH=("6" "6" "8")
-# Fetch Params
-#FETCH_BUFFER_SIZE=("16" "32" "64")
-#FETCH_QUEUE_SIZE=("8" "16" "32")
-# LQ/SQ Size
-#LOAD_QUEUE_SIZE=("8" "16" "32")
-#STORE_QUEUE_SIZE=("8" "16" "32")
-# ReorderBuffer Params
-#NUM_ROB=("1" "1" "1")
-#NUM_ROB_ENTRIES=("48" "96" "192")
-# Regfile Params
-#INT_PHYS_REGS=("64" "128" "256")
-#3FP_PHYS_REGS=("64" "128" "256")
-#VEC_PHYS_REGS=("64" "128" "256")
-#VEC_PRED_PHYS_REGS=("8" "16" "32")
-# Instruction Queue Size
-#INSTR_QUEUE_SIZE=("16" "32" "64")
-# Functional Unit Counts
-#INT_ALU_COUNT=("6" "6" "8")
-#INT_MULT_DIV_COUNT=("4" "4" "6")
-#FP_ALU_COUNT=("2" "4" "6")
-#FP_MULT_DIV_COUNT=("1" "2" "4")
-#SIMD_UNIT_COUNT=("1" "2" "4")
-
-# Mobile
-#CLK=( "2.0GHz")
-#CLK_=("2000000000")
-## Superscalar Core Width
-#CORE_WIDTH=("2")
-## Fetch Params
-#FETCH_BUFFER_SIZE=("16")
-#FETCH_QUEUE_SIZE=("8")
-## LQ/SQ Size
-#LOAD_QUEUE_SIZE=("8")
-#STORE_QUEUE_SIZE=("8")
-## ReorderBuffer Params
-#NUM_ROB=("1")
-#NUM_ROB_ENTRIES=("48")
-## Regfile Params
-#INT_PHYS_REGS=("64")
-#FP_PHYS_REGS=("64")
-#VEC_PHYS_REGS=("64")
-#VEC_PRED_PHYS_REGS=("8")
-## Instruction Queue Size
-#INSTR_QUEUE_SIZE=("16")
-## Functional Unit Counts
-#INT_ALU_COUNT=("6")
-#INT_MULT_DIV_COUNT=("4")
-#FP_ALU_COUNT=("2")
-#FP_MULT_DIV_COUNT=("1")
-#SIMD_UNIT_COUNT=("1")
-
-# Laptop
-#CLK=( "3.0GHz")
-#CLK_=("3000000000")
-## Superscalar Core Width
-#CORE_WIDTH=("4")
-## Fetch Params
-#FETCH_BUFFER_SIZE=("32")
-#FETCH_QUEUE_SIZE=("16")
-## LQ/SQ Size
-#LOAD_QUEUE_SIZE=("16")
-#STORE_QUEUE_SIZE=("16")
-## ReorderBuffer Params
-#NUM_ROB=("1")
-#NUM_ROB_ENTRIES=("96")
-## Regfile Params
-#INT_PHYS_REGS=("128")
-#FP_PHYS_REGS=("128")
-#VEC_PHYS_REGS=("128")
-#VEC_PRED_PHYS_REGS=("16")
-## Instruction Queue Size
-#INSTR_QUEUE_SIZE=("32")
-## Functional Unit Counts
-#INT_ALU_COUNT=("6")
-#INT_MULT_DIV_COUNT=("4")
-#FP_ALU_COUNT=("4")
-#FP_MULT_DIV_COUNT=("2")
-#SIMD_UNIT_COUNT=("1")
 
 # Desktop
 CLK=( "4GHz")
@@ -382,9 +300,12 @@ SIMD_UNIT_COUNT=("4")
 #exe=("rijndael" "dijkstra" "toast" "fft")
 #opt=("${INPUT}/rijndael.asc ${OUTPUT}/rijndael.enc e 1234567890abcdeffedcba09876543211234567890abcdeffedcba0987654321" "${INPUT}/dijkstra.dat" "-fps -c ${INPUT}/toast.au" "4 4096")
 
-name=("basicmath" "bitcnts" "qsort" "susan_smooth" "susan_edge" "susan_corner" "dijkstra" "blowfish_encrypt" "blowfish_decrypt" "rijndael_encrypt" "rijndael_decrypt" "sha" "crc" "fft" "ffti" "toast" "untoast")
-exe=("basicmath" "bitcnts" "qsort" "susan" "susan" "susan" "dijkstra" "blowfish" "blowfish" "rijndael" "rijndael" "sha" "crc" "fft" "fft" "toast" "untoast")
-opt=("" "1000" "${INPUT}/qsort.dat" "${INPUT}/susan.pgm ${OUTPUT}/susan_s.pgm -s" "${INPUT}/susan.pgm ${OUTPUT}/susan_e.pgm -e" "${INPUT}/susan.pgm ${OUTPUT}/susan_c.pgm -c" "${INPUT}/dijkstra.dat" "e ${INPUT}/blowfish.asc ${OUTPUT}/blowfish.enc 1234567890abcdeffedcba0987654321" "d ${INPUT}/blowfish.enc ${OUTPUT}/blowfish.asc 1234567890abcdeffedcba0987654321" "${INPUT}/rijndael.asc ${OUTPUT}/rijndael.enc e 1234567890abcdeffedcba09876543211234567890abcdeffedcba0987654321" "${INPUT}/rijndael.enc ${OUTPUT}/rijndael.asc d 1234567890abcdeffedcba09876543211234567890abcdeffedcba0987654321" "${INPUT}/sha.asc" "${INPUT}/crc.pcm" "4 4096" "4 8192 -i" "-fps -c ${INPUT}/toast.au" "-fps -c ${INPUT}/untoast.au.run.gsm")
+#name=("basicmath" "bitcnts" "qsort" "susan_smooth" "susan_edge" "susan_corner" "dijkstra" "blowfish_encrypt" "blowfish_decrypt" "rijndael_encrypt" "rijndael_decrypt" "sha" "crc" "fft" "ffti" "toast" "untoast")
+#exe=("basicmath" "bitcnts" "qsort" "susan" "susan" "susan" "dijkstra" "blowfish" "blowfish" "rijndael" "rijndael" "sha" "crc" "fft" "fft" "toast" "untoast")
+#opt=("" "1000" "${INPUT}/qsort.dat" "${INPUT}/susan.pgm ${OUTPUT}/susan_s.pgm -s" "${INPUT}/susan.pgm ${OUTPUT}/susan_e.pgm -e" "${INPUT}/susan.pgm ${OUTPUT}/susan_c.pgm -c" "${INPUT}/dijkstra.dat" "e ${INPUT}/blowfish.asc ${OUTPUT}/blowfish.enc 1234567890abcdeffedcba0987654321" "d ${INPUT}/blowfish.enc ${OUTPUT}/blowfish.asc 1234567890abcdeffedcba0987654321" "${INPUT}/rijndael.asc ${OUTPUT}/rijndael.enc e 1234567890abcdeffedcba09876543211234567890abcdeffedcba0987654321" "${INPUT}/rijndael.enc ${OUTPUT}/rijndael.asc d 1234567890abcdeffedcba09876543211234567890abcdeffedcba0987654321" "${INPUT}/sha.asc" "${INPUT}/crc.pcm" "4 4096" "4 8192 -i" "-fps -c ${INPUT}/toast.au" "-fps -c ${INPUT}/untoast.au.run.gsm")
+#name=("susan_corner" "dijkstra" "blowfish_encrypt" "blowfish_decrypt" "rijndael_encrypt" "rijndael_decrypt" "sha" "crc" "fft" "ffti" "toast" "untoast")
+#exe=("susan" "dijkstra" "blowfish" "blowfish" "rijndael" "rijndael" "sha" "crc" "fft" "fft" "toast" "untoast")
+#opt=("${INPUT}/susan.pgm ${OUTPUT}/susan_c.pgm -c" "${INPUT}/dijkstra.dat" "e ${INPUT}/blowfish.asc ${OUTPUT}/blowfish.enc 1234567890abcdeffedcba0987654321" "d ${INPUT}/blowfish.enc ${OUTPUT}/blowfish.asc 1234567890abcdeffedcba0987654321" "${INPUT}/rijndael.asc ${OUTPUT}/rijndael.enc e 1234567890abcdeffedcba09876543211234567890abcdeffedcba0987654321" "${INPUT}/rijndael.enc ${OUTPUT}/rijndael.asc d 1234567890abcdeffedcba09876543211234567890abcdeffedcba0987654321" "${INPUT}/sha.asc" "${INPUT}/crc.pcm" "4 4096" "4 8192 -i" "-fps -c ${INPUT}/toast.au" "-fps -c ${INPUT}/untoast.au.run.gsm")
 
 #name=("qsort" "dijkstra" "fft" "ffti" "sha" "toast" "untoast")
 #exe=("qsort" "dijkstra" "fft" "fft" "sha" "toast" "untoast")
@@ -405,137 +326,70 @@ opt=("" "1000" "${INPUT}/qsort.dat" "${INPUT}/susan.pgm ${OUTPUT}/susan_s.pgm -s
 #exe=("blowfish" "rijndael")
 #opt=("${INPUT}/blowfish.asc ${OUTPUT}/blowfish.enc 1234567890abcdeffedcba0987654321" "${INPUT}/rijndael.asc ${OUTPUT}/rijndael.enc e 1234567890abcdeffedcba09876543211234567890abcdeffedcba0987654321")
 
-#name=("toast")
-#exe=("toast")
-#opt=("-fps -c ${INPUT}/toast.au")
+name=("blowfish_encrypt")
+exe=("blowfish")
+opt=("${INPUT}/blowfish.asc ${OUTPUT}/blowfish.enc 1234567890abcdeffedcba0987654321")
 
-#name=("crc") 
-#exe=("crc")
-#opt=("${INPUT}/crc.pcm")
-
-#name=("different_cycle" "same_cycle") 
-#exe=("different_cycle" "same_cycle")
-#opt=("" "")
-
-#name=("same_cycle") 
-#exe=("same_cycle")
-#opt=("")
-
-
-#name=("sha" "untoast")
-#exe=("sha" "untoast")
-#opt=("${INPUT}/sha.asc" "-fps -c ${INPUT}/untoast.au.run.gsm")
-#name=("blowfish_encrypt")
-#exe=("blowfish")
-#opt=("e ${INPUT}/blowfish.asc ${OUTPUT}/blowfish.enc 1234567890abcdeffedcba0987654321")
-#name=("fft")
-#exe=("fft")
-#opt=("4 4096")
-#name=("rijndael_encrypt")
-#exe=("rijndael")
-#opt=("${INPUT}/rijndael.asc ${OUTPUT}/rijndael.enc e 1234567890abcdeffedcba09876543211234567890abcdeffedcba0987654321")
-#name=("toast"i)
-#exe=("toast")
-#opt=("-fps -c ${INPUT}/toast.au")
-#name=("dijkstra")
-#exe=("dijkstra")
-#opt=("${INPUT}/dijkstra.dat")
+BENCHMARK_CODE="none"
+BZIP2_CODE=401.bzip2
+BENCHMARK_CODE=$BZIP2_CODE
+RUN_DIR=$HOME/passat/predict-T/CPU2006/$BENCHMARK_CODE/run/run_base_ref_amd64-m64-gcc43-nn.0000  # Run directory for the selected SPEC benchmark
+echo "Changing to SPEC benchmark runtime directory: $RUN_DIR"
+cd $RUN_DIR
 
 #--------------------------------------------------------------------
 # Run
 #--------------------------------------------------------------------
 for j in ${!name[@]}; do 
-  for i in ${!DEVICE_TYPE[@]}; do
-    for pred in ${!PREDICTOR[@]}; do
-      sleep 10
-      TN="${name[$j]}_${INSTRUCTIONS[$j]}_${CPU_CYCLES[0]}_${DEVICE_TYPE[$i]}_${PDN[$i]}_${PREDICTOR[$pred]}_${PPRED_ACTIONS[$pred]}"
-#echo "se_classic_mc_ncv \
-#$TN ${DURATION[$i]} \
-#${INSTRUCTIONS[$i]} \
-#${PROFILE_START[$i]} \
-#${exe[$j]} \
-#"${opt[$j]}" \
-#${CLK[$i]} \
-#${PDN[$i]} \
-#${CLK_[$i]} \
-#$VOLTAGE \
-#${CPU_CYCLES[0]} \
-#${PREDICTOR[$pred]} \
-#${NUM_CORES[$i]} \
-#${L1I[$i]} \
-#${L1D[$i]} \
-#${L2[$i]} \
-#${L3[$i]} \
-#${CORE_WIDTH[$i]} \
-#${FETCH_BUFFER_SIZE[$i]} \
-#${FETCH_QUEUE_SIZE[$i]} \
-#${LOAD_QUEUE_SIZE[$i]} \
-#${STORE_QUEUE_SIZE[$i]} \
-#${NUM_ROB[$i]} \
-#${NUM_ROB_ENTRIES[$i]} \
-#${INT_PHYS_REGS[$i]} \
-#${FP_PHYS_REGS[$i]} \
-#${VEC_PHYS_REGS[$i]} \
-#${VEC_PRED_PHYS_REGS[$i]} \
-#${INSTR_QUEUE_SIZE[$i]} \
-#${INT_ALU_COUNT[$i]} \
-#${INT_MULT_DIV_COUNT[$i]} \
-#${FP_ALU_COUNT[$i]} \
-#${FP_MULT_DIV_COUNT[$i]} \
-#${SIMD_UNIT_COUNT[$i]} \
-#${McPAT_DEVICE_TYPE[$i]} \
-#${McPAT_SCALE_FACTOR[$i]} \
-#${PPRED_TRAINED_MODEL[$pred]} \
-#${PPRED_EVENTS[$pred]} \
-#${PPRED_ACTIONS[$pred]} \
-#${VOLTAGE_EMERGENCY[$i]} \
-#${VOLTAGE_THRESHOLD[$i]}"
-      se_classic_mc_ncv \
-          $TN ${DURATION[$j]} \
-          ${INSTRUCTIONS[$j]} \
-          ${PROFILE_START[$j]} \
-          ${exe[$j]} \
-          "${opt[$j]}" \
-          ${CLK[$i]} \
-          ${PDN[$i]} \
-          ${CLK_[$i]} \
-          ${VOLTAGE[$i]} \
-          ${CPU_CYCLES[0]} \
-          ${PREDICTOR[$pred]} \
-          ${NUM_CORES[$i]} \
-          ${L1I[$i]} \
-          ${L1D[$i]} \
-          ${L2[$i]} \
-          ${L3[$i]} \
-          ${CORE_WIDTH[$i]} \
-          ${FETCH_BUFFER_SIZE[$i]} \
-          ${FETCH_QUEUE_SIZE[$i]} \
-          ${LOAD_QUEUE_SIZE[$i]} \
-          ${STORE_QUEUE_SIZE[$i]} \
-          ${NUM_ROB[$i]} \
-          ${NUM_ROB_ENTRIES[$i]} \
-          ${INT_PHYS_REGS[$i]} \
-          ${FP_PHYS_REGS[$i]} \
-          ${VEC_PHYS_REGS[$i]} \
-          ${VEC_PRED_PHYS_REGS[$i]} \
-          ${INSTR_QUEUE_SIZE[$i]} \
-          ${INT_ALU_COUNT[$i]} \
-          ${INT_MULT_DIV_COUNT[$i]} \
-          ${FP_ALU_COUNT[$i]} \
-          ${FP_MULT_DIV_COUNT[$i]} \
-          ${SIMD_UNIT_COUNT[$i]} \
-          ${McPAT_DEVICE_TYPE[$i]} \
-          ${McPAT_SCALE_FACTOR[$i]} \
-          ${PPRED_TRAINED_MODEL[$pred]} \
-          ${PPRED_EVENTS[$pred]} \
-          ${PPRED_ACTIONS[$pred]} \
-          ${VOLTAGE_EMERGENCY[$i]} \
-          ${VOLTAGE_THRESHOLD[$i]}
-      while [ `jobs | wc -l` -ge 4 ]; do
-        sleep 1
-      done
-    done
+  sleep 10
+  TN="${name[$j]}_${INSTRUCTIONS[$j]}_${CPU_CYCLES[0]}_${DEVICE_TYPE[$i]}_${PDN[$i]}_${PREDICTOR[$pred]}_${PPRED_ACTIONS[$pred]}"
+
+  se_classic_mc_ncv \
+      $TN \
+      ${DURATION[$j]} \
+      ${INSTRUCTIONS[$j]} \
+      ${PROFILE_START[$j]} \
+      ${exe[$j]} \
+      "${opt[$j]}" \
+      ${CLK[$i]} \
+      ${PDN[$i]} \
+      ${CLK_[$i]} \
+      ${VOLTAGE[$i]} \
+      ${CPU_CYCLES[0]} \
+      ${PREDICTOR[$pred]} \
+      ${NUM_CORES[$i]} \
+      ${L1I[$i]} \
+      ${L1D[$i]} \
+      ${L2[$i]} \
+      ${L3[$i]} \
+      ${CORE_WIDTH[$i]} \
+      ${FETCH_BUFFER_SIZE[$i]} \
+      ${FETCH_QUEUE_SIZE[$i]} \
+      ${LOAD_QUEUE_SIZE[$i]} \
+      ${STORE_QUEUE_SIZE[$i]} \
+      ${NUM_ROB[$i]} \
+      ${NUM_ROB_ENTRIES[$i]} \
+      ${INT_PHYS_REGS[$i]} \
+      ${FP_PHYS_REGS[$i]} \
+      ${VEC_PHYS_REGS[$i]} \
+      ${VEC_PRED_PHYS_REGS[$i]} \
+      ${INSTR_QUEUE_SIZE[$i]} \
+      ${INT_ALU_COUNT[$i]} \
+      ${INT_MULT_DIV_COUNT[$i]} \
+      ${FP_ALU_COUNT[$i]} \
+      ${FP_MULT_DIV_COUNT[$i]} \
+      ${SIMD_UNIT_COUNT[$i]} \
+      ${McPAT_DEVICE_TYPE[$i]} \
+      ${McPAT_SCALE_FACTOR[$i]} \
+      ${PPRED_TRAINED_MODEL[$pred]} \
+      ${PPRED_EVENTS[$pred]} \
+      ${PPRED_ACTIONS[$pred]} \
+      ${VOLTAGE_EMERGENCY[$i]} \
+      ${VOLTAGE_THRESHOLD[$i]}
+  while [ `jobs | wc -l` -ge 4 ]; do
+    sleep 1
   done
+
 done
 
 while [ `jobs | wc -l` -ne 1 ]; do
