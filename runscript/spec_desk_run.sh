@@ -18,7 +18,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-script_name="desk_run.sh"
+script_name="spec_desk_run.sh"
 
 print_info () {
   green="\e[32m"
@@ -81,7 +81,7 @@ fi
 #--------------------------------------------------------------------
 # Configure Test Specific Paths
 #--------------------------------------------------------------------
-TEST="$PREDICT_T_ROOT/testbin"
+TEST="$HOME/passat/spec2006/benchspec/CPU2006/z"
 INPUT="$TEST/input"
 OUTPUT="$TEST/output"
 print_info "TEST $TEST"
@@ -90,7 +90,6 @@ print_info "OUTPUT $OUTPUT"
 
 TRAINING_ROOT="$OUTPUT_ROOT/training_data"
 print_info "TRAINING_ROOT $TRAINING_ROOT"
-
 
 #---------------------------------------------------
 # Simulation Params
@@ -264,164 +263,52 @@ SIMD_UNIT_COUNT=("4")
 #---------------------------------------------------
 # Test Executables:
 #---------------------------------------------------
+$PREFIX = 
+$TEST = "$HOME/passat/spec2006/benchspec/CPU2006/"
+$DIR = "${TEST}${NAME}run/run_base_ref_amd64-m64-gcc43-nn.0000"
+$EXE = 
 
-
-# name=(
-#   "basicmath" \
-#   "bitcnts" \
-#   "qsort" \
-#   "dijkstra" \
-#   "blowfish_encrypt" \
-#   "blowfish_decrypt" \
-#   "rijndael_encrypt" \
-#   "rijndael_decrypt" \
-#   "sha" \
-#   "crc" \
-#   "fft" \
-#   "ffti" \
-#   "toast" \
-#   "untoast" \
-#   "susan_smooth" \
-#   "susan_edge" \
-#   "susan_corner" \
-# )
-# exe=(
-#   "basicmath" \
-#   "bitcnts" \
-#   "qsort" \
-#   "dijkstra" \ 
-#   "blowfish" \
-#   "blowfish" \
-#   "rijndael" \
-#   "rijndael" \
-#   "sha" \
-#   "crc" \
-#   "fft" \
-#   "fft" \
-#   "toast" \
-#   "untoast" \
-#   "susan" \
-#   "susan" \
-#   "susan" \
-# )
-# opt=(
-#   "" \
-#   "1000" \
-#   "${INPUT}/qsort.dat" \
-#   "${INPUT}/dijkstra.dat" \
-#   "e ${INPUT}/blowfish.asc ${OUTPUT}/blowfish.enc 1234567890abcdeffedcba0987654321" \
-#   "d ${INPUT}/blowfish.enc ${OUTPUT}/blowfish.asc 1234567890abcdeffedcba0987654321" \
-#   "${INPUT}/rijndael.asc ${OUTPUT}/rijndael.enc e 1234567890abcdeffedcba09876543211234567890abcdeffedcba0987654321" \
-#   "${INPUT}/rijndael.enc ${OUTPUT}/rijndael.asc d 1234567890abcdeffedcba09876543211234567890abcdeffedcba0987654321" \
-#   "${INPUT}/sha.asc" "${INPUT}/crc.pcm" \
-#   "4 4096" \
-#   "4 8192 -i" \
-#   "-fps -c ${INPUT}/toast.au" \
-#   "-fps -c ${INPUT}/untoast.au.run.gsm" \
-#   "${INPUT}/susan.pgm ${OUTPUT}/susan_s.pgm -s" \
-#   "${INPUT}/susan.pgm ${OUTPUT}/susan_e.pgm -e" \
-#   "${INPUT}/susan.pgm ${OUTPUT}/susan_c.pgm -c" \
-# )
-
-
-# name=(
-#   "blowfish_encrypt" \
-#   "blowfish_decrypt" \
-#   "rijndael_encrypt" \
-#   "rijndael_decrypt" \
-#   "sha" \
-#   "crc" \
-#   "fft" \
-#   "ffti" \
-#   "toast" \
-#   "untoast" \
-#   "susan_smooth" \
-#   "susan_edge" \
-#   "susan_corner" \
-# )
-# exe=(
-#   "blowfish" \
-#   "blowfish" \
-#   "rijndael" \
-#   "rijndael" \
-#   "sha" \
-#   "crc" \
-#   "fft" \
-#   "fft" \
-#   "toast" \
-#   "untoast" \
-#   "susan" \
-#   "susan" \
-#   "susan" \
-# )
-# opt=(
-#   "e ${INPUT}/blowfish.asc ${OUTPUT}/blowfish.enc 1234567890abcdeffedcba0987654321" \
-#   "d ${INPUT}/blowfish.enc ${OUTPUT}/blowfish.asc 1234567890abcdeffedcba0987654321" \
-#   "${INPUT}/rijndael.asc ${OUTPUT}/rijndael.enc e 1234567890abcdeffedcba09876543211234567890abcdeffedcba0987654321" \
-#   "${INPUT}/rijndael.enc ${OUTPUT}/rijndael.asc d 1234567890abcdeffedcba09876543211234567890abcdeffedcba0987654321" \
-#   "${INPUT}/sha.asc" "${INPUT}/crc.pcm" \
-#   "4 4096" \
-#   "4 8192 -i" \
-#   "-fps -c ${INPUT}/toast.au" \
-#   "-fps -c ${INPUT}/untoast.au.run.gsm" \
-#   "${INPUT}/susan.pgm ${OUTPUT}/susan_s.pgm -s" \
-#   "${INPUT}/susan.pgm ${OUTPUT}/susan_e.pgm -e" \
-#   "${INPUT}/susan.pgm ${OUTPUT}/susan_c.pgm -c" \
-# )
-
-
-#name=( "blowfish_encrypt" "rijndael_decrypt" "sha" "crc" "toast" "untoast")
-#exe=("blowfish" "rijndael" "sha" "crc" "toast" "untoast")
-#opt=("e ${INPUT}/blowfish.asc ${OUTPUT}/blowfish.enc 1234567890abcdeffedcba0987654321" "${INPUT}/rijndael.asc ${OUTPUT}/rijndael.enc e 1234567890abcdeffedcba09876543211234567890abcdeffedcba0987654321" "${INPUT}/sha.asc" "${INPUT}/crc.pcm" "-fps -c ${INPUT}/toast.au" "-fps -c ${INPUT}/untoast.au.run.gsm")
-
-#name=("susan_corner" "blowfish_encrypt" "rijndael_decrypt")
-#exe=("susan" "blowfish" "rijndael")
-#opt=("${INPUT}/susan.pgm ${OUTPUT}/susan_c.pgm -c" "e ${INPUT}/blowfish.asc ${OUTPUT}/blowfish.enc 1234567890abcdeffedcba0987654321" "${INPUT}/rijndael.asc ${OUTPUT}/rijndael.enc e 1234567890abcdeffedcba09876543211234567890abcdeffedcba0987654321")
-
-#name=("blowfish_encrypt" "rijndael_decrypt")
-#exe=("blowfish" "rijndael")
-#opt=("${INPUT}/blowfish.asc ${OUTPUT}/blowfish.enc 1234567890abcdeffedcba0987654321" "${INPUT}/rijndael.asc ${OUTPUT}/rijndael.enc e 1234567890abcdeffedcba09876543211234567890abcdeffedcba0987654321")
-
-#name=("toast")
-#exe=("toast")
-#opt=("-fps -c ${INPUT}/toast.au")
-
-name=("crc") 
-exe=("crc")
-opt=("${INPUT}/crc.pcm")
-
-#name=("different_cycle" "same_cycle") 
-#exe=("different_cycle" "same_cycle")
-#opt=("" "")
-
-#name=("same_cycle") 
-#exe=("same_cycle")
-#opt=("")
-
-
-#name=("sha" "untoast")
-#exe=("sha" "untoast")
-#opt=("${INPUT}/sha.asc" "-fps -c ${INPUT}/untoast.au.run.gsm")
-#name=("blowfish_encrypt")
-#exe=("blowfish")
-#opt=("e ${INPUT}/blowfish.asc ${OUTPUT}/blowfish.enc 1234567890abcdeffedcba0987654321")
-#name=("fft")
-#exe=("fft")
-#opt=("4 4096")
-#name=("rijndael_encrypt")
-#exe=("rijndael")
-#opt=("${INPUT}/rijndael.asc ${OUTPUT}/rijndael.enc e 1234567890abcdeffedcba09876543211234567890abcdeffedcba0987654321")
-#name=("toast"i)
-#exe=("toast")
-#opt=("-fps -c ${INPUT}/toast.au")
-#name=("dijkstra")
-#exe=("dijkstra")
-#opt=("${INPUT}/dijkstra.dat")
-
-# TEST="$HOME/passat/spec2006/benchspec/CPU2006/401.bzip2/run/run_base_ref_amd64-m64-gcc43-nn.0000"
+# DIR="$HOME/passat/spec2006/benchspec/CPU2006/401.bzip2/run/run_base_ref_amd64-m64-gcc43-nn.0000"
 # name=("bzip") 
 # exe=("bzip2_base.amd64-m64-gcc43-nn")
 # opt=("$HOME/passat/spec2006/benchspec/CPU2006/401.bzip2/run/run_base_ref_amd64-m64-gcc43-nn.0000/input.program 1")
+
+name=(
+  "401.bzip2" \
+  "403.gcc" \
+  "410.bwaves" \
+  "416.gamess" \
+  "429.mcf" \
+  "433.milc" \
+  "434.zeusmp" \
+  "435.gromacs" \
+  "436.cactusADM" \
+  "437.leslie3d" \
+  "444.namd" \
+  "445.gobmk" \
+  "447.dealII" \
+  "450.soplex" \
+  "453.povray" \
+  "454.calculix" \
+  "456.hmmer" \
+  "458.sjeng" \
+  "459.GemsFDTD" \
+  "462.libquantum" \
+  "464.h264ref" \
+  "470.lbm" \
+  "471.omnetpp" \
+  "473.astar" \
+  "481.wrf" \
+  "482.sphinx" \
+  "998.xalancbmk" \
+  "999.specrand" \
+) 
+#400.perlbench
+opt = (
+  "-I ./lib attrs.pl"
+)
+
+
 
 
 #--------------------------------------------------------------------
