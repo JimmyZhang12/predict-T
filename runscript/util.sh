@@ -67,10 +67,8 @@ se_classic_mc_ncv() {
   PPVE=${40}   # Voltage Emergency Level
   PPVTH=${41}  # Voltage Threshold Level; applies to sensor predictor
   
-#$GEM5_ROOT/build/X86/gem5.fast \
-#$GEM5_ROOT/build/X86/gem5.opt \
   echo "
-$GEM5_ROOT/build/X86/gem5.fast \
+$GEM5_ROOT/build/X86/gem5.opt \
 --outdir=${OUTPUT_ROOT}/gem5_out/$TN \
 --mcpat_enable \
 --mcpat_path=${MCPAT_ROOT} \
@@ -132,7 +130,8 @@ $GEM5_ROOT/build/X86/gem5.fast \
   #--debug-flags=StatEvent \
     #--ncverilog_feedback \
   #gdb --args $GEM5_ROOT/build/X86/gem5.debug \
-  time $GEM5_ROOT/build/X86/gem5.fast \
+  time $GEM5_ROOT/build/X86/gem5.opt \
+    --write_stripped_stats \
     --outdir=${OUTPUT_ROOT}/gem5_out/$TN \
     --mcpat_enable \
     --mcpat_path=${MCPAT_ROOT} \
@@ -190,7 +189,7 @@ $GEM5_ROOT/build/X86/gem5.fast \
     --l3_size=${L3_} \
     --caches \
     --sys-clock=${CLK} \
-    --mem-size=8GB > ${OUTPUT_ROOT}/text_out/$TN.out &
+    --mem-size=8GB #> ${OUTPUT_ROOT}/text_out/$TN.out &
 }
 
 #------------------------------------------------------------------------------

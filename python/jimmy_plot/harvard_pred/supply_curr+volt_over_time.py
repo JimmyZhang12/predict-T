@@ -12,13 +12,14 @@ import util
 HOME = os.environ['HOME']
 PREDICTOR = 'HarvardPowerPredictor_1'
 CLASS = 'DESKTOP'
-TEST = 'fft'
-path = HOME + '/output_12_10/gem5_out/' + CLASS + '_' + PREDICTOR + '/' + TEST + '.txt'
+TEST = 'crc'
+path = HOME + '/output_1_4/gem5_out/' + CLASS + '_' + PREDICTOR + '/' + TEST + '.txt'
+print(path)
 stats = open(path, 'r')
 #PARAMETERS
 
-start_cycle = 10000
-end_cycle = 15000
+start_cycle = 0
+end_cycle = 4000
 
 fig = plt.figure(figsize=(60,5))
 ax = plt.axes()
@@ -38,10 +39,10 @@ while True:
     EOF = cycle_dump.parseCycle()
     if EOF:
         break
-    if cycle_dump.cycle % 1000 < 3:
-        print (cycle_dump.cycle)  
+    # if cycle_dump.cycle % 1000 < 3:
+    #     print (cycle_dump.cycle)  
     
-    for _ in range(2): #TODO dont hardcode this to 2
+    for _ in range(2): #TODO: dont hardcode this to 2
         voltage.append(None)
         current.append(None)
     #implicit assumption stat dumps are every 2 cycles
@@ -50,8 +51,8 @@ while True:
     voltage[-2] = (voltage[-1]+voltage[-3])/2
     current[-2] = (current[-1]+current[-3])/2
  
-    if cycle_dump.cycle > end_cycle:
-        break
+    # if cycle_dump.cycle > end_cycle:
+    #     break
 
 
 xvar = np.linspace(0,len(voltage),len(voltage))
@@ -64,5 +65,5 @@ ax2.tick_params(axis='y', labelcolor='tab:blue')
 ax2.set_ylim([min(i for i in current if i > 0.8), max(current)])
 
 plt.xlim(left = start_cycle, right = min(end_cycle,len(xvar)) )
-plt.savefig(HOME+'/passat/plot/12-18_Vs&Is_vs_time_' + CLASS + '_' + TEST +'.png', dpi=300)
+plt.savefig(HOME+'/plot/1-4-2_Vs&Is_vs_time_' + CLASS + '_' + TEST +'.png', dpi=300)
 
