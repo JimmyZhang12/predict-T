@@ -18,7 +18,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-script_name="spec_desk_run.sh"
+script_name="desk_run.sh"
 
 print_info () {
   green="\e[32m"
@@ -81,7 +81,7 @@ fi
 #--------------------------------------------------------------------
 # Configure Test Specific Paths
 #--------------------------------------------------------------------
-TEST="$HOME/passat/spec2006/benchspec/CPU2006/z"
+TEST="$PREDICT_T_ROOT/testbin"
 INPUT="$TEST/input"
 OUTPUT="$TEST/output"
 print_info "TEST $TEST"
@@ -91,19 +91,20 @@ print_info "OUTPUT $OUTPUT"
 TRAINING_ROOT="$OUTPUT_ROOT/training_data"
 print_info "TRAINING_ROOT $TRAINING_ROOT"
 
+
 #---------------------------------------------------
 # Simulation Params
 #---------------------------------------------------
 # Configure Simulation Parameters
-DURATION=("-1" "-1" "-1" "-1" "-1" "-1" "-1" "-1" "-1" "-1" "-1" "-1" "-1" "-1" "-1" "-1" "-1") # Data Points to Simulate
+DURATION=("-1") # Data Points to Simulate
 #INSTRUCTIONS=("10000" "25000" "25000" "25000" "25000" "25000" "25000") # Instructions to Simulate
-INSTRUCTIONS=("40000" "40000" "40000" "40000" "40000" "40000" "40000" "40000" "40000" "40000" "40000" "40000" "40000" "40000" "40000" "40000" "40000" "40000")
+INSTRUCTIONS=("40000")
 
 #INSTRUCTIONS=("2000")
 
 # When to start ROI, in Sim Ticks, -or- ROI by setting "-1"
 #default 10^12 sim ticks per second (250 ticks per cycle at 4Ghz)
-PROFILE_START=("-1" "-1" "-1" "-1" "-1" "-1" "-1" "-1" "-1" "-1" "-1" "-1" "-1" "-1" "-1" "-1" "-1")  
+PROFILE_START=("2500000000")  
 
 #DURATION=("-1") # Data Points to Simulate
 #INSTRUCTIONS=("25000") # Instructions to Simulate
@@ -263,51 +264,46 @@ SIMD_UNIT_COUNT=("4")
 #---------------------------------------------------
 # Test Executables:
 #---------------------------------------------------
-$PREFIX = 
-$TEST = "$HOME/passat/spec2006/benchspec/CPU2006/"
-$DIR = "${TEST}${NAME}run/run_base_ref_amd64-m64-gcc43-nn.0000"
-$EXE = 
-
-# DIR="$HOME/passat/spec2006/benchspec/CPU2006/401.bzip2/run/run_base_ref_amd64-m64-gcc43-nn.0000"
-# name=("bzip") 
-# exe=("bzip2_base.amd64-m64-gcc43-nn")
-# opt=("$HOME/passat/spec2006/benchspec/CPU2006/401.bzip2/run/run_base_ref_amd64-m64-gcc43-nn.0000/input.program 1")
 
 name=(
-  "401.bzip2" \
-  "403.gcc" \
-  "410.bwaves" \
-  "416.gamess" \
-  "429.mcf" \
-  "433.milc" \
-  "434.zeusmp" \
-  "435.gromacs" \
-  "436.cactusADM" \
-  "437.leslie3d" \
-  "444.namd" \
-  "445.gobmk" \
-  "447.dealII" \
-  "450.soplex" \
-  "453.povray" \
-  "454.calculix" \
-  "456.hmmer" \
-  "458.sjeng" \
-  "459.GemsFDTD" \
-  "462.libquantum" \
-  "464.h264ref" \
-  "470.lbm" \
-  "471.omnetpp" \
-  "473.astar" \
-  "481.wrf" \
-  "482.sphinx" \
-  "998.xalancbmk" \
-  "999.specrand" \
-) 
-#400.perlbench
-opt = (
-  "-I ./lib attrs.pl"
+	"481.wrf" \
+	"482.sphinx3" \
+	"983.xalancbmk" \
+	"998.specrand" \
+	"999.specrand" \
 )
 
+dir=(
+	"$HOME/passat/spec2006/benchspec/CPU2006/481.wrf/run/run_base_ref_amd64-m64-gcc43-nn.0000/" \
+	"$HOME/passat/spec2006/benchspec/CPU2006/482.sphinx3/run/run_base_ref_amd64-m64-gcc43-nn.0000/" \
+	"$HOME/passat/spec2006/benchspec/CPU2006/983.xalancbmk/run/run_base_ref_amd64-m64-gcc43-nn.0000/" \
+	"$HOME/passat/spec2006/benchspec/CPU2006/998.specrand/run/run_base_ref_amd64-m64-gcc43-nn.0000/" \
+	"$HOME/passat/spec2006/benchspec/CPU2006/999.specrand/run/run_base_ref_amd64-m64-gcc43-nn.0000/" \
+)
+
+cmd=(
+	"wrf_base.amd64-m64-gcc43-nn" \
+	"sphinx_livepretend_base.amd64-m64-gcc43-nn" \
+	"xalancbmk_base.amd64-m64-gcc43-nn" \
+	"specrand_base.amd64-m64-gcc43-nn" \
+	"specrand_base.amd64-m64-gcc43-nn" \
+)
+
+opt=(
+	"" \
+	"ctlfile . args.an4 " \
+	"-v test.xml xalanc.xsl " \
+	"-v test.xml xalanc.xsl " \
+	"-v test.xml xalanc.xsl " \
+)
+
+stdin=(
+	"" \
+	"" \
+	"" \
+	"" \
+	"" \
+)
 
 
 
@@ -316,14 +312,17 @@ opt = (
 #--------------------------------------------------------------------
 for j in ${!name[@]}; do 
   for pred in ${!PREDICTOR[@]}; do
+  	cd ${dir[$j]}
+
     sleep 10
     TN="${name[$j]}_${INSTRUCTIONS[$j]}_${CPU_CYCLES[0]}_${DEVICE_TYPE[$i]}_${PDN[$i]}_${PREDICTOR[$pred]}_${PPRED_ACTIONS[$pred]}"
 
-    se_classic_mc_ncv \
-        $TN ${DURATION[$j]} \
-        ${INSTRUCTIONS[$j]} \
-        ${PROFILE_START[$j]} \
-        ${exe[$j]} \
+    se_classic_mc_ncv_spec \
+        $TN \
+        ${DURATION} \
+        ${INSTRUCTIONS} \
+        ${PROFILE_START} \
+        ${cmd[$j]} \
         "${opt[$j]}" \
         ${CLK[$i]} \
         ${PDN[$i]} \
@@ -359,13 +358,16 @@ for j in ${!name[@]}; do
         ${PPRED_EVENTS[$pred]} \
         ${PPRED_ACTIONS[$pred]} \
         ${VOLTAGE_EMERGENCY[$i]} \
-        ${VOLTAGE_THRESHOLD[$i]}
+        ${VOLTAGE_THRESHOLD[$i]} \
+        ${stdin[$j]} \
+        ${stdout[$j]} \
 
-    while [ `jobs | wc -l` -ge 9 ]; do
+
+    while [ `jobs | wc -l` -ge 12 ]; do
       sleep 1
     done
   done
 done
-while [ `jobs | wc -l` -ne  1]; do
+while [ `jobs | wc -l` -ne  1 ]; do
   sleep 1
 done

@@ -5,7 +5,7 @@ matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import numpy as np
 from enum import Enum
-from collections import deque
+from collections import deque, defaultdict
 
 
 event_map = {
@@ -32,15 +32,49 @@ event_map = {
     20:'EMPTY_EVENT',
     21:'DUMMY_EVENT2'
     }
-
 event_map_filter = {
+    1:'BRANCH_T',
+    2:'BRANCH_NT',
     3:'BRANCH_MP',
-    5:'TLB_STALL',
-    6:'ICACHE_STALL',
-    7:'COMMIT_BLOCK',
-    16:'INSTR_ISSUE',
     19:'MEM_MP',
-    }
+
+}
+event_map_pred = {
+    0:'NO_EVENT',
+    1:'BRANCH_T',
+    2:'BRANCH_NT',
+    3:'BRANCH_MP',
+    19:'MEM_MP',
+    20:'EMPTY_EVENT',
+
+    22:'DCACHE_MISS',
+    23:'ICACHE_MISS',
+    24:'L2_MISS',
+    25:'TLB_MISS',
+}
+
+class PDN:
+    def __init__(self, L, C, R, VDC, CLK):
+        self.L = L
+        self.C = C
+        self.R = R
+        self.VDC = VDC
+        self.CLK = CLK
+        self.vout_2_cycle_ago = VDC
+        self.vout_1_cycle_ago = VDC
+    def get_curr(self, current):
+        ts = 1/self.CLK
+        LmulC = self.L*self.C
+        LdivR = self.L/self.R
+        vout = self.VDC*ts**2/LmulC \
+            + self.vout_1_cycle_ago*(2 - ts/LdivR) \
+            + self.vout_2_cycle_ago*(ts/(LdivR) \
+            - 1 - ts**2/(LmulC)) \
+            - current*self.R*ts**2/(LmulC)
+            
+        self.vout_2_cycle_ago = self.vout_1_cycle_ago
+        self.vout_1_cycle_ago = vout
+        return vout
 
 
 class Cycle_Dump:
@@ -48,12 +82,9 @@ class Cycle_Dump:
         self.ve_count = 0
         self.action_count = 0
         self.stats = stats
-        #self.stats.readline()
         self.stats.readline()
-        keys = range(len(event_map.keys()))
-        self.event_count = {k: 0 for k in keys}
-        self.EOF = False
-    def reset(self):
+        self.stats.readline()
+        
         self.new_events_var = [] #list of new events the current cycle
         self.new_events_prev_var = [] #list of new events the previous cycle of the cycle dump
         self.table_index_count = 0
@@ -63,23 +94,48 @@ class Cycle_Dump:
         self.supply_volt_prev = None
         self.anchorPC_var = None
         self.numCycles_var = None
-        
+
+        self.branchMispredicts_count = 0
+        self.memOrderViolationEvents_count = 0
+        self.DcacheMisses_count = 0
+        self.IcacheMisses_count = 0
+        self.TLBcacheMisses_count = 0
+        self.L2cacheMisses_count = 0
+
+        keys = event_map_pred.keys()
+        self.event_count = {k: 0 for k in keys}
+        self.EOF = False
+
+
+    def reset(self):
+        for e in self.new_events_var:
+            self.event_count[e] += 1
+
+        self.new_events_var = [] #list of new events the current cycle
+        self.new_events_prev_var = [] #list of new events the previous cycle of the cycle dump
+        self.table_index_count = 0
+        self.cycle = None
+        self.supply_curr = None
+        self.supply_volt = None
+        self.supply_volt_prev = None
+        self.anchorPC_var = None
+        self.numCycles_var = None
         return
+
     def new_events(self,line):
         linespl = line.split()
         event = int(linespl[1])
-        if event != 20: #TODO make this a enum
-            self.event_count[event] += 1
+        if event in event_map_filter.keys() and (event not in self.new_events_var):
             self.new_events_var.append(event)
 
         return
-    def new_events_prev(self,line):
-        linespl = line.split()
-        event = int(linespl[1])
-        if event != 20:
-            self.event_count[event] += 1
-            self.new_events_prev_var.append(event) 
-        return
+    # # def new_events_prev(self,line):
+    # #     linespl = line.split()
+    # #     event = int(linespl[1])
+    # #     if event != 20:
+    # #         self.event_count[event] += 1
+    # #         self.new_events_prev_var.append(event) 
+    #     return
     def counter(self, line):
         linespl = line.split()
         self.cycle = int(linespl[1])
@@ -93,10 +149,7 @@ class Cycle_Dump:
         linespl = line.split()
         self.supply_volt = float(linespl[1])
         return
-    def supply_voltage_prev(self, line):
-        linespl = line.split()
-        self.supply_volt_prev = float(linespl[1])
-        return
+
     def anchorPC(self, line):
         linespl = line.split()
         self.anchorPC_var = hex(int(linespl[1]))
@@ -106,19 +159,60 @@ class Cycle_Dump:
         self.numCycles_var = int(linespl[1])
         return
 
+    # def branchMispredicts(self,line):
+    #     linespl = line.split()
+    #     val = int(linespl[1])
+    #     if val > self.branchMispredicts_count:
+    #         self.branchMispredicts_count = val
+    #         self.new_events_var.append(3) #normally enum but its 2am
+    
+    # def memOrderViolationEvents(self,line):
+    #     linespl = line.split()
+    #     val = int(linespl[1])
+    #     if val > self.memOrderViolationEvents_count:
+    #         self.memOrderViolationEvents_count = val
+    #         self.new_events_var.append(8) #normally enum but its 2am
+
+    def overall_misses(self,line):
+        linespl = line.split()
+        val = int(linespl[1])
+        cache = line.split()[0].split('.')[-2]
+
+        if (cache == 'l2'):
+            if val > self.L2cacheMisses_count:
+                self.L2cacheMisses_count = val
+                self.new_events_var.append(24) #normally enum but its 2am
+        if (cache == 'dcache'):
+            if val > self.DcacheMisses_count:
+                self.DcacheMisses_count = val
+                self.new_events_var.append(22) #normally enum but its 2am
+        if (cache == 'icache'):
+            if val > self.IcacheMisses_count:
+                self.IcacheMisses_count = val
+                self.new_events_var.append(23) #normally enum but its 2am
+        if (cache == 'itb_walker_cache' or cache == 'dtb_walker_cache'):
+            if val > self.TLBcacheMisses_count:
+                self.TLBcacheMisses_count = val
+                self.new_events_var.append(25) #normally enum but its 2am
+
     def parseCycle(self):
         while(True):
-            line = self.stats.readline()       
+            line = self.stats.readline()  
             if not line:
                 return True
-            #one cycle worth of stat dumps    
-            if 'Begin Simulation Statistics' in line:
-                self.stats.readline()
+            #end of 1 cycle of stat dump    
+            elif (not line.upper().isupper()):
+                for _ in range(4):
+                    self.stats.readline()
+                    if not line:
+                        return True
                 return False
-            stat_name = line.split()[0].split('.')[-1].split(':')[0]
-            func = getattr(self, stat_name, False)
-            if func:
-                func(line)
+            else:
+            #one cycle worth of stat dumps    
+                stat_name = line.split()[0].split('.')[-1].split(':')[0]
+                func = getattr(self, stat_name, False)
+                if func:
+                    func(line)
 
     def dump(self):
         print('******* CYCLE: ',self.cycle,'*********')
@@ -126,15 +220,18 @@ class Cycle_Dump:
         print('SUPPLY VOLTAGE: ', self.supply_volt)
         #print('SUPPLY VOLTAGE_prev: ', self.supply_volt_prev)
         print('ANCHOR PC: ', self.anchorPC_var)
-        # print("New Events : ", " ".join([event_map[i] for i in self.new_events_var]) )
-        # print("New Events prev: ", " ".join([event_map[i] for i in self.new_events_prev_var]))
+        #print("EVENTS: ", [event_map[e] for e in self.new_events_var])
+        print("New Events : ", " ".join([event_map_pred[i] for i in self.new_events_var]) )
+        print("***********************************")
 
 class Entry:
     def __init__(self, pc, events):
             self.pc = pc
-            self.events = list(events)
+            self.events = tuple(events)
 
     def equals(self, entry):
+        if entry is None:
+            return False
         if (self.pc == entry.pc and self.events == entry.events):
             return True
         return False
@@ -156,74 +253,56 @@ class Harvard:
         self.h_table =  [ Entry(0,[20]*SIGNATURE_LENGTH) for _ in range(TABLE_HEIGHT)]
         self.history = deque([0]*SIGNATURE_LENGTH)
         self.cycle_since_pred = 0
-        self.prev_volt = 0
 
-        self.insertIndex_prev = -1
         self.insertIndex = -1
-        self.prev_cycle_predict = -1
-        self.curr_cycle_predict = -1
+        self.cycle_predict = -1
 
         self.VEflag = False
         self.Actionflag = False
+        self.prev_volt = 0
+        self.prev_PC = None
+        self.event_count = defaultdict(lambda: 0)
+        
 
     def tick(self, cycle_dump):
-        self.insertIndex_prev = -1
+
         self.insertIndex = -1
-        self.prev_cycle_predict = -1
-        self.curr_cycle_predict = -1
+        self.cycle_predict = -1
         self.VEflag = False
         self.Actionflag = False
+
         for i in range(self.TABLE_HEIGHT):
             self.lru[i] += 1
 
-        #advance two cycles 
-        #first cycle
+        #update
         self.cycle_since_pred += 1
-        history_prev = deque(self.history)
-        self.history_insert(cycle_dump.new_events_prev_var)
-        self.entry_prev = Entry(cycle_dump.anchorPC_var, self.history)
-        if (history_prev != self.history):
-            self.prev_cycle_predict = self.find(self.entry_prev)
-            if self.prev_cycle_predict != -1:
-                self.cycle_since_pred = 0
-        #second cycle
-        self.cycle_since_pred += 1
-        history_prev = deque(self.history)
         self.history_insert(cycle_dump.new_events_var)
-        self.entry_curr = Entry(cycle_dump.anchorPC_var, self.history)
-        if (history_prev != self.history):
-            self.curr_cycle_predict = self.find(self.entry_curr)
-            if self.curr_cycle_predict != -1:
+        curr_entry = Entry(pc=cycle_dump.anchorPC_var, events=self.history)
+        #predict
+        if cycle_dump.new_events_var or self.prev_PC != cycle_dump.anchorPC_var:
+            self.cycle_predict = self.find(curr_entry)
+            if self.cycle_predict != -1:
                 self.cycle_since_pred = 0
+                self.Actionflag = True
 
         if (cycle_dump.supply_volt < self.EMERGENCY_V and self.prev_volt > self.EMERGENCY_V):
             self.VEflag = True
             if self.cycle_since_pred > self.LEAD_TIME:
-                if self.curr_cycle_predict == -1:
-                    self.insertIndex = self.insert(self.entry_prev)
-                if self.prev_cycle_predict == -1:
-                    self.insertIndex_prev = self.insert(self.entry_curr)
-
-
+                self.insertIndex = self.insert(curr_entry)
+        
         self.prev_volt = cycle_dump.supply_volt
-        if (self.prev_cycle_predict != -1) and (self.curr_cycle_predict != -1):
-            self.Actionflag = True
-
+        self.prev_PC = cycle_dump.anchorPC_var
         return
 
     def history_insert(self, events):
-        events_compact = []
         for e in events:
-            if e not in events_compact and e in event_map_filter.keys():
-                events_compact.append(e)
-
-        for e in events_compact:
+            self.event_count[e] += 1
             self.history.popleft()
             self.history.append(e)
 
     def find(self, entry):
-        for i in range(self.TABLE_HEIGHT):
-            if self.h_table[i].equals(entry):
+        for i, table_entry in enumerate(self.h_table):
+            if entry.equals(table_entry):
                 self.lru[i] = 0
                 return i
         return -1
@@ -235,19 +314,15 @@ class Harvard:
 
     def print(self):
         for i in range(self.TABLE_HEIGHT):
-            print(i,':  ', self.h_table[i].pc,  [event_map[e] for e in self.h_table[i].events])
-        print("HISTORY: ", [event_map[e] for e in self.history])
-
-        if self.prev_cycle_predict != -1:
-            print('cycle PREDICTION HIGH prev :' + str(self.prev_cycle_predict))
-        if self.curr_cycle_predict != -1:
-            print('cycle PREDICTION HIGH curr :' + str(self.curr_cycle_predict)) 
-        if self.insertIndex_prev != -1:
-            print('insert ENTRY prev :' + str(self.insertIndex_prev))
-        if self.insertIndex != -1:
-            print('insert ENTRY curr :' + str(self.insertIndex)) 
+            print(i,':  ',self.lru[i], self.h_table[i].pc,  [event_map_pred[e] for e in self.h_table[i].events])
+        print("HISTORY: ", [event_map_pred[e] for e in self.history])
+        print("Cycles since Prediction: ", self.cycle_since_pred)
+        if self.Actionflag:
+            print('cycle PREDICTION HIGH :' + str(self.cycle_predict)) 
         if self.VEflag:
             print('Entering EMERGENCY state')
+            print('insert ENTRY :' + str(self.insertIndex)) 
+
         else:
             print(self.STATE)
 

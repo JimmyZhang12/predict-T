@@ -5,7 +5,7 @@ matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import numpy as np
 from enum import Enum
-from collections import deque
+from collections import deque, defaultdict
 
 
 event_map = {
@@ -31,57 +31,50 @@ event_map = {
     19:'MEM_MP',
     20:'EMPTY_EVENT',
     21:'DUMMY_EVENT2'
-}
+    }
 event_map_filter = {
     1:'BRANCH_T',
     2:'BRANCH_NT',
     3:'BRANCH_MP',
-    4:'FETCH',
-    5:'TLB_STALL',
-    6:'ICACHE_STALL',
-    7:'COMMIT_BLOCK',
-    8:'IQ_FULL',
-    9:'LSQ_FULL',
-    10:'LOAD_EX',
-    11:'LOAD_WB',
-    12:'LOAD_CFETCH',
-    13:'STORE_EXECUTE',
-    14:'STORE_WB',
-    15:'INSTR_DISPATCH',
-    16:'INSTR_ISSUE',
-    18:'INSTR_COMMIT',
     19:'MEM_MP',
-}
 
+}
 event_map_pred = {
     0:'NO_EVENT',
     1:'BRANCH_T',
     2:'BRANCH_NT',
     3:'BRANCH_MP',
-    4:'FETCH',
-    5:'TLB_STALL',
-    6:'ICACHE_STALL',
-    7:'COMMIT_BLOCK',
-    8:'IQ_FULL',
-    9:'LSQ_FULL',
-    10:'LOAD_EX',
-    11:'LOAD_WB',
-    12:'LOAD_CFETCH',
-    13:'STORE_EXECUTE',
-    14:'STORE_WB',
-    15:'INSTR_DISPATCH',
-    16:'INSTR_ISSUE',
-    17:'INSTR_EXECUTE',
-    18:'INSTR_COMMIT',
     19:'MEM_MP',
     20:'EMPTY_EVENT',
-    21:'DUMMY_EVENT2',
+
     22:'DCACHE_MISS',
     23:'ICACHE_MISS',
     24:'L2_MISS',
-    25:'TLB_MISS'
-
+    25:'TLB_MISS',
 }
+
+class PDN:
+    def __init__(self, L, C, R, VDC, CLK):
+        self.L = L
+        self.C = C
+        self.R = R
+        self.VDC = VDC
+        self.CLK = CLK
+        self.vout_2_cycle_ago = VDC
+        self.vout_1_cycle_ago = VDC
+    def get_curr(self, current):
+        ts = 1/self.CLK
+        LmulC = self.L*self.C
+        LdivR = self.L/self.R
+        vout = self.VDC*ts**2/LmulC \
+            + self.vout_1_cycle_ago*(2 - ts/LdivR) \
+            + self.vout_2_cycle_ago*(ts/(LdivR) \
+            - 1 - ts**2/(LmulC)) \
+            - current*self.R*ts**2/(LmulC)
+            
+        self.vout_2_cycle_ago = self.vout_1_cycle_ago
+        self.vout_1_cycle_ago = vout
+        return vout
 
 
 class Cycle_Dump:
@@ -109,7 +102,7 @@ class Cycle_Dump:
         self.TLBcacheMisses_count = 0
         self.L2cacheMisses_count = 0
 
-        keys = range(len(event_map_pred.keys()))
+        keys = event_map_pred.keys()
         self.event_count = {k: 0 for k in keys}
         self.EOF = False
 
@@ -127,8 +120,8 @@ class Cycle_Dump:
         self.supply_volt_prev = None
         self.anchorPC_var = None
         self.numCycles_var = None
-
         return
+
     def new_events(self,line):
         linespl = line.split()
         event = int(linespl[1])
@@ -231,147 +224,108 @@ class Cycle_Dump:
         print("New Events : ", " ".join([event_map_pred[i] for i in self.new_events_var]) )
         print("***********************************")
 
+class Entry:
+    def __init__(self, pc, events):
+            self.pc = pc
+            self.events = tuple(events)
 
+    def equals(self, entry):
+        if entry is None:
+            return False
+        if (self.pc == entry.pc and self.events == entry.events):
+            return True
+        return False
 
-
-class Dist_Pred:
-
+class Harvard:
     class State(Enum):
         NORMAL = 0
         EMERGENCY = 1 
 
-    def __init__(self, HISTORY_WIDTH, HYSTERESIS, EMERGENCY_V, TABLE_HEIGHT, C_THRES, LEAD_TIME):
-        self.LEAD_TIME = LEAD_TIME
-        self.C_THRES = C_THRES
+    def __init__(self,TABLE_HEIGHT, SIGNATURE_LENGTH, HYSTERESIS, EMERGENCY_V, LEAD_TIME):
         self.TABLE_HEIGHT = TABLE_HEIGHT
-        self.HISTORY_WIDTH = HISTORY_WIDTH
-        self.HISTORY_HEIGHT = len(event_map_pred.keys())
+        self.SIGNATURE_LENGTH = SIGNATURE_LENGTH
         self.HYSTERESIS = HYSTERESIS
         self.EMERGENCY_V = EMERGENCY_V
-
+        self.LEAD_TIME = LEAD_TIME
         self.STATE = self.State.NORMAL
-        self.history = [deque([0]*HISTORY_WIDTH) for _ in range(self.HISTORY_HEIGHT)]
-        self.table = [np.zeros((self.HISTORY_HEIGHT, self.HISTORY_WIDTH))]*TABLE_HEIGHT
-        self.convs_over_table = []
 
-        #conv max for this cycle and prev cycle
-        self.conv_max = deque([0]*600)
-        self.conv_max_norm = deque([0]*600)
+        self.lru = [0] * TABLE_HEIGHT
+        self.h_table =  [ Entry(0,[20]*SIGNATURE_LENGTH) for _ in range(TABLE_HEIGHT)]
+        self.history = deque([0]*SIGNATURE_LENGTH)
+        self.cycle_since_pred = 0
 
-        self.conf_min = 0
-        self.LRU = [0]*TABLE_HEIGHT
+        self.insertIndex = -1
+        self.cycle_predict = -1
 
-        self.VEflag_curr = False
-        self.Actionflag_curr = False
-
-        self.cycles_since_pred = 0
-        self.prev_max_conf = 0
-        self.volt_1_cycles_ago = 0
-
-        #debug
-        #self.table[0] = np.ones((self.HISTORY_HEIGHT, self.HISTORY_WIDTH))
-    
-
+        self.VEflag = False
+        self.Actionflag = False
+        self.prev_volt = 0
+        self.prev_PC = None
+        self.event_count = defaultdict(lambda: 0)
+        
 
     def tick(self, cycle_dump):
 
-        self.Actionflag_curr = False
-        self.insert_index = -1
-        for i in range(self.TABLE_HEIGHT):self.LRU[i] += 1
-        self.cycles_since_pred += 1
-        self.addCycle(cycle_dump.new_events_var)
+        self.insertIndex = -1
+        self.cycle_predict = -1
+        self.VEflag = False
+        self.Actionflag = False
 
-        #search the table
-        self.convs_over_table = self.convolution()
-        self.push_convmax(max(self.convs_over_table))
+        for i in range(self.TABLE_HEIGHT):
+            self.lru[i] += 1
+
+        #update
+        self.cycle_since_pred += 1
+        self.history_insert(cycle_dump.new_events_var)
+        curr_entry = Entry(pc=cycle_dump.anchorPC_var, events=self.history)
         #predict
-        if self.predict():
-            self.Actionflag_curr = True
-            self.cycles_since_pred = 0
-            self.LRU[self.convs_over_table.index(max(self.convs_over_table))] = 0
+        if cycle_dump.new_events_var or self.prev_PC != cycle_dump.anchorPC_var:
+            self.cycle_predict = self.find(curr_entry)
+            if self.cycle_predict != -1:
+                self.cycle_since_pred = 0
+                self.Actionflag = True
 
-        #try to insert to table
-        self.VEflag_curr = False
-        if (self.volt_1_cycles_ago > self.EMERGENCY_V and cycle_dump.supply_volt < self.EMERGENCY_V):
-            self.VEflag_curr = True
-            if self.cycles_since_pred > self.LEAD_TIME:
-                self.insert_index = self.insert()
-
-        self.volt_1_cycles_ago = cycle_dump.supply_volt
-
-    def predict(self):
-        prediction = (self.conv_max_norm[-2] < self.C_THRES and self.conv_max_norm[-1] > self.C_THRES) \
-                and (self.cycles_since_pred > self.LEAD_TIME)
-        return prediction
-
-    def push_convmax(self, conv_max):
-        self.conv_max.popleft()
-        self.conv_max.append(conv_max)
-
-        self.conv_max_norm.popleft()
-        denom = max(self.conv_max) - min(self.conv_max)
-        if denom > 0 :
-            norm_conv_max = (conv_max - min(self.conv_max)) / denom
-        else:
-            norm_conv_max = 0
-        # norm_conv_max = conv_max
-        self.conv_max_norm.append(norm_conv_max)
-
-    def addCycle(self, new_events):
-        for row in self.history:
-            row.popleft()
-            row.append(0)
-
-        for event in event_map_pred.keys():
-            if event in new_events:
-                self.history[event][-1] += 1
-
-    def convolution(self):
-        conf_over_table = []
-        history_np = np.fliplr(np.array(self.history))
-        for entry in self.table:
-            conv_temp = 0
-            for i in range(self.HISTORY_HEIGHT):
-                if sum(history_np[i]) > 0:
-                    conv_temp += sum(np.convolve(entry[i], history_np[i]) )
-
-            conf_over_table.append(conv_temp)
-        return conf_over_table
+        if (cycle_dump.supply_volt < self.EMERGENCY_V and self.prev_volt > self.EMERGENCY_V):
+            self.VEflag = True
+            if self.cycle_since_pred > self.LEAD_TIME:
+                self.insertIndex = self.insert(curr_entry)
         
-    def insert(self):
-        index = self.LRU.index(max(self.LRU))
-        self.table[index] = np.array(self.history)
-        self.LRU[index] = 0
-        return index  
-           
-    def print(self):
-        # for j in range(self.TABLE_HEIGHT):
-        #     for i,e in enumerate(self.history):
-        #         print(list(self.table[j][i])," : ", event_map_pred[i])
-        #     print()
-        print('HISTORY')
-        for i,e in enumerate(self.history):
-            print(list(e)," : ", event_map_pred[i])
-        print()
+        self.prev_volt = cycle_dump.supply_volt
+        self.prev_PC = cycle_dump.anchorPC_var
+        return
 
-        if self.VEflag_curr:
+    def history_insert(self, events):
+        for e in events:
+            self.event_count[e] += 1
+            self.history.popleft()
+            self.history.append(e)
+
+    def find(self, entry):
+        for i, table_entry in enumerate(self.h_table):
+            if entry.equals(table_entry):
+                self.lru[i] = 0
+                return i
+        return -1
+    def insert(self, entry):
+        index = self.lru.index(max(self.lru))
+        self.h_table[index] = entry
+        self.lru[index] = 0
+        return index
+
+    def print(self):
+        for i in range(self.TABLE_HEIGHT):
+            print(i,':  ',self.lru[i], self.h_table[i].pc,  [event_map_pred[e] for e in self.h_table[i].events])
+        print("HISTORY: ", [event_map_pred[e] for e in self.history])
+        print("Cycles since Prediction: ", self.cycle_since_pred)
+        if self.Actionflag:
+            print('cycle PREDICTION HIGH :' + str(self.cycle_predict)) 
+        if self.VEflag:
             print('Entering EMERGENCY state')
+            print('insert ENTRY :' + str(self.insertIndex)) 
+
         else:
             print(self.STATE)
-        if self.insert_index != -1:
-            print("Insert Entry Index: ", self.insert_index)
 
-        # print('LRU: ', self.LRU)
-        print('CONV result: ', self.convs_over_table)
-
-        # self.conv_max_norm.popleft()
-        # denom = max(self.conv_max) - min(self.conv_max)
-        # if denom > 0 :
-        #     norm_conv_max = (conv_max - min(self.conv_max) / denom)
-        # else:
-        #     norm_conv_max = 0
-        # # norm_conv_max = conv_max
-        # self.conv_max_norm.append(norm_conv_max)
 
 def accuracy(action,VE,LEAD_TIME_CAP):
     bins = dict()
@@ -425,4 +379,5 @@ def accuracy(action,VE,LEAD_TIME_CAP):
         false_pos_x.append(xvar[-1])
         false_pos.append(false_pos[-1])
 
-    return [xvar,hits,false_neg,false_pos_x,false_pos]   
+
+    return [xvar,hits,false_neg,false_pos_x,false_pos]  

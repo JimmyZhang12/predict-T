@@ -266,62 +266,62 @@ SIMD_UNIT_COUNT=("4")
 #---------------------------------------------------
 
 
-# name=(
-#   "basicmath" \
-#   "bitcnts" \
-#   "qsort" \
-#   "dijkstra" \
-#   "blowfish_encrypt" \
-#   "blowfish_decrypt" \
-#   "rijndael_encrypt" \
-#   "rijndael_decrypt" \
-#   "sha" \
-#   "crc" \
-#   "fft" \
-#   "ffti" \
-#   "toast" \
-#   "untoast" \
-#   "susan_smooth" \
-#   "susan_edge" \
-#   "susan_corner" \
-# )
-# exe=(
-#   "basicmath" \
-#   "bitcnts" \
-#   "qsort" \
-#   "dijkstra" \ 
-#   "blowfish" \
-#   "blowfish" \
-#   "rijndael" \
-#   "rijndael" \
-#   "sha" \
-#   "crc" \
-#   "fft" \
-#   "fft" \
-#   "toast" \
-#   "untoast" \
-#   "susan" \
-#   "susan" \
-#   "susan" \
-# )
-# opt=(
-#   "" \
-#   "1000" \
-#   "${INPUT}/qsort.dat" \
-#   "${INPUT}/dijkstra.dat" \
-#   "e ${INPUT}/blowfish.asc ${OUTPUT}/blowfish.enc 1234567890abcdeffedcba0987654321" \
-#   "d ${INPUT}/blowfish.enc ${OUTPUT}/blowfish.asc 1234567890abcdeffedcba0987654321" \
-#   "${INPUT}/rijndael.asc ${OUTPUT}/rijndael.enc e 1234567890abcdeffedcba09876543211234567890abcdeffedcba0987654321" \
-#   "${INPUT}/rijndael.enc ${OUTPUT}/rijndael.asc d 1234567890abcdeffedcba09876543211234567890abcdeffedcba0987654321" \
-#   "${INPUT}/sha.asc" "${INPUT}/crc.pcm" \
-#   "4 4096" \
-#   "4 8192 -i" \
-#   "-fps -c ${INPUT}/toast.au" \
-#   "-fps -c ${INPUT}/untoast.au.run.gsm" \
-#   "${INPUT}/susan.pgm ${OUTPUT}/susan_s.pgm -s" \
-#   "${INPUT}/susan.pgm ${OUTPUT}/susan_e.pgm -e" \
-#   "${INPUT}/susan.pgm ${OUTPUT}/susan_c.pgm -c" \
-# )
+name=(
+  "basicmath" \
+  "bitcnts" \
+  "qsort" \
+  "dijkstra" \
+  "blowfish_encrypt" \
+  "blowfish_decrypt" \
+  "rijndael_encrypt" \
+  "rijndael_decrypt" \
+  "sha" \
+  "crc" \
+  "fft" \
+  "ffti" \
+  "toast" \
+  "untoast" \
+  "susan_smooth" \
+  "susan_edge" \
+  "susan_corner" \
+)
+exe=(
+  "basicmath" \
+  "bitcnts" \
+  "qsort" \
+  "dijkstra" \
+  "blowfish" \
+  "blowfish" \
+  "rijndael" \
+  "rijndael" \
+  "sha" \
+  "crc" \
+  "fft" \
+  "fft" \
+  "toast" \
+  "untoast" \
+  "susan" \
+  "susan" \
+  "susan" \
+)
+opt=(
+  "" \
+  "1000" \
+  "${INPUT}/qsort.dat" \
+  "${INPUT}/dijkstra.dat" \
+  "e ${INPUT}/blowfish.asc ${OUTPUT}/blowfish.enc 1234567890abcdeffedcba0987654321" \
+  "d ${INPUT}/blowfish.enc ${OUTPUT}/blowfish.asc 1234567890abcdeffedcba0987654321" \
+  "${INPUT}/rijndael.asc ${OUTPUT}/rijndael.enc e 1234567890abcdeffedcba09876543211234567890abcdeffedcba0987654321" \
+  "${INPUT}/rijndael.enc ${OUTPUT}/rijndael.asc d 1234567890abcdeffedcba09876543211234567890abcdeffedcba0987654321" \
+  "${INPUT}/sha.asc" "${INPUT}/crc.pcm" \
+  "4 4096" \
+  "4 8192 -i" \
+  "-fps -c ${INPUT}/toast.au" \
+  "-fps -c ${INPUT}/untoast.au.run.gsm" \
+  "${INPUT}/susan.pgm ${OUTPUT}/susan_s.pgm -s" \
+  "${INPUT}/susan.pgm ${OUTPUT}/susan_e.pgm -e" \
+  "${INPUT}/susan.pgm ${OUTPUT}/susan_c.pgm -c" \
+)
 
 
 # name=(
@@ -382,13 +382,13 @@ SIMD_UNIT_COUNT=("4")
 #exe=("blowfish" "rijndael")
 #opt=("${INPUT}/blowfish.asc ${OUTPUT}/blowfish.enc 1234567890abcdeffedcba0987654321" "${INPUT}/rijndael.asc ${OUTPUT}/rijndael.enc e 1234567890abcdeffedcba09876543211234567890abcdeffedcba0987654321")
 
-#name=("toast")
-#exe=("toast")
-#opt=("-fps -c ${INPUT}/toast.au")
+# name=("toast")
+# exe=("toast")
+# opt=("-fps -c ${INPUT}/toast.au")
 
-name=("crc") 
-exe=("crc")
-opt=("${INPUT}/crc.pcm")
+# name=("crc") 
+# exe=("crc")
+# opt=("${INPUT}/crc.pcm")
 
 #name=("different_cycle" "same_cycle") 
 #exe=("different_cycle" "same_cycle")
@@ -397,7 +397,6 @@ opt=("${INPUT}/crc.pcm")
 #name=("same_cycle") 
 #exe=("same_cycle")
 #opt=("")
-
 
 #name=("sha" "untoast")
 #exe=("sha" "untoast")
@@ -474,11 +473,11 @@ for j in ${!name[@]}; do
         ${VOLTAGE_EMERGENCY[$i]} \
         ${VOLTAGE_THRESHOLD[$i]}
 
-    while [ `jobs | wc -l` -ge 9 ]; do
+    while [ `jobs | wc -l` -ge 18 ]; do
       sleep 1
     done
   done
 done
-while [ `jobs | wc -l` -ne  1]; do
+while [ `jobs | wc -l` -ne  1 ]; do
   sleep 1
 done

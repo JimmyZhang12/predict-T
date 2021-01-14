@@ -9,16 +9,13 @@ from enum import Enum
 from datetime import datetime
 import math
 
-def calc_plot_stats(PREDICTOR, CLASS, TEST, OUTPUT_DIR, DATE, CYCLE_START, CYCLE_END):
-    HOME = os.environ['HOME']
-    path = HOME + '/' + OUTPUT_DIR + '/gem5_out/' + CLASS + '_' + PREDICTOR + '/' + TEST + '.txt'
-    stats = open(path, 'r')
+def calc_plot_stats(stats, CYCLE_START, CYCLE_END, IDENTIFIER):
 
     dist_pred = util.Dist_Pred(
         HISTORY_WIDTH= 10,
         HYSTERESIS=0.005, 
         EMERGENCY_V=1.358, 
-        TABLE_HEIGHT=10, 
+        TABLE_HEIGHT=25, 
         C_THRES=0.7,
         LEAD_TIME = 20)
 
@@ -33,27 +30,24 @@ def calc_plot_stats(PREDICTOR, CLASS, TEST, OUTPUT_DIR, DATE, CYCLE_START, CYCLE
     while True:
         cycle_dump.reset()
         EOF = cycle_dump.parseCycle()
-        dist_pred.tick(cycle_dump)
         if EOF:
             break
+        else:
+            dist_pred.tick(cycle_dump)
 
-        supply_curr.append(dist_pred.curr_1_cycles_ago)
+
         supply_curr.append(cycle_dump.supply_curr)
-        supply_volt.append(dist_pred.volt_1_cycles_ago)
         supply_volt.append(cycle_dump.supply_volt)
-        conf.append(dist_pred.conv_max_norm[-2])
         conf.append(dist_pred.conv_max_norm[-1])
-        action.append(dist_pred.Actionflag_prev)
         action.append(dist_pred.Actionflag_curr)
-        VE.append(dist_pred.VEflag_prev)
         VE.append(dist_pred.VEflag_curr)
 
         # print(dist_pred.VEflag_prev)
         # print(dist_pred.VEflag_curr)
-        if cycle_dump.cycle % 1000 < 3:
+        if cycle_dump.cycle % 1000 < 1:
             print (cycle_dump.cycle)
 
-        if cycle_dump.cycle > CYCLE_END:
+        if cycle_dump.cycle > CYCLE_END and CYCLE_END != -1:
             break
         # if cycle_dump.cycle > CYCLE_START: 
         #     cycle_dump.dump()
@@ -66,26 +60,27 @@ def calc_plot_stats(PREDICTOR, CLASS, TEST, OUTPUT_DIR, DATE, CYCLE_START, CYCLE
         #     input()
     #print how many events 
     for k,v in cycle_dump.event_count.items():
-        print(util.event_map[k], ": ", v)
+        print(util.event_map_pred[k], ": ", v)
+        
+    HOME = os.environ['HOME']
+    np.save(HOME+'/plot/data/conv'+IDENTIFIER+'_supply_curr_'  + TEST, np.array(supply_curr))
+    np.save(HOME+'/plot/data/conv'+IDENTIFIER+'_supply_volt_'  + TEST, np.array(supply_volt))
+    np.save(HOME+'/plot/data/conv'+IDENTIFIER+'_conf_'  + TEST, np.array(conf))
+    np.save(HOME+'/plot/data/conv'+IDENTIFIER+'_action_'+ TEST, np.array(action))
+    np.save(HOME+'/plot/data/conv'+IDENTIFIER+'_VE_'+ TEST, np.array(VE))
 
-    np.save('plot/data/conv'+DATE+'_supply_curr_'  + TEST, np.array(supply_curr))
-    np.save('plot/data/conv'+DATE+'_supply_volt_'  + TEST, np.array(supply_volt))
-    np.save('plot/data/conv'+DATE+'_conf_'  + TEST, np.array(conf))
-    np.save('plot/data/conv'+DATE+'_action_'+ TEST, np.array(action))
-    np.save('plot/data/conv'+DATE+'_VE_'+ TEST, np.array(VE))
 
-
-def plot(TEST, DATE, start_cycle, end_cycle):
+def plot_single(TEST, DATE, start_cycle, end_cycle):
 
     #PARAMETERS
     FONTSIZE = 18
     HOME = os.environ['HOME']
 
-    supply_curr = np.load('plot/data/conv'+DATE+'_supply_curr_'  +TEST +'.npy')
-    supply_volt = np.load('plot/data/conv'+DATE+'_supply_volt_'  +TEST +'.npy')
-    conf =        np.load('plot/data/conv'+DATE+'_conf_'+TEST +'.npy')
-    action =      np.load('plot/data/conv'+DATE+'_action_'+TEST +'.npy')
-    VE =          np.load('plot/data/conv'+DATE+'_VE_'+TEST +'.npy')
+    supply_curr = np.load(HOME+'/plot/data/conv'+DATE+'_supply_curr_'  +TEST +'.npy')
+    supply_volt = np.load(HOME+'/plot/data/conv'+DATE+'_supply_volt_'  +TEST +'.npy')
+    conf =        np.load(HOME+'/plot/data/conv'+DATE+'_conf_'+TEST +'.npy')
+    action =      np.load(HOME+'/plot/data/conv'+DATE+'_action_'+TEST +'.npy')
+    VE =          np.load(HOME+'/plot/data/conv'+DATE+'_VE_'+TEST +'.npy')
 
     print(len(supply_curr))
     print(len(supply_volt))
@@ -169,8 +164,9 @@ def plot(TEST, DATE, start_cycle, end_cycle):
     axc.set_xlabel('Lead Time', fontsize=14) 
     axc.set_ylabel('(%)', fontsize=14)
 
-    plt.savefig(HOME+ '/passat/plot/' + DATE + '_Vs&Is_vs_time' + '_dist_pred_' + TEST +'.png', dpi=300)
-    print(HOME+ '/passat/plot/' + DATE + '_Vs&Is_vs_time' + '_dist_pred_' + TEST +'.png')
+    dir = HOME+ '/plot/' + DATE + '_Vs&Is_vs_time' + '_dist_pred_' + TEST +'.png'
+    plt.savefig(dir, dpi=300)
+    print(dir)
 
 def plot_all(TEST_LIST, DATE):
     #PARAMETERS
@@ -214,8 +210,8 @@ def plot_all(TEST_LIST, DATE):
 
     for x,TEST in enumerate(TEST_LIST):
         print("Plotting: ",TEST)
-        action =      np.load('plot/data/conv'+DATE+'_action_'+TEST +'.npy')
-        VE =          np.load('plot/data/conv'+DATE+'_VE_'+TEST +'.npy')
+        action =      np.load(HOME+'/plot/data/conv'+DATE+'_action_'+TEST +'.npy')
+        VE =          np.load(HOME+'/plot/data/conv'+DATE+'_VE_'+TEST +'.npy')
 
         #correct stat dump being not every cycle
         action = np.roll(action,-1)
@@ -236,34 +232,76 @@ def plot_all(TEST_LIST, DATE):
     ax_fp.set_title('False Pos (Min) Average = '+ str(fp_avg), fontsize=FONTSIZE)
     ax_fn.set_title('False Neg (Min) Average = '+ str(fn_avg), fontsize=FONTSIZE)
 
-    plt.savefig(HOME+ '/passat/plot/conv' + DATE + 'all_tests.png', dpi=300)
-    print(HOME+ '/passat/plot/conv' + DATE + 'all_tests.png')
+    dir = HOME+ '/plot/conv_' + DATE + '_all_tests.png'
+    plt.savefig(dir, dpi=300)
+    print(dir)
 
 if __name__ == "__main__":
+    HOME = os.environ['HOME']
+    OUTPUT_DIR = 'spec_output_1_7'
+    NUM_INSTR = '40000'
+    VERSION = '1'
+    PDN = 'DESKTOP_INTEL_DT'
     PREDICTOR = 'HarvardPowerPredictor_1'
-    CLASS = 'DESKTOP'
-    OUTPUT_DIR = 'output_12_10'
-    DATE = '12-17'
-    START_CYCLE = 1
-    END_CYCLE = 30000  
 
-    TEST = 'different_cycle'
-    # calc_plot_stats(PREDICTOR, CLASS, TEST, OUTPUT_DIR, DATE, START_CYCLE, END_CYCLE)
+    # TEST = 'crc'
+    # path = HOME+'/'+OUTPUT_DIR+'/gem5_out/'+TEST+'_'+NUM_INSTR+'_'+VERSION+'_'+PDN+'_'+PREDICTOR+'/stats.txt'
+    # print(path)
+    # stats = open(path, 'r')
+    # calc_plot_stats(stats, CYCLE_START=653, CYCLE_END=-1, IDENTIFIER=IDENTIFIER)
 
-    PLOT_START_CYCLE = 10000
-    PLOT_END_CYCLE = 15000
-    plot(TEST, DATE, PLOT_START_CYCLE, PLOT_END_CYCLE)
-
-    # TEST_LIST =["same_cycle", "different_cycle", "basicmath", "bitcnts", 
-    #     "qsort", "susan_smooth", "susan_edge", "susan_corner", "dijkstra", "rijndael_decrypt", "sha", "crc", "fft", "ffti", 
+    # PLOT_START_CYCLE = 10000
+    # PLOT_END_CYCLE = 15000
+    # plot_single(TEST, IDENTIFIER, PLOT_START_CYCLE, PLOT_END_CYCLE)
+    
+    # TEST_LIST =["basicmath", "bitcnts", "blowfish_decrypt", "blowfish_encrypt", 
+    #     "qsort", "susan_smooth", "susan_edge", "susan_corner", "dijkstra", 
+    #     "rijndael_decrypt", "rijndael_encrypt", "sha", "crc", "fft", "ffti", 
     #     "toast", "untoast"]
-    # for t in TEST_LIST:
-    #     print(t)
-    #     calc_plot_stats(PREDICTOR, CLASS, t, OUTPUT_DIR, DATE, START_CYCLE, END_CYCLE)
-    # TEST_LIST =["same_cycle", "different_cycle", "basicmath", "bitcnts", 
-    #             "qsort", "dijkstra", "sha", "crc", "fft", "ffti", 
-    #             "toast", "untoast", "rijndael_decrypt", "susan_smooth", "susan_edge", "susan_corner"]
-    # plot_all(TEST_LIST, DATE)
+    # IDENTIFIER = "1-7"
+
+    TEST_LIST=[
+    #"400.perlbench", \ NO BINARIES
+    "401.bzip2", \
+    "403.gcc", \
+    "410.bwaves", \
+    #"416.gamess", \ NO BINARIES
+    "429.mcf", \
+    "433.milc", \
+    "434.zeusmp", \
+    "435.gromacs", \
+    "436.cactusADM", \
+    "437.leslie3d", \
+    "444.namd", \
+    "445.gobmk", \
+    "447.dealII", \
+    "450.soplex", \
+    "453.povray", \
+    "454.calculix", \
+    "456.hmmer", \
+    "458.sjeng", \
+    "459.GemsFDTD", \
+    "462.libquantum", \
+    "464.h264ref", \
+    "470.lbm", \
+    "471.omnetpp", \
+    "473.astar", \
+    # "481.wrf", \
+    # "482.sphinx3", \
+    # "983.xalancbmk", \
+    # "998.specrand", \
+    # "999.specrand" \
+    ]
+    NUM_INSTR = ""
+    IDENTIFIER = "1-7_spec"
+
+    for TEST in TEST_LIST:
+        path = HOME+'/'+OUTPUT_DIR+'/gem5_out/'+TEST+'_'+NUM_INSTR+'_'+VERSION+'_'+PDN+'_'+PREDICTOR+'/stats.txt'
+        print(path)
+        stats = open(path, 'r')
+        calc_plot_stats(stats, CYCLE_START=1000, CYCLE_END=-1, IDENTIFIER=IDENTIFIER)
+    plot_all(TEST_LIST, IDENTIFIER)
+
 
 
     
