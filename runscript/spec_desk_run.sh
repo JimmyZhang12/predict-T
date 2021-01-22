@@ -98,7 +98,7 @@ print_info "TRAINING_ROOT $TRAINING_ROOT"
 # Configure Simulation Parameters
 DURATION=("-1") # Data Points to Simulate
 #INSTRUCTIONS=("10000" "25000" "25000" "25000" "25000" "25000" "25000") # Instructions to Simulate
-INSTRUCTIONS=("40000")
+INSTRUCTIONS=("10000000000")
 
 #INSTRUCTIONS=("2000")
 
@@ -266,45 +266,24 @@ SIMD_UNIT_COUNT=("4")
 #---------------------------------------------------
 
 name=(
-	"481.wrf" \
-	"482.sphinx3" \
-	"983.xalancbmk" \
-	"998.specrand" \
-	"999.specrand" \
+	"403.gcc" \
 )
 
 dir=(
-	"$HOME/passat/spec2006/benchspec/CPU2006/481.wrf/run/run_base_ref_amd64-m64-gcc43-nn.0000/" \
-	"$HOME/passat/spec2006/benchspec/CPU2006/482.sphinx3/run/run_base_ref_amd64-m64-gcc43-nn.0000/" \
-	"$HOME/passat/spec2006/benchspec/CPU2006/983.xalancbmk/run/run_base_ref_amd64-m64-gcc43-nn.0000/" \
-	"$HOME/passat/spec2006/benchspec/CPU2006/998.specrand/run/run_base_ref_amd64-m64-gcc43-nn.0000/" \
-	"$HOME/passat/spec2006/benchspec/CPU2006/999.specrand/run/run_base_ref_amd64-m64-gcc43-nn.0000/" \
+	"$HOME/passat/spec2006/benchspec/CPU2006/403.gcc/run/run_base_ref_amd64-m64-gcc43-nn.0000/" \
 )
 
 cmd=(
-	"wrf_base.amd64-m64-gcc43-nn" \
-	"sphinx_livepretend_base.amd64-m64-gcc43-nn" \
-	"xalancbmk_base.amd64-m64-gcc43-nn" \
-	"specrand_base.amd64-m64-gcc43-nn" \
-	"specrand_base.amd64-m64-gcc43-nn" \
+	"gcc_base.amd64-m64-gcc43-nn" \
 )
 
 opt=(
-	"" \
-	"ctlfile . args.an4 " \
-	"-v test.xml xalanc.xsl " \
-	"-v test.xml xalanc.xsl " \
-	"-v test.xml xalanc.xsl " \
+	"166.i -o 166.s " \
 )
 
 stdin=(
 	"" \
-	"" \
-	"" \
-	"" \
-	"" \
 )
-
 
 
 #--------------------------------------------------------------------

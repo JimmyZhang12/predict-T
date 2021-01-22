@@ -95,12 +95,12 @@ print_info "TRAINING_ROOT $TRAINING_ROOT"
 #---------------------------------------------------
 # Simulation Params
 #---------------------------------------------------
+
+
 # Configure Simulation Parameters
 DURATION=("-1" "-1" "-1" "-1" "-1" "-1" "-1" "-1" "-1" "-1" "-1" "-1" "-1" "-1" "-1" "-1" "-1") # Data Points to Simulate
 #INSTRUCTIONS=("10000" "25000" "25000" "25000" "25000" "25000" "25000") # Instructions to Simulate
-INSTRUCTIONS=("40000" "40000" "40000" "40000" "40000" "40000" "40000" "40000" "40000" "40000" "40000" "40000" "40000" "40000" "40000" "40000" "40000" "40000")
-
-#INSTRUCTIONS=("2000")
+INSTRUCTIONS=("20000" "40000" "40000" "40000" "40000" "40000" "40000" "40000" "40000" "40000" "40000" "40000" "40000" "40000" "40000" "40000" "40000" "40000")
 
 # When to start ROI, in Sim Ticks, -or- ROI by setting "-1"
 #default 10^12 sim ticks per second (250 ticks per cycle at 4Ghz)
@@ -133,6 +133,11 @@ VOLTAGE_THRESHOLD=("1.372")
 #PDN=("HARVARD_M" "HARVARD_L" "HARVARD_D")
 #PDN=("HARVARD")
 PDN=("INTEL_DT")
+
+L=$(echo "scale=15;20*10^-12" | bc)
+R=$(echo "scale=15;1.32*10^-6" | bc)
+C=$(echo "scale=15;3.2*10^-3" | bc)
+
 
 #---------------------------------------------------
 # Cache Params:
@@ -266,62 +271,62 @@ SIMD_UNIT_COUNT=("4")
 #---------------------------------------------------
 
 
-name=(
-  "basicmath" \
-  "bitcnts" \
-  "qsort" \
-  "dijkstra" \
-  "blowfish_encrypt" \
-  "blowfish_decrypt" \
-  "rijndael_encrypt" \
-  "rijndael_decrypt" \
-  "sha" \
-  "crc" \
-  "fft" \
-  "ffti" \
-  "toast" \
-  "untoast" \
-  "susan_smooth" \
-  "susan_edge" \
-  "susan_corner" \
-)
-exe=(
-  "basicmath" \
-  "bitcnts" \
-  "qsort" \
-  "dijkstra" \
-  "blowfish" \
-  "blowfish" \
-  "rijndael" \
-  "rijndael" \
-  "sha" \
-  "crc" \
-  "fft" \
-  "fft" \
-  "toast" \
-  "untoast" \
-  "susan" \
-  "susan" \
-  "susan" \
-)
-opt=(
-  "" \
-  "1000" \
-  "${INPUT}/qsort.dat" \
-  "${INPUT}/dijkstra.dat" \
-  "e ${INPUT}/blowfish.asc ${OUTPUT}/blowfish.enc 1234567890abcdeffedcba0987654321" \
-  "d ${INPUT}/blowfish.enc ${OUTPUT}/blowfish.asc 1234567890abcdeffedcba0987654321" \
-  "${INPUT}/rijndael.asc ${OUTPUT}/rijndael.enc e 1234567890abcdeffedcba09876543211234567890abcdeffedcba0987654321" \
-  "${INPUT}/rijndael.enc ${OUTPUT}/rijndael.asc d 1234567890abcdeffedcba09876543211234567890abcdeffedcba0987654321" \
-  "${INPUT}/sha.asc" "${INPUT}/crc.pcm" \
-  "4 4096" \
-  "4 8192 -i" \
-  "-fps -c ${INPUT}/toast.au" \
-  "-fps -c ${INPUT}/untoast.au.run.gsm" \
-  "${INPUT}/susan.pgm ${OUTPUT}/susan_s.pgm -s" \
-  "${INPUT}/susan.pgm ${OUTPUT}/susan_e.pgm -e" \
-  "${INPUT}/susan.pgm ${OUTPUT}/susan_c.pgm -c" \
-)
+# name=(
+#   "basicmath" \
+#   "bitcnts" \
+#   "qsort" \
+#   "dijkstra" \
+#   "blowfish_encrypt" \
+#   "blowfish_decrypt" \
+#   "rijndael_encrypt" \
+#   "rijndael_decrypt" \
+#   "sha" \
+#   "crc" \
+#   "fft" \
+#   "ffti" \
+#   "toast" \
+#   "untoast" \
+#   "susan_smooth" \
+#   "susan_edge" \
+#   "susan_corner" \
+# )
+# exe=(
+#   "basicmath" \
+#   "bitcnts" \
+#   "qsort" \
+#   "dijkstra" \
+#   "blowfish" \
+#   "blowfish" \
+#   "rijndael" \
+#   "rijndael" \
+#   "sha" \
+#   "crc" \
+#   "fft" \
+#   "fft" \
+#   "toast" \
+#   "untoast" \
+#   "susan" \
+#   "susan" \
+#   "susan" \
+# )
+# opt=(
+#   "" \
+#   "1000" \
+#   "${INPUT}/qsort.dat" \
+#   "${INPUT}/dijkstra.dat" \
+#   "e ${INPUT}/blowfish.asc ${OUTPUT}/blowfish.enc 1234567890abcdeffedcba0987654321" \
+#   "d ${INPUT}/blowfish.enc ${OUTPUT}/blowfish.asc 1234567890abcdeffedcba0987654321" \
+#   "${INPUT}/rijndael.asc ${OUTPUT}/rijndael.enc e 1234567890abcdeffedcba09876543211234567890abcdeffedcba0987654321" \
+#   "${INPUT}/rijndael.enc ${OUTPUT}/rijndael.asc d 1234567890abcdeffedcba09876543211234567890abcdeffedcba0987654321" \
+#   "${INPUT}/sha.asc" "${INPUT}/crc.pcm" \
+#   "4 4096" \
+#   "4 8192 -i" \
+#   "-fps -c ${INPUT}/toast.au" \
+#   "-fps -c ${INPUT}/untoast.au.run.gsm" \
+#   "${INPUT}/susan.pgm ${OUTPUT}/susan_s.pgm -s" \
+#   "${INPUT}/susan.pgm ${OUTPUT}/susan_e.pgm -e" \
+#   "${INPUT}/susan.pgm ${OUTPUT}/susan_c.pgm -c" \
+# )
 
 
 # name=(
@@ -386,9 +391,9 @@ opt=(
 # exe=("toast")
 # opt=("-fps -c ${INPUT}/toast.au")
 
-# name=("crc") 
-# exe=("crc")
-# opt=("${INPUT}/crc.pcm")
+name=("crc") 
+exe=("crc")
+opt=("${INPUT}/crc.pcm")
 
 #name=("different_cycle" "same_cycle") 
 #exe=("different_cycle" "same_cycle")
@@ -432,7 +437,8 @@ for j in ${!name[@]}; do
     TN="${name[$j]}_${INSTRUCTIONS[$j]}_${CPU_CYCLES[0]}_${DEVICE_TYPE[$i]}_${PDN[$i]}_${PREDICTOR[$pred]}_${PPRED_ACTIONS[$pred]}"
 
     se_classic_mc_ncv \
-        $TN ${DURATION[$j]} \
+        $TN \
+        ${DURATION[$j]} \
         ${INSTRUCTIONS[$j]} \
         ${PROFILE_START[$j]} \
         ${exe[$j]} \
@@ -471,7 +477,10 @@ for j in ${!name[@]}; do
         ${PPRED_EVENTS[$pred]} \
         ${PPRED_ACTIONS[$pred]} \
         ${VOLTAGE_EMERGENCY[$i]} \
-        ${VOLTAGE_THRESHOLD[$i]}
+        ${VOLTAGE_THRESHOLD[$i]} \
+        ${L} \
+        ${C} \
+        ${R} 
 
     while [ `jobs | wc -l` -ge 18 ]; do
       sleep 1

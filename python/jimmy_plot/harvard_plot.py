@@ -10,19 +10,28 @@ from enum import Enum
 from datetime import datetime
 import math
 
+
+#mi optimal
+L = 20e-12
+C = 1.32e-06 
+R =  0.0032
+#spec optimal
+# L = 2e-11  
+# C = 7.6e-07  
+# R = 0.0041
 def calc_plot_stats(stats, CYCLE_START, CYCLE_END, IDENTIFIER):
     pdn = util.PDN(
-        L = 30E-12,
-        C = 1E-6,
-        R = 3E-3,
+        L = L,
+        C = C,
+        R = R,
         VDC = 1.4,
-        CLK = 4E9
+        CLK = 4E9,
     )
-    harvard = util.Harvard(
-        TABLE_HEIGHT=1000,
-        SIGNATURE_LENGTH=8,
+    harvard_pred = harvard.Harvard(
+        TABLE_HEIGHT=30,
+        SIGNATURE_LENGTH=32,
         HYSTERESIS=0.005,
-        EMERGENCY_V= 1.335,
+        EMERGENCY_V= 0.96*1.4,
         LEAD_TIME=40
     )
     cycle_dump = util.Cycle_Dump(stats)
@@ -35,19 +44,18 @@ def calc_plot_stats(stats, CYCLE_START, CYCLE_END, IDENTIFIER):
     while True:
         cycle_dump.reset()
         EOF = cycle_dump.parseCycle()
-    
 
         if EOF:
             break
         else:
-            voltage = pdn.get_curr(cycle_dump.supply_curr)
-            cycle_dump.supply_volt = voltage
-            harvard.tick(cycle_dump)
+            # voltage = pdn.get_curr(cycle_dump.supply_curr)
+            # cycle_dump.supply_volt = voltage
+            harvard_pred.tick(cycle_dump)
 
         supply_curr.append(cycle_dump.supply_curr)
         supply_volt.append(cycle_dump.supply_volt)
-        action.append(harvard.cycle_predict != -1)
-        VE.append(harvard.VEflag)
+        action.append(harvard_pred.cycle_predict != -1)
+        VE.append(harvard_pred.VEflag)
 
         if cycle_dump.cycle > CYCLE_END and CYCLE_END != -1:
             break
@@ -58,17 +66,17 @@ def calc_plot_stats(stats, CYCLE_START, CYCLE_END, IDENTIFIER):
 
         # if cycle_dump.cycle > CYCLE_START: 
         #     cycle_dump.dump()
-        #     harvard.print()
+        #     harvard_pred.print()
         #     input()
 
-        # if (harvard.VEflag or harvard.Actionflag) and cycle_dump.cycle > CYCLE_START: 
+        # if (harvard_pred.VEflag or harvard_pred.Actionflag) and cycle_dump.cycle > CYCLE_START: 
         #     cycle_dump.dump()
-        #     harvard.print()
+        #     harvard_pred.print()
         #     input()
 
-    print("EVENTS from stat dump")
-    for k,v in cycle_dump.event_count.items():
-        print(util.event_map_pred[k], ": ", v)
+    # print("EVENTS from stat dump")
+    # for k,v in harvard_pred.event_count.items():
+    #     print(harvard.valid_events[k], ": ", v)
 
     
     HOME = os.environ['HOME']
@@ -88,19 +96,18 @@ def plot_single(TEST, DATE, start_cycle, end_cycle):
     action =      np.load(HOME+'/plot/data/harvard_'+DATE+'_action_'+TEST +'.npy')
     VE =          np.load(HOME+'/plot/data/harvard_'+DATE+'_VE_'+TEST +'.npy')
 
-    #correct stat dump being not every cycle
-    action = np.roll(action,-1)
+    print(len(supply_volt))
 
     end_cycle = min(end_cycle,len(supply_curr))
 
     fig = plt.figure(constrained_layout=True)
-    gs = fig.add_gridspec(4, 7)
+    gs = fig.add_gridspec(2, 3)
     ax = fig.add_subplot(gs[0, :])
     # axb = fig.add_subplot(gs[1, :])
     # axd = fig.add_subplot(gs[2, :])
     axc = fig.add_subplot(gs[1, 0])
 
-    fig.set_size_inches(40, 15)
+    fig.set_size_inches(15, 7.5)
     fig.suptitle('(Harvard)' +  ', DESKTOP, ' + TEST + ' )', fontsize=FONTSIZE)
     ax.set_ylabel('Supply Voltage', fontsize=FONTSIZE)
     ax2 = ax.twinx()
@@ -114,18 +121,16 @@ def plot_single(TEST, DATE, start_cycle, end_cycle):
     ax.set_ylim(bottom = min(i for i in supply_volt if i > 0.8), top = max(supply_volt))
     ax2.plot(xvar, supply_curr, color='tab:blue')
     ax2.tick_params(axis='y', labelcolor='tab:blue')
-    ax2.set_ylim([min(i for i in supply_curr if i > 0.8), max(supply_curr)])
+    ax2.set_ylim([5,40])
 
     for i in range(len(supply_volt)):
-        if action[i]:
-            ax.axvspan(i, i+1, color='red', alpha=0.15)
+        # if action[i]:
+        #     ax.axvspan(i, i+1, color='red', alpha=0.15)
         if VE[i]:
             ax.axvspan(i, i+1, color='blue', alpha=0.3)
 
     print('NUM VEs: ', sum(VE))
     print('NUM actions: ', sum(action))
-    print(len(VE))
-    print(len(action))
 
     xvar,hits,false_neg,false_pos_x,false_pos = util.accuracy(action,VE, LEAD_TIME_CAP=80)   
     axc.set_xlim([0,max(xvar[-1],false_pos_x[-1])])
@@ -165,17 +170,9 @@ def plot_all(TEST_LIST, DATE):
     ax_fn.set_xticks(x)
     ax_fn.set_xticklabels(TEST_LIST,fontsize = FONTSIZE)
 
-
     hit_avg = 0
     fp_avg = 0
     fn_avg = 0
-
-    def average(y,x):
-        auc = 0
-        for i in range(len(y)):
-            auc += y[i] * x[i]
-        auc /= x[-1]
-        return auc
 
     for x,TEST in enumerate(TEST_LIST):
         print("Plotting: ",TEST)
@@ -204,70 +201,84 @@ def plot_all(TEST_LIST, DATE):
 
     plt.savefig(HOME+ '/plot/' + DATE + '_all_tests' + '_harvard.png', dpi=300)
 
+def global_avg(TEST_LIST, DATE):
+    #PARAMETERS
+    hit_avg = 0
+    fp_avg = 0
+    fn_avg = 0
+
+    for x,TEST in enumerate(TEST_LIST):
+        HOME = os.environ['HOME']
+        action =      np.load(HOME+'/plot/data/harvard_'+DATE+'_action_'+TEST +'.npy')
+        VE =          np.load(HOME+'/plot/data/harvard_'+DATE+'_VE_'+TEST +'.npy')
+
+        xvar,hits,false_neg,false_pos_x,false_pos = util.accuracy(action,VE, LEAD_TIME_CAP=40)   
+
+        hit_avg += max(hits)
+        fp_avg += min(false_pos)
+        fn_avg += min(false_neg)
+
+    hit_avg /= len(TEST_LIST)
+    fp_avg /= len(TEST_LIST)
+    fn_avg /= len(TEST_LIST)
+
+    return hit_avg, fp_avg, fn_avg
+
 
 if __name__ == "__main__":
     HOME = os.environ['HOME']
-    OUTPUT_DIR = 'output_1_7'
-    NUM_INSTR = '40000'
+    OUTPUT_DIR = 'output_1_20'
+    NUM_INSTR = '2000'
     VERSION = '1'
     PDN = 'DESKTOP_INTEL_DT'
     PREDICTOR = 'HarvardPowerPredictor_1'
-    IDENTIFIER = "1-11"
-    
-    TEST_LIST_mi =["basicmath", "bitcnts", "blowfish_decrypt", "blowfish_encrypt", 
-        "qsort", "susan_smooth", "susan_edge", "susan_corner", "dijkstra", 
-        "rijndael_decrypt", "rijndael_encrypt", "sha", "crc", "fft", "ffti", 
-        "toast", "untoast"]
+    IDENTIFIER = "1-20"
 
-    TEST_LIST_spec=[
-        #"400.perlbench", \ NO BINARIES
-        "401.bzip2", \
-        "403.gcc", \
-        "410.bwaves", \
-        #"416.gamess", \ NO BINARIES
-        "429.mcf", \
-        "433.milc", \
-        "434.zeusmp", \
-        "435.gromacs", \
-        "436.cactusADM", \
-        "437.leslie3d", \
-        "444.namd", \
-        "445.gobmk", \
-        "447.dealII", \
-        "450.soplex", \
-        "453.povray", \
-        "454.calculix", \
-        "456.hmmer", \
-        "458.sjeng", \
-        "459.GemsFDTD", \
-        "462.libquantum", \
-        "464.h264ref", \
-        "470.lbm", \
-        "471.omnetpp", \
-        "473.astar", \
-        # "481.wrf", \
-        # "482.sphinx3", \
-        # "983.xalancbmk", \
-        # "998.specrand", \
-        # "999.specrand" \
-        ]
-    # NUM_INSTR = ""
+    # IDENTIFIER = "spec_1-11"
+    # NUM_INSTR = "10000000000"
+    # OUTPUT_DIR = 'spec_output_1_7'
 
-    TEST = 'fft'
+    TEST = 'crc'
     path = HOME+'/'+OUTPUT_DIR+'/gem5_out/'+TEST+'_'+NUM_INSTR+'_'+VERSION+'_'+PDN+'_'+PREDICTOR+'/stats.txt'
     print(path)
     stats = open(path, 'r')
-    calc_plot_stats(stats, CYCLE_START=12200, CYCLE_END=-1, IDENTIFIER=IDENTIFIER)
-    PLOT_START_CYCLE = 12000
-    PLOT_END_CYCLE = 17000
-    plot_single(TEST, IDENTIFIER, PLOT_START_CYCLE, PLOT_END_CYCLE)
+    calc_plot_stats(stats, CYCLE_START=0, CYCLE_END=-1, IDENTIFIER=IDENTIFIER)
+    # for TEST in util.TEST_LIST_mi:
+    plot_single(TEST, IDENTIFIER, start_cycle=0, end_cycle=20000)
+    
 
-    # for TEST in TEST_LIST_spec:
+
+    # for TEST in util.TEST_LIST_spec:
     #     path = HOME+'/'+OUTPUT_DIR+'/gem5_out/'+TEST+'_'+NUM_INSTR+'_'+VERSION+'_'+PDN+'_'+PREDICTOR+'/stats.txt'
     #     print(path)
     #     stats = open(path, 'r')
     #     calc_plot_stats(stats, CYCLE_START=1000, CYCLE_END=-1, IDENTIFIER=IDENTIFIER)
-    # plot_all(TEST_LIST_mi, IDENTIFIER)
+    # plot_all(util.TEST_LIST_spec, IDENTIFIER)
+
+# R = 3.2E-3
+# L = 25E-12
+# C = 0.9E-6
+    # averages = []
+    # for l in range(1,6):
+    #     for c in range(1,6):
+    #         for r in range(1,6):
+    #             L = 10E-12 + l * ((60E-12 - 10E-12)/5)
+    #             C = 0.2E-6 + c * ((3E-6 - 0.2E-6)/5)
+    #             R = 0.5E-3 + r * ((5E-3 - 0.5E-3)/5)
+    #             print(l," ",c," ",r," of ", 5**3)
+
+    #             for TEST in util.TEST_LIST_spec:
+    #                 path = HOME+'/'+OUTPUT_DIR+'/gem5_out/'+TEST+'_'+NUM_INSTR+'_'+VERSION+'_'+PDN+'_'+PREDICTOR+'/stats.txt'
+    #                 stats = open(path, 'r')
+    #                 print(TEST)
+    #                 calc_plot_stats(stats, CYCLE_START=1000, CYCLE_END=-1, IDENTIFIER=IDENTIFIER)
+    #             hit_avg, fp_avg, fn_avg = global_avg(util.TEST_LIST_spec, IDENTIFIER)
+    #             averages.append([l,c,r,hit_avg, fp_avg, fn_avg])
+
+    #             np.save(HOME+'/plot/data/PDN_SWEEP_HARVARD_spec', np.array(averages))
+
+    
+                
 
 
 

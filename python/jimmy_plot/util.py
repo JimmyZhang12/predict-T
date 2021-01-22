@@ -8,50 +8,6 @@ from enum import Enum
 from collections import deque, defaultdict
 
 
-event_map = {
-    0:'NO_EVENT',
-    1:'BRANCH_T',
-    2:'BRANCH_NT',
-    3:'BRANCH_MP',
-    4:'FETCH',
-    5:'TLB_STALL',
-    6:'ICACHE_STALL',
-    7:'COMMIT_BLOCK',
-    8:'IQ_FULL',
-    9:'LSQ_FULL',
-    10:'LOAD_EX',
-    11:'LOAD_WB',
-    12:'LOAD_CFETCH',
-    13:'STORE_EXECUTE',
-    14:'STORE_WB',
-    15:'INSTR_DISPATCH',
-    16:'INSTR_ISSUE',
-    17:'INSTR_EXECUTE',
-    18:'INSTR_COMMIT',
-    19:'MEM_MP',
-    20:'EMPTY_EVENT',
-    21:'DUMMY_EVENT2'
-    }
-event_map_filter = {
-    1:'BRANCH_T',
-    2:'BRANCH_NT',
-    3:'BRANCH_MP',
-    19:'MEM_MP',
-
-}
-event_map_pred = {
-    0:'NO_EVENT',
-    1:'BRANCH_T',
-    2:'BRANCH_NT',
-    3:'BRANCH_MP',
-    19:'MEM_MP',
-    20:'EMPTY_EVENT',
-
-    22:'DCACHE_MISS',
-    23:'ICACHE_MISS',
-    24:'L2_MISS',
-    25:'TLB_MISS',
-}
 
 class PDN:
     def __init__(self, L, C, R, VDC, CLK):
@@ -62,22 +18,90 @@ class PDN:
         self.CLK = CLK
         self.vout_2_cycle_ago = VDC
         self.vout_1_cycle_ago = VDC
+        self.iout_1_cycle_ago = 0
     def get_curr(self, current):
         ts = 1/self.CLK
         LmulC = self.L*self.C
         LdivR = self.L/self.R
-        vout = self.VDC*ts**2/LmulC \
-            + self.vout_1_cycle_ago*(2 - ts/LdivR) \
+        vout = self.VDC*ts**2/(LmulC) \
+            + self.vout_1_cycle_ago*(2 - ts/(LdivR)) \
             + self.vout_2_cycle_ago*(ts/(LdivR) \
             - 1 - ts**2/(LmulC)) \
-            - current*self.R*ts**2/(LmulC)
+            - current*self.R*ts**2/(LmulC) \
+            - (1/self.C)*ts*(current - self.iout_1_cycle_ago)
             
         self.vout_2_cycle_ago = self.vout_1_cycle_ago
         self.vout_1_cycle_ago = vout
+        self.iout_1_cycle_ago = current
         return vout
 
 
+class Events(Enum):
+    NO_EVENT = 1
+    BRANCH_T = 2
+    BRANCH_NT = 3 
+    BRANCH_MP = 4
+    FETCH = 5 
+    TLB_STALL = 6 
+    ICACHE_STALL = 7
+    COMMIT_BLOCK = 8
+    IQ_FULL = 9
+    LSQ_FULL = 10 
+    LOAD_EX = 11
+    LOAD_WB = 12
+    LOAD_CFETCH = 13
+    STORE_EXECUTE = 14
+    STORE_WB = 15
+    INSTR_DISPATCH = 16
+    INSTR_ISSUE = 17
+    INSTR_EXECUTE = 18
+    INSTR_COMMIT = 19
+    MEM_MP = 20
+    EMPTY_EVENT = 21
+    DUMMY_EVENT2 = 22
+    #from other stats
+    DCACHE_MISS = 23
+    ICACHE_MISS = 24
+    L2_MISS = 25
+    TLB_MISS = 16
+
 class Cycle_Dump:
+    event_map = {
+        #from new_events_stats
+        0:'NO_EVENT',
+        1:'BRANCH_T',
+        2:'BRANCH_NT',
+        3:'BRANCH_MP',
+        4:'FETCH',
+        5:'TLB_STALL',
+        6:'ICACHE_STALL',
+        7:'COMMIT_BLOCK',
+        8:'IQ_FULL',
+        9:'LSQ_FULL',
+        10:'LOAD_EX',
+        11:'LOAD_WB',
+        12:'LOAD_CFETCH',
+        13:'STORE_EXECUTE',
+        14:'STORE_WB',
+        15:'INSTR_DISPATCH',
+        16:'INSTR_ISSUE',
+        17:'INSTR_EXECUTE',
+        18:'INSTR_COMMIT',
+        19:'MEM_MP',
+        20:'EMPTY_EVENT',
+        21:'DUMMY_EVENT2',
+        #from other stats
+        22:'DCACHE_MISS',
+        23:'ICACHE_MISS',
+        24:'L2_MISS',
+        25:'TLB_MISS',
+    }
+    new_events_blacklist = {
+        0:'NO_EVENT',
+        20:'EMPTY_EVENT',
+        21:'DUMMY_EVENT2',
+    }
+
     def __init__(self, stats):
         self.ve_count = 0
         self.action_count = 0
@@ -102,7 +126,7 @@ class Cycle_Dump:
         self.TLBcacheMisses_count = 0
         self.L2cacheMisses_count = 0
 
-        keys = event_map_pred.keys()
+        keys = self.event_map.keys()
         self.event_count = {k: 0 for k in keys}
         self.EOF = False
 
@@ -125,9 +149,8 @@ class Cycle_Dump:
     def new_events(self,line):
         linespl = line.split()
         event = int(linespl[1])
-        if event in event_map_filter.keys() and (event not in self.new_events_var):
+        if (not event in self.new_events_blacklist.keys()) and (event not in self.new_events_var):
             self.new_events_var.append(event)
-
         return
     # # def new_events_prev(self,line):
     # #     linespl = line.split()
@@ -221,110 +244,8 @@ class Cycle_Dump:
         #print('SUPPLY VOLTAGE_prev: ', self.supply_volt_prev)
         print('ANCHOR PC: ', self.anchorPC_var)
         #print("EVENTS: ", [event_map[e] for e in self.new_events_var])
-        print("New Events : ", " ".join([event_map_pred[i] for i in self.new_events_var]) )
+        # print("New Events : ", " ".join([event_map[i] for i in self.new_events_var]) )
         print("***********************************")
-
-class Entry:
-    def __init__(self, pc, events):
-            self.pc = pc
-            self.events = tuple(events)
-
-    def equals(self, entry):
-        if entry is None:
-            return False
-        if (self.pc == entry.pc and self.events == entry.events):
-            return True
-        return False
-
-class Harvard:
-    class State(Enum):
-        NORMAL = 0
-        EMERGENCY = 1 
-
-    def __init__(self,TABLE_HEIGHT, SIGNATURE_LENGTH, HYSTERESIS, EMERGENCY_V, LEAD_TIME):
-        self.TABLE_HEIGHT = TABLE_HEIGHT
-        self.SIGNATURE_LENGTH = SIGNATURE_LENGTH
-        self.HYSTERESIS = HYSTERESIS
-        self.EMERGENCY_V = EMERGENCY_V
-        self.LEAD_TIME = LEAD_TIME
-        self.STATE = self.State.NORMAL
-
-        self.lru = [0] * TABLE_HEIGHT
-        self.h_table =  [ Entry(0,[20]*SIGNATURE_LENGTH) for _ in range(TABLE_HEIGHT)]
-        self.history = deque([0]*SIGNATURE_LENGTH)
-        self.cycle_since_pred = 0
-
-        self.insertIndex = -1
-        self.cycle_predict = -1
-
-        self.VEflag = False
-        self.Actionflag = False
-        self.prev_volt = 0
-        self.prev_PC = None
-        self.event_count = defaultdict(lambda: 0)
-        
-
-    def tick(self, cycle_dump):
-
-        self.insertIndex = -1
-        self.cycle_predict = -1
-        self.VEflag = False
-        self.Actionflag = False
-
-        for i in range(self.TABLE_HEIGHT):
-            self.lru[i] += 1
-
-        #update
-        self.cycle_since_pred += 1
-        self.history_insert(cycle_dump.new_events_var)
-        curr_entry = Entry(pc=cycle_dump.anchorPC_var, events=self.history)
-        #predict
-        if cycle_dump.new_events_var or self.prev_PC != cycle_dump.anchorPC_var:
-            self.cycle_predict = self.find(curr_entry)
-            if self.cycle_predict != -1:
-                self.cycle_since_pred = 0
-                self.Actionflag = True
-
-        if (cycle_dump.supply_volt < self.EMERGENCY_V and self.prev_volt > self.EMERGENCY_V):
-            self.VEflag = True
-            if self.cycle_since_pred > self.LEAD_TIME:
-                self.insertIndex = self.insert(curr_entry)
-        
-        self.prev_volt = cycle_dump.supply_volt
-        self.prev_PC = cycle_dump.anchorPC_var
-        return
-
-    def history_insert(self, events):
-        for e in events:
-            self.event_count[e] += 1
-            self.history.popleft()
-            self.history.append(e)
-
-    def find(self, entry):
-        for i, table_entry in enumerate(self.h_table):
-            if entry.equals(table_entry):
-                self.lru[i] = 0
-                return i
-        return -1
-    def insert(self, entry):
-        index = self.lru.index(max(self.lru))
-        self.h_table[index] = entry
-        self.lru[index] = 0
-        return index
-
-    def print(self):
-        for i in range(self.TABLE_HEIGHT):
-            print(i,':  ',self.lru[i], self.h_table[i].pc,  [event_map_pred[e] for e in self.h_table[i].events])
-        print("HISTORY: ", [event_map_pred[e] for e in self.history])
-        print("Cycles since Prediction: ", self.cycle_since_pred)
-        if self.Actionflag:
-            print('cycle PREDICTION HIGH :' + str(self.cycle_predict)) 
-        if self.VEflag:
-            print('Entering EMERGENCY state')
-            print('insert ENTRY :' + str(self.insertIndex)) 
-
-        else:
-            print(self.STATE)
 
 
 def accuracy(action,VE,LEAD_TIME_CAP):
@@ -379,5 +300,60 @@ def accuracy(action,VE,LEAD_TIME_CAP):
         false_pos_x.append(xvar[-1])
         false_pos.append(false_pos[-1])
 
-
+    # print(false_neg)
+    # print(false_pos)
     return [xvar,hits,false_neg,false_pos_x,false_pos]  
+
+
+TEST_LIST_spec=[
+    #"400.perlbench", NO BINARIES
+    "401.bzip2", 
+    "403.gcc", 
+    "410.bwaves", 
+    #"416.gamess", NO BINARIES
+    "429.mcf", 
+    "433.milc", 
+    "434.zeusmp", 
+    "435.gromacs", 
+    "436.cactusADM", 
+    "437.leslie3d", 
+    "444.namd", 
+    "445.gobmk", 
+    "447.dealII", 
+    "450.soplex", 
+    "453.povray", 
+    "454.calculix", 
+    "456.hmmer", 
+    "458.sjeng", 
+    "459.GemsFDTD", 
+    "462.libquantum", 
+    "464.h264ref", 
+    "470.lbm", 
+    "471.omnetpp", 
+    "473.astar", 
+    # "481.wrf", \
+    # "482.sphinx3", \
+    # "983.xalancbmk", \
+    # "998.specrand", \
+    # "999.specrand" \
+    ]
+
+TEST_LIST_mi = [
+    "basicmath", 
+    "bitcnts", 
+    "blowfish_decrypt", 
+    "blowfish_encrypt", 
+    "qsort", 
+    "susan_smooth",
+    # "susan_edge", 
+    # "susan_corner", 
+    "dijkstra", 
+    "rijndael_decrypt", 
+    # "rijndael_encrypt", 
+    "sha", 
+    "crc", 
+    "fft", 
+    "ffti", 
+    "toast", 
+    "untoast"
+]

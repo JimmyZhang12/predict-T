@@ -4,19 +4,31 @@ matplotlib.use('Agg')
 
 import matplotlib.pyplot as plt
 import numpy as np
-import util_dist_pred as util
+import util
+import convolution
 from enum import Enum
 from datetime import datetime
 import math
 
+
+L = 20E-12
+C = 1.32E-6
+R = 0.0032
 def calc_plot_stats(stats, CYCLE_START, CYCLE_END, IDENTIFIER):
 
-    dist_pred = util.Dist_Pred(
-        HISTORY_WIDTH= 10,
+    pdn = util.PDN(
+        L = L,
+        C = C,
+        R = R,
+        VDC = 1.4,
+        CLK = 4E9,
+    )
+    dist_pred = convolution.Conv_Pred(
+        HISTORY_WIDTH=60,
         HYSTERESIS=0.005, 
         EMERGENCY_V=1.358, 
-        TABLE_HEIGHT=25, 
-        C_THRES=0.7,
+        TABLE_HEIGHT=5, 
+        C_THRES=0.8,
         LEAD_TIME = 20)
 
     cycle_dump = util.Cycle_Dump(stats)
@@ -33,22 +45,22 @@ def calc_plot_stats(stats, CYCLE_START, CYCLE_END, IDENTIFIER):
         if EOF:
             break
         else:
+            voltage = pdn.get_curr(cycle_dump.supply_curr)
+            cycle_dump.supply_volt = voltage
             dist_pred.tick(cycle_dump)
-
 
         supply_curr.append(cycle_dump.supply_curr)
         supply_volt.append(cycle_dump.supply_volt)
         conf.append(dist_pred.conv_max_norm[-1])
-        action.append(dist_pred.Actionflag_curr)
-        VE.append(dist_pred.VEflag_curr)
-
-        # print(dist_pred.VEflag_prev)
-        # print(dist_pred.VEflag_curr)
-        if cycle_dump.cycle % 1000 < 1:
-            print (cycle_dump.cycle)
+        action.append(dist_pred.Actionflag)
+        VE.append(dist_pred.VEflag)
 
         if cycle_dump.cycle > CYCLE_END and CYCLE_END != -1:
             break
+
+        if cycle_dump.cycle % 1000 < 1:
+            print (cycle_dump.cycle)
+
         # if cycle_dump.cycle > CYCLE_START: 
         #     cycle_dump.dump()
         #     dist_pred.print()
@@ -58,9 +70,11 @@ def calc_plot_stats(stats, CYCLE_START, CYCLE_END, IDENTIFIER):
         #     cycle_dump.dump()
         #     dist_pred.print()
         #     input()
+
     #print how many events 
     for k,v in cycle_dump.event_count.items():
-        print(util.event_map_pred[k], ": ", v)
+        if k in convolution.valid_events.keys():
+            print(cycle_dump.event_map[k], ": ", v)
         
     HOME = os.environ['HOME']
     np.save(HOME+'/plot/data/conv'+IDENTIFIER+'_supply_curr_'  + TEST, np.array(supply_curr))
@@ -236,71 +250,75 @@ def plot_all(TEST_LIST, DATE):
     plt.savefig(dir, dpi=300)
     print(dir)
 
+def global_avg(TEST_LIST, DATE):
+    #PARAMETERS
+    hit_avg = 0
+    fp_avg = 0
+    fn_avg = 0
+
+    for x,TEST in enumerate(TEST_LIST):
+        HOME = os.environ['HOME']
+        action =      np.load(HOME+'/plot/data/harvard_'+DATE+'_action_'+TEST +'.npy')
+        VE =          np.load(HOME+'/plot/data/harvard_'+DATE+'_VE_'+TEST +'.npy')
+
+        xvar,hits,false_neg,false_pos_x,false_pos = util.accuracy(action,VE, LEAD_TIME_CAP=40)   
+
+        hit_avg += max(hits)
+        fp_avg += min(false_pos)
+        fn_avg += min(false_neg)
+
+    hit_avg /= len(TEST_LIST)
+    fp_avg /= len(TEST_LIST)
+    fn_avg /= len(TEST_LIST)
+
+    return hit_avg, fp_avg, fn_avg
+    
 if __name__ == "__main__":
     HOME = os.environ['HOME']
-    OUTPUT_DIR = 'spec_output_1_7'
+    OUTPUT_DIR = 'output_1_7'
     NUM_INSTR = '40000'
     VERSION = '1'
     PDN = 'DESKTOP_INTEL_DT'
     PREDICTOR = 'HarvardPowerPredictor_1'
+    IDENTIFIER = "1-11"
 
-    # TEST = 'crc'
+    # IDENTIFIER = "spec_1-11"
+    # NUM_INSTR = "10000000000"
+    # OUTPUT_DIR = 'spec_output_1_7'
+
+    # TEST = '403.gcc'
     # path = HOME+'/'+OUTPUT_DIR+'/gem5_out/'+TEST+'_'+NUM_INSTR+'_'+VERSION+'_'+PDN+'_'+PREDICTOR+'/stats.txt'
     # print(path)
     # stats = open(path, 'r')
     # calc_plot_stats(stats, CYCLE_START=653, CYCLE_END=-1, IDENTIFIER=IDENTIFIER)
 
-    # PLOT_START_CYCLE = 10000
-    # PLOT_END_CYCLE = 15000
-    # plot_single(TEST, IDENTIFIER, PLOT_START_CYCLE, PLOT_END_CYCLE)
-    
-    # TEST_LIST =["basicmath", "bitcnts", "blowfish_decrypt", "blowfish_encrypt", 
-    #     "qsort", "susan_smooth", "susan_edge", "susan_corner", "dijkstra", 
-    #     "rijndael_decrypt", "rijndael_encrypt", "sha", "crc", "fft", "ffti", 
-    #     "toast", "untoast"]
-    # IDENTIFIER = "1-7"
+    # plot_single(TEST, IDENTIFIER, start_cycle=15000, end_cycle=25000)
 
-    TEST_LIST=[
-    #"400.perlbench", \ NO BINARIES
-    "401.bzip2", \
-    "403.gcc", \
-    "410.bwaves", \
-    #"416.gamess", \ NO BINARIES
-    "429.mcf", \
-    "433.milc", \
-    "434.zeusmp", \
-    "435.gromacs", \
-    "436.cactusADM", \
-    "437.leslie3d", \
-    "444.namd", \
-    "445.gobmk", \
-    "447.dealII", \
-    "450.soplex", \
-    "453.povray", \
-    "454.calculix", \
-    "456.hmmer", \
-    "458.sjeng", \
-    "459.GemsFDTD", \
-    "462.libquantum", \
-    "464.h264ref", \
-    "470.lbm", \
-    "471.omnetpp", \
-    "473.astar", \
-    # "481.wrf", \
-    # "482.sphinx3", \
-    # "983.xalancbmk", \
-    # "998.specrand", \
-    # "999.specrand" \
-    ]
-    NUM_INSTR = ""
-    IDENTIFIER = "1-7_spec"
-
-    for TEST in TEST_LIST:
+    for TEST in util.TEST_LIST_mi:
         path = HOME+'/'+OUTPUT_DIR+'/gem5_out/'+TEST+'_'+NUM_INSTR+'_'+VERSION+'_'+PDN+'_'+PREDICTOR+'/stats.txt'
         print(path)
         stats = open(path, 'r')
         calc_plot_stats(stats, CYCLE_START=1000, CYCLE_END=-1, IDENTIFIER=IDENTIFIER)
-    plot_all(TEST_LIST, IDENTIFIER)
+    plot_all(util.TEST_LIST_mi, IDENTIFIER)
+
+    # averages = []
+    # for l in range(1,6):
+    #     for c in range(1,6):
+    #         for r in range(1,6):
+    #             L = 10E-12 + l * ((60E-12 - 10E-12)/5)
+    #             C = 0.2E-6 + c * ((3E-6 - 0.2E-6)/5)
+    #             R = 0.5E-3 + r * ((5E-3 - 0.5E-3)/5)
+    #             print("CONV", l," ",c," ",r," of ", 5**3)
+
+    #             for TEST in util.TEST_LIST_spec:
+    #                 path = HOME+'/'+OUTPUT_DIR+'/gem5_out/'+TEST+'_'+NUM_INSTR+'_'+VERSION+'_'+PDN+'_'+PREDICTOR+'/stats.txt'
+    #                 stats = open(path, 'r')
+    #                 print(TEST)
+    #                 calc_plot_stats(stats, CYCLE_START=1000, CYCLE_END=-1, IDENTIFIER=IDENTIFIER)
+    #             hit_avg, fp_avg, fn_avg = global_avg(util.TEST_LIST_spec, IDENTIFIER)
+    #             averages.append([l,c,r,hit_avg, fp_avg, fn_avg])
+    #             np.save(HOME+'/plot/data/PDN_SWEEP_CONV_spec', np.array(averages))
+
 
 
 

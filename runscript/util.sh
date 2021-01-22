@@ -66,6 +66,9 @@ se_classic_mc_ncv() {
   PPACTION=${39} # Num Actions in DNN/Perceptron
   PPVE=${40}   # Voltage Emergency Level
   PPVTH=${41}  # Voltage Threshold Level; applies to sensor predictor
+  L=${42}
+  C=${43}
+  R=${44}
 
   echo "RUNNING: "${TEST}/${EXE} 
 
@@ -87,6 +90,11 @@ se_classic_mc_ncv() {
     --ncverilog_warmup=10 \
     --ncverilog_path=${PREDICT_T_ROOT}/circuit_model \
     --power-supply-type=$P \
+    --pdn_L=${L} \
+    --pdn_C=${C} \
+    --pdn_R=${R} \
+    --pdn_VDC=${V} \
+    --pdn_CLK=${F} \
     $GEM5_ROOT/configs/example/se.py \
     --cmd=${TEST}/${EXE} \
     --opt="${OPT}" \
