@@ -136,7 +136,7 @@ se_classic_mc_ncv() {
     --l3_size=${L3_} \
     --caches \
     --sys-clock=${CLK} \
-    --mem-size=8GB > ${OUTPUT_ROOT}/text_out/$TN.out &
+    --mem-size=8GB #> ${OUTPUT_ROOT}/text_out/$TN.out &
 }
 
 se_classic_mc_ncv_spec() {
@@ -249,5 +249,5 @@ se_classic_mc_ncv_spec() {
     --l3_size=${L3_} \
     --caches \
     --sys-clock=${CLK} \
-    --mem-size=8GB > ${OUTPUT_ROOT}/text_out/$TN.out &
+    --mem-size=8GB #> ${OUTPUT_ROOT}/text_out/$TN.out &
 }

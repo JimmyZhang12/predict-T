@@ -100,7 +100,7 @@ print_info "TRAINING_ROOT $TRAINING_ROOT"
 # Configure Simulation Parameters
 DURATION=("-1" "-1" "-1" "-1" "-1" "-1" "-1" "-1" "-1" "-1" "-1" "-1" "-1" "-1" "-1" "-1" "-1") # Data Points to Simulate
 #INSTRUCTIONS=("10000" "25000" "25000" "25000" "25000" "25000" "25000") # Instructions to Simulate
-INSTRUCTIONS=("20000" "40000" "40000" "40000" "40000" "40000" "40000" "40000" "40000" "40000" "40000" "40000" "40000" "40000" "40000" "40000" "40000" "40000")
+INSTRUCTIONS=("200" "40000" "40000" "40000" "40000" "40000" "40000" "40000" "40000" "40000" "40000" "40000" "40000" "40000" "40000" "40000" "40000" "40000")
 
 # When to start ROI, in Sim Ticks, -or- ROI by setting "-1"
 #default 10^12 sim ticks per second (250 ticks per cycle at 4Ghz)
