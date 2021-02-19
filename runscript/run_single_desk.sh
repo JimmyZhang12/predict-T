@@ -107,7 +107,7 @@ INSTRUCTIONS=("10" "30000" "30000" "30000" "30000" "30000" "30000" "30000" "3000
 #DURATION=("-1") # Data Points to Simulate
 #INSTRUCTIONS=("25000") # Instructions to Simulate
 ## When to start ROI, in Sim Ticks, -or- ROI by setting "-1"
-PROFILE_START=("0") 
+PROFILE_START=("-1") 
 
 #---------------------------------------------------
 # Device Params:
