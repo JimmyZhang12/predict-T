@@ -73,10 +73,12 @@ se_classic_mc_ncv() {
   PDN_RES=${44}  # Voltage Threshold Level; applies to sensor predictor
   
   #--debug-flags=StatEvent \
+  # --debug-flags=PPredStat \
+  #  --ncverilog_enable \
+
     #--ncverilog_feedback \
   #gdb --args $GEM5_ROOT/build/X86/gem5.debug \
   time $GEM5_ROOT/build/X86/gem5.opt \
-    --debug-flags=PPredStat \
     --outdir=${OUTPUT_ROOT}/gem5_out/$TN \
     --mcpat_enable \
     --mcpat_path=${MCPAT_ROOT} \
@@ -89,7 +91,6 @@ se_classic_mc_ncv() {
     --power_profile_start=${PS} \
     --power_profile_duration=${DUR} \
     --power_profile_instrs=${INSTRS} \
-    --ncverilog_enable \
     --ncverilog_warmup=10 \
     --ncverilog_path=${PREDICT_T_ROOT}/circuit_model \
     --power-supply-type=$P \
@@ -110,6 +111,7 @@ se_classic_mc_ncv() {
     --pdn_ind=${PDN_IND} \
     --pdn_cap=${PDN_CAP} \
     --pdn_res=${PDN_RES} \
+    --debug_print_delay=0 \
     --num-cpus=${NCORE} \
     --cpu_superscalar_width=$CW \
     --cpu_fetch_buffer_size=$FBS \

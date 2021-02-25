@@ -4,16 +4,15 @@ matplotlib.use('Agg')
 
 import matplotlib.pyplot as plt
 import numpy as np
-import harvard
 import util
 from enum import Enum
 from datetime import datetime
 import math
+import random
 
 def plot_all(TEST_LIST, DATE):
 
-    hits =      [64,63,47,92,75,68,86,36,95,32,72,48,11,33,55,30,81,25,48,45,95,15,82]
-    false_pos = [45,48,63,22,39,61,24,27,75,53,78,62,55,15,81,34,25,74,32,16,4,80,40]
+
     #PARAMETERS
     FONTSIZE = 12
     HOME = os.environ['HOME']
@@ -63,8 +62,8 @@ def plot_all(TEST_LIST, DATE):
     ax_fp.set_title('False Pos (Min) Average = '+ str(fp_avg), fontsize=FONTSIZE*2)
     ax_fn.set_title('False Neg (Min) Average = '+ str(fn_avg), fontsize=FONTSIZE*2)
 
-    plt.savefig(HOME+ '/plot/' + DATE + '_all_tests' + '_harvard.png', dpi=300)
+    plt.savefig(HOME+ '/plot/' + DATE + '_all_tests' + '_conv.png', dpi=300)
 
 
 if __name__ == "__main__":
-    plot_all(util.TEST_LIST_spec, "02-11-20")
+    plot_all(util.TEST_LIST_spec, "02-19-20")

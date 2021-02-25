@@ -96,10 +96,12 @@ print_info "TRAINING_ROOT $TRAINING_ROOT"
 # Simulation Params
 #---------------------------------------------------
 # Configure Simulation Parameters
-DURATION=("-1" "-1" "-1" "-1" "-1" "-1" "-1" "-1" "-1" "-1" "-1" "-1" "-1" "-1" "-1" "-1" "-1") # Data Points to Simulate
+DURATION=("10" "-1" "-1" "-1" "-1" "-1" "-1" "-1" "-1" "-1" "-1" "-1" "-1" "-1" "-1" "-1" "-1") # Data Points to Simulate
 #INSTRUCTIONS=("10000" "25000" "25000" "25000" "25000" "25000" "25000") # Instructions to Simulate
-INSTRUCTIONS=("10" "30000" "30000" "30000" "30000" "30000" "30000" "30000" "30000" "30000" "30000" "30000" "30000" "30000" "30000" "30000" "30000")
-#INSTRUCTIONS=("2000")
+INSTRUCTIONS=("10000000" "30000" "30000" "30000" "30000" "30000" "30000" "30000" "30000" "30000" "30000" "30000" "30000" "30000" "30000" "30000" "30000")
+
+# Stat Dump Cycles
+CPU_CYCLES=("100000")
 
 # When to start ROI, in Sim Ticks, -or- ROI by setting "-1"
 # PROFILE_START=("0" "-1" "-1" "-1" "-1" "-1" "-1" "-1" "-1" "-1" "-1" "-1" "-1" "-1" "-1" "-1" "-1")  
@@ -178,8 +180,7 @@ L3=("16MB")
 #---------------------------------------------------
 # Predictor Params:
 #---------------------------------------------------
-# Stat Dump Cycles
-CPU_CYCLES=("1")
+
 
 PREDICTOR=(
 #"IdealSensor" 
