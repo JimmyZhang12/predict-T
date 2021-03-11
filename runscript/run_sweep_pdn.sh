@@ -177,7 +177,7 @@ L3=("16MB")
 # Predictor Params:
 #---------------------------------------------------
 # Stat Dump Cycles
-CPU_CYCLES=("2")
+
 
 PREDICTOR=(
 #"IdealSensor" 
