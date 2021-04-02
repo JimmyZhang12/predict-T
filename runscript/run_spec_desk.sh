@@ -96,7 +96,7 @@ print_info "TRAINING_ROOT $TRAINING_ROOT"
 #---------------------------------------------------
 # Simulation Params
 #---------------------------------------------------
-DURATION=("30") # Data Points to Simulate
+DURATION=("35") # Data Points to Simulate
 START_DELAY=("10000000")
 # Stat Dump Cycles
 CPU_CYCLES=("500000")
@@ -118,7 +118,7 @@ McPAT_SCALE_FACTOR=("1.0") # This is a HACK, Fix McPAT to support < 22nm planar
 NUM_CORES=("1")
 
 VOLTAGE=("1.4")
-VOLTAGE_EMERGENCY=("1.344")
+VOLTAGE_EMERGENCY=("1.33")
 VOLTAGE_THRESHOLD=("1.372")
 
 #---------------------------------------------------
@@ -144,14 +144,12 @@ L3=("16MB")
 #---------------------------------------------------
 
 PREDICTOR=(
-#"IdealSensor" 
-#"uArchEventPredictor" 
-"HarvardPowerPredictor"
-#"DecorOnly" 
+# "HarvardPowerPredictorMitigation"
+# "HarvardPowerPredictor"
+"IdealSensor"
+# "IdealSensorHarvardMitigation"
 )
-#"DepAnalysis"
-#"ThrottleAfterStall"
-#"Test"
+
 PPRED_TRAINED_MODEL=(
 "bottom.txt"
 "bottom.txt"
@@ -257,7 +255,6 @@ SIMD_UNIT_COUNT=("4")
 #---------------------------------------------------
 # Test Executables:
 #---------------------------------------------------
-
 name=(
 	"429.mcf" \
 	"433.milc" \
@@ -273,7 +270,6 @@ name=(
 	"459.GemsFDTD" \
 	"462.libquantum" \
 	"464.h264ref" \
-	"470.lbm" \
 	"471.omnetpp" \
 	"473.astar" \
 	"481.wrf" \
@@ -295,7 +291,6 @@ dir=(
 	"$HOME/passat/spec2006/benchspec/CPU2006/459.GemsFDTD/run/run_base_ref_amd64-m64-gcc43-nn.0000/" \
 	"$HOME/passat/spec2006/benchspec/CPU2006/462.libquantum/run/run_base_ref_amd64-m64-gcc43-nn.0000/" \
 	"$HOME/passat/spec2006/benchspec/CPU2006/464.h264ref/run/run_base_ref_amd64-m64-gcc43-nn.0000/" \
-	"$HOME/passat/spec2006/benchspec/CPU2006/470.lbm/run/run_base_ref_amd64-m64-gcc43-nn.0000/" \
 	"$HOME/passat/spec2006/benchspec/CPU2006/471.omnetpp/run/run_base_ref_amd64-m64-gcc43-nn.0000/" \
 	"$HOME/passat/spec2006/benchspec/CPU2006/473.astar/run/run_base_ref_amd64-m64-gcc43-nn.0000/" \
 	"$HOME/passat/spec2006/benchspec/CPU2006/481.wrf/run/run_base_ref_amd64-m64-gcc43-nn.0000/" \
@@ -317,7 +312,6 @@ cmd=(
 	"GemsFDTD_base.amd64-m64-gcc43-nn" \
 	"libquantum_base.amd64-m64-gcc43-nn" \
 	"h264ref_base.amd64-m64-gcc43-nn" \
-	"lbm_base.amd64-m64-gcc43-nn" \
 	"omnetpp_base.amd64-m64-gcc43-nn" \
 	"astar_base.amd64-m64-gcc43-nn" \
 	"wrf_base.amd64-m64-gcc43-nn" \
@@ -339,7 +333,6 @@ opt=(
 	"" \
 	"1297 8 " \
 	"-d foreman_ref_encoder_baseline.cfg " \
-	"300 reference.dat 0 0 100_100_130_ldc.of " \
 	"omnetpp.ini " \
 	"rivers.cfg " \
 	"" \
@@ -365,16 +358,20 @@ stdin=(
 	"" \
 	"" \
 	"" \
-	"" \
 )
+
 
 #---------------------------------------------------
 # PDN PARAMS:
 #---------------------------------------------------
 
 L=$(echo "scale=30;20*10^-12" | bc)
-R=$(echo "scale=30;1.32*10^-6" | bc)
-C=$(echo "scale=30;3.2*10^-3" | bc)
+C=$(echo "scale=30;1.32*10^-6" | bc)
+R=$(echo "scale=30;3.2*10^-3" | bc)
+
+# L=$(echo "scale=30;20*10^-12" | bc)
+# R=$(echo "scale=30;1.32*10^-6" | bc)
+# C=$(echo "scale=30;3.2*10^-3" | bc)
 
 # L=$(echo "scale=30;30*10^-12" | bc)
 # R=$(echo "scale=30;2.32*10^-6" | bc)
@@ -440,7 +437,7 @@ for j in ${!name[@]}; do
         ${stdin[$j]} \
 
 
-    while [ `jobs | wc -l` -ge 14 ]; do
+    while [ `jobs | wc -l` -ge 6 ]; do
       sleep 1
     done
   done

@@ -27,8 +27,6 @@
 se_classic_mc_ncv() {
   TN=$1
   DUR=$2
-  echo $TN
-  echo ${DUR}
   INSTRS=$3
   PS=$4
   EXE=$5
@@ -73,13 +71,15 @@ se_classic_mc_ncv() {
   PDN_RES=${44}  # Voltage Threshold Level; applies to sensor predictor
   START_DELAY=${45}
   
-  #--debug-flags=StatEvent \
-  # --debug-flags=PPredStat \
-  #  --ncverilog_enable \
-  # --debug-flags=HarvardPowerPred \
 
-    #--ncverilog_feedback \
-  #gdb --args $GEM5_ROOT/build/X86/gem5.debug \
+#  --ncverilog_enable \
+# --ncverilog_feedback \
+#gdb --args $GEM5_ROOT/build/X86/gem5.debug \
+# --power_pred_train_name=${TRAINING_ROOT}/${TN}.csv \
+# --power_pred_model=${PTM} \
+# --power_pred_events=${PPEVENT} \
+# --power_pred_actions=${PPACTION} \
+
   time $GEM5_ROOT/build/X86/gem5.opt \
     --outdir=${OUTPUT_ROOT}/gem5_out/$TN \
     --mcpat_enable \
@@ -97,22 +97,20 @@ se_classic_mc_ncv() {
     --ncverilog_path=${PREDICT_T_ROOT}/circuit_model \
     --power-supply-type=$P \
     $GEM5_ROOT/configs/example/se.py \
+    --save_data=1 \
     --debug_print_delay=0 \
     --run_verilog_power_sim=0 \
+    --mcpat_output_path=${OUTPUT_ROOT}/mcpat_out/$TN \
+    --gem5_output_path=${OUTPUT_ROOT}/gem5_out/$TN \
     --cmd=${TEST}/${EXE} \
     --opt="${OPT}" \
-    --mcpat_output_path=${OUTPUT_ROOT}/mcpat_out/$TN \
-    --power_pred_cpu_cycles=${CS} \
+    --power_pred_cycles_per_dump=${CS} \
+    --power_pred_num_dumps=${DUR} \
     --power_pred_cpu_freq=${F} \
     --power_pred_voltage=${V} \
     --power_pred_voltage_emergency=${PPVE} \
     --power_pred_voltage_threshold=${PPVTH} \
     --power_pred_type=${PRED} \
-    --power_pred_train_name=${TRAINING_ROOT}/${TN}.csv \
-    --power_pred_model=${PTM} \
-    --power_pred_events=${PPEVENT} \
-    --power_pred_actions=${PPACTION} \
-    --power_start_delay=${START_DELAY} \
     --pdn_ind=${PDN_IND} \
     --pdn_cap=${PDN_CAP} \
     --pdn_res=${PDN_RES} \
@@ -144,7 +142,7 @@ se_classic_mc_ncv() {
     --l3_size=${L3_} \
     --caches \
     --sys-clock=${CLK} \
-    --mem-size=8GB > ${OUTPUT_ROOT}/text_out/$TN.out &
+    --mem-size=8GB #> ${OUTPUT_ROOT}/text_out/$TN.out &
 }
 
 se_classic_mc_ncv_spec() {
@@ -195,7 +193,11 @@ se_classic_mc_ncv_spec() {
   START_DELAY=${45}
   STDIN=${46}
 
-#    --ncverilog_enable \
+# --ncverilog_enable \
+# --power_pred_train_name=${TRAINING_ROOT}/${TN}.csv \
+# --power_pred_model=${PTM} \
+# --power_pred_events=${PPEVENT} \
+# --power_pred_actions=${PPACTION} \
 
   time $GEM5_ROOT/build/X86/gem5.opt \
     --outdir=${OUTPUT_ROOT}/gem5_out/$TN \
@@ -214,23 +216,21 @@ se_classic_mc_ncv_spec() {
     --ncverilog_path=${PREDICT_T_ROOT}/circuit_model \
     --power-supply-type=$P \
     $GEM5_ROOT/configs/example/se.py \
+    --save_data=1 \
     --debug_print_delay=0 \
     --run_verilog_power_sim=0 \
+    --mcpat_output_path=${OUTPUT_ROOT}/mcpat_out/$TN \
+    --gem5_output_path=${OUTPUT_ROOT}/gem5_out/$TN \
     --cmd=${EXE} \
     --opt="${OPT}" \
     --input="${STDIN}" \
-    --mcpat_output_path=${OUTPUT_ROOT}/mcpat_out/$TN \
-    --power_pred_cpu_cycles=${CS} \
+    --power_pred_cycles_per_dump=${CS} \
+    --power_pred_num_dumps=${DUR} \
     --power_pred_cpu_freq=${F} \
     --power_pred_voltage=${V} \
     --power_pred_voltage_emergency=${PPVE} \
     --power_pred_voltage_threshold=${PPVTH} \
     --power_pred_type=${PRED} \
-    --power_pred_train_name=${TRAINING_ROOT}/${TN}.csv \
-    --power_pred_model=${PTM} \
-    --power_pred_events=${PPEVENT} \
-    --power_pred_actions=${PPACTION} \
-    --power_start_delay=${START_DELAY} \
     --pdn_ind=${PDN_IND} \
     --pdn_cap=${PDN_CAP} \
     --pdn_res=${PDN_RES} \

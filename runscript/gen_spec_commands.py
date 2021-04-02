@@ -355,7 +355,7 @@ names=[
     "459.GemsFDTD", \
     "462.libquantum", \
     "464.h264ref", \
-    "470.lbm", \
+    # "470.lbm", \
     "471.omnetpp", \
     "473.astar", \
     "481.wrf", \
@@ -364,6 +364,10 @@ names=[
     # "998.specrand", \
     # "999.specrand" \
 ]
+
+
+
+
 
 
 only_names = []

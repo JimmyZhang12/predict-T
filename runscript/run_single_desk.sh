@@ -115,7 +115,7 @@ McPAT_SCALE_FACTOR=("1.0") # This is a HACK, Fix McPAT to support < 22nm planar
 NUM_CORES=("1")
 
 VOLTAGE=("1.4")
-VOLTAGE_EMERGENCY=("1.35")
+VOLTAGE_EMERGENCY=("1.33")
 VOLTAGE_THRESHOLD=("1.372")
 
 #---------------------------------------------------
@@ -138,7 +138,7 @@ L3=("16MB")
 PREDICTOR=(
 # "HarvardPowerPredictorMitigation"
 "HarvardPowerPredictor"
-
+# "IdealSensor"
 )
 
 PPRED_TRAINED_MODEL=(
@@ -277,8 +277,8 @@ opt=("${INPUT}/qsort.dat")
 #---------------------------------------------------
 
 L=$(echo "scale=15;20*10^-12" | bc)
-R=$(echo "scale=15;1.32*10^-6" | bc)
-C=$(echo "scale=15;3.2*10^-3" | bc)
+C=$(echo "scale=15;1.32*10^-6" | bc)
+R=$(echo "scale=15;3.2*10^-3" | bc)
 
 #--------------------------------------------------------------------
 # Run
