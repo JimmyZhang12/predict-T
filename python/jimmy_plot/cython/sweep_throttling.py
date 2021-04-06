@@ -1,4 +1,3 @@
-#testing.py
 import os
 import matplotlib
 matplotlib.use('Agg')
@@ -20,27 +19,27 @@ TEST_LIST_spec=[
     # "410.bwaves", 
     # # "416.gamess", NO BINARIES
     "429.mcf", 
-    "433.milc", 
-    # "434.zeusmp", 
-    "435.gromacs", 
-    "436.cactusADM", 
-    "437.leslie3d", 
-    "444.namd", 
-    "445.gobmk", 
+    # "433.milc", 
+    # # "434.zeusmp", 
+    # "435.gromacs", 
+    # "436.cactusADM", 
+    # "437.leslie3d", 
+    # "444.namd", 
+    # "445.gobmk", 
     # "447.dealII", 
     # "450.soplex", 
-    "453.povray", 
-    "454.calculix", 
-    "456.hmmer", 
-    # "458.sjeng", 
-    "459.GemsFDTD", 
-    "462.libquantum", 
-    "464.h264ref", 
-    # # "470.lbm", 
-    "471.omnetpp", 
-    "473.astar", 
-    "481.wrf", \
-    "482.sphinx3", \
+    # "453.povray", 
+    # "454.calculix", 
+    # "456.hmmer", 
+    # # "458.sjeng", 
+    # "459.GemsFDTD", 
+    # "462.libquantum", 
+    # "464.h264ref", 
+    # # # "470.lbm", 
+    # "471.omnetpp", 
+    # "473.astar", 
+    # "481.wrf", \
+    # "482.sphinx3", \
     # # "983.xalancbmk", \
     # # "998.specrand", \
     # # "999.specrand" \
@@ -78,7 +77,6 @@ class PDN:
         return vout
 
 
-
 def run(test_name):
     #load data files
     HOME = os.environ['HOME']
@@ -89,7 +87,7 @@ def run(test_name):
     file_path = os.path.join(file_path,'power.bin')
 
     save_path = os.path.join(HOME,'plot/data')
-    save_path = os.path.join(save_path,test_name+'_lead_time_sweep.np')
+    save_path = os.path.join(save_path,test_name+'_lead_time_sweep')
     print(file_path)
     print(save_path)
     with open(file_path, "rb") as binaryfile :
@@ -120,8 +118,8 @@ def run(test_name):
     num_VEs = len(ve_cycle)
     print(num_VEs)
 
-    ve_ret = []
-    for THROTTLE_TIME in range(10,150,10):
+    ve_ret = [[0,0,num_VEs]]
+    for THROTTLE_TIME in range(10,150,5):
         for THROTTLE_LEADTIME in range(0,THROTTLE_TIME,5):
             #CYTHON  
             start_throttle = np.asarray([(i-THROTTLE_LEADTIME) for i in ve_cycle], dtype=np.int32)

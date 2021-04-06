@@ -69,13 +69,13 @@ for load in when_load:
 
 voltage_t = []
 power_t = []
-throttle_start_cycles = [599] #must be always even
+throttle_start_cycles = [550] #must be always even
 while throttle_start_cycles[-1] < len(when_load):
     throttle_start_cycles.append(throttle_start_cycles[-1] + 1000)
 
 
 throttle_end_cycles = [] #must always even
-throttle_time = 100
+throttle_time = 60
 for i in throttle_start_cycles:
     throttle_end_cycles.append(i+throttle_time)
 
@@ -125,7 +125,7 @@ fig.set_size_inches(12.5, 7.5)
 ax1.plot(range(len(voltage)), voltage, label = 'no throttle')
 ax1.plot(range(len(voltage_t)), voltage_t, label = 'throttle')
 ax1.legend()
-ax1.set_ylim([min(voltage),VDC])
+ax1.set_ylim([min(min(voltage),min(voltage_t)),VDC])
 ax1.set_xticks(range(0, len(voltage), 150))
 
 # ax.set_xlim([950,1100])
