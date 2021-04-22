@@ -70,7 +70,7 @@ def plot(x,y,num_ves):
 
     HOME = os.environ['HOME']
     DATE = '4-2-2021_'
-    NAME = 'HEATMAP spec'
+    NAME = 'HEATMAP qsort'
     file_dir = HOME+ '/plot/' + DATE + NAME +'.png'
     plt.savefig(file_dir, dpi=300)
     print(file_dir)
@@ -128,16 +128,18 @@ def run(load_path):
 
 if __name__ == "__main__":
     HOME = os.environ['HOME']
-    load_paths = []
-    for tn in TEST_LIST_spec:
-        test_name = tn + '_35_500000_DESKTOP_IdealSensor'
-        load_path = os.path.join(HOME,'plot/data')
-        load_path = os.path.join(load_path,test_name+'_lead_time_sweep.npy')
-        load_paths.append(load_path)
-    run_all(load_paths)
-    # test_name = 'qsort_10_100000_DESKTOP_HarvardPowerPredictor'
-    # load_path = os.path.join(HOME,'plot/data')
-    # load_path = os.path.join(load_path,test_name+'_lead_time_sweep.npy')
+    
+    # load_paths = []
+    # for tn in TEST_LIST_spec:
+    #     test_name = tn + '_35_500000_DESKTOP_IdealSensor'
+    #     load_path = os.path.join(HOME,'plot/data')
+    #     load_path = os.path.join(load_path,test_name+'_lead_time_sweep.npy')
+    #     load_paths.append(load_path)
+    # run_all(load_paths)
+
+    test_name = 'qsort_lead_time_sweep'
+    load_path = os.path.join(HOME,'plot/data')
+    load_path = os.path.join(load_path,test_name+'.npy')
 
     # for tn in TEST_LIST_spec:
     #     run(tn+'_35_500000_DESKTOP_IdealSensor')

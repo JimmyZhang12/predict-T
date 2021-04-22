@@ -76,23 +76,20 @@ class PDN:
         self.iout_1_cycle_ago = current
         return vout
 
-
-def run(test_name):
-    #load data files
+def get_data(test_name):
+    output_dir = 'output_4_6/gem5_out'
     HOME = os.environ['HOME']
-    output_dir = 'output_4_1/gem5_out'
 
     file_path = os.path.join(HOME,output_dir)
     file_path = os.path.join(file_path,test_name)
     file_path = os.path.join(file_path,'power.bin')
 
-    save_path = os.path.join(HOME,'plot/data')
-    save_path = os.path.join(save_path,test_name+'_lead_time_sweep')
     print(file_path)
-    print(save_path)
     with open(file_path, "rb") as binaryfile :
         myArr = bytearray(binaryfile.read())          
     power = np.frombuffer(myArr)
+    return power
+def run():
     #init pdn parameters
     VDC = 1.4
     THRES = 1.33
@@ -101,14 +98,15 @@ def run(test_name):
     R = 3.2e-3
     VDC = VDC
     CLK = 4E9
-
-    stc_curr = 10.249102297480446
-    total_curr = np.true_divide(power,VDC)
-    dyn_curr = np.subtract(total_curr,stc_curr)
+    #load data files
+    power = get_data('qsort_10_100000_DESKTOP_HarvardPowerPredictor_nothrottle')
+    reg_current = np.true_divide(power,VDC)
+    power = get_data('qsort_10_100000_DESKTOP_HarvardPowerPredictor_throttle')
+    throttle_current = np.true_divide(power,VDC)    
     #done init
 
     ve_cycle = sim_pdn.detect_VE_wrapper(
-        total_curr,
+        reg_current,
         THRES,
         _L = L,
         _C = C,
@@ -119,24 +117,26 @@ def run(test_name):
     print(num_VEs)
 
     ve_ret = [[0,0,num_VEs]]
-    for THROTTLE_TIME in range(10,150,5):
+    for THROTTLE_TIME in range(0,180,5):
         for THROTTLE_LEADTIME in range(0,THROTTLE_TIME,5):
             #CYTHON  
             start_throttle = np.asarray([(i-THROTTLE_LEADTIME) for i in ve_cycle], dtype=np.int32)
             end_throttle = np.asarray([(i+THROTTLE_TIME) for i in ve_cycle], dtype=np.int32)
 
-            ves = sim_pdn.detect_VE_throttle_wrapper(dyn_curr, stc_curr,
+            ves = sim_pdn.detect_VE_throttle_wrapper(throttle_current, reg_current,
                 THROTTLE_TIME, THROTTLE_LEADTIME,
                 THRES, L, C, R, VDC, CLK, 
                 start_throttle, end_throttle)
 
             print('LEADTIME=',THROTTLE_LEADTIME, 'THROTTLE_TIME=',THROTTLE_TIME, ves)
             ve_ret.append([THROTTLE_TIME,THROTTLE_LEADTIME,ves])
+
+    HOME = os.environ['HOME']
+    save_path = os.path.join(HOME,'plot/data')
+    save_path = os.path.join(save_path,'qsort'+'_lead_time_sweep')
+    print(save_path)
     np.save(save_path,np.array(ve_ret))
 
 
 if __name__ == "__main__":
-    for tn in TEST_LIST_spec:
-        run(tn+'_35_500000_DESKTOP_IdealSensor')
-
-    # run('qsort_10_100000_DESKTOP_HarvardPowerPredictor')
+    run()

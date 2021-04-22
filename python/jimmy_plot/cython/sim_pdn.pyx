@@ -2,6 +2,8 @@
 from cython.view cimport array as cvarray
 from libcpp cimport bool
 import numpy as np
+cimport numpy as np
+
 
 
 cdef class PDN:
@@ -26,7 +28,7 @@ cdef class PDN:
     cdef double get_volt(self, double current):
         ts = 1/self.CLK
         
-        vout = self.VDC*ts**2/(self.LmulC) \
+        cdef double vout = self.VDC*ts**2/(self.LmulC) \
             + self.vout_1_cycle_ago*(2 - ts/(self.LdivR)) \
             + self.vout_2_cycle_ago*(ts/(self.LdivR) \
             - 1 - ts**2/(self.LmulC)) \
@@ -38,6 +40,19 @@ cdef class PDN:
         self.iout_1_cycle_ago = current
         return vout
 
+
+cdef get_voltage(double[:] current, double thres, PDN pdn):
+    I = current.shape[0]
+    cdef np.ndarray[double, ndim=1] volt = np.zeros([I], dtype=np.double)
+    cdef list ve_cycle = []
+    
+    cdef int i
+    for i in range(I):
+        volt[i] = pdn.get_volt(current[i])
+        if volt[i] < thres and volt[i-1] > thres:
+            ve_cycle.append(i)
+    cdef ve_cycle_ret = np.asarray(ve_cycle, np.uint)
+    return [volt,ve_cycle_ret]
 
 cdef detect_VE(double[:] current, double thres, PDN pdn):
     cdef list ve_cycle = []
@@ -56,8 +71,8 @@ cdef detect_VE(double[:] current, double thres, PDN pdn):
     return ve_cycle
 
 cdef int detect_VE_throttle(
-    double[:] dyn_current, 
-    double stc_current,
+    double[:] throttle_curr, 
+    double[:] reg_curr, 
     int throttle_dur,
     int lead_time,
     double thres, 
@@ -73,12 +88,12 @@ cdef int detect_VE_throttle(
     cdef int start_throttle_ind = 0
     cdef int end_throttle_ind = 0
 
-    I = dyn_current.shape[0]
+    I = throttle_curr.shape[0]
     for i in range(I):
         if is_throttle:
-            curr = dyn_current[i]/2 + stc_current
+            curr = throttle_curr[i]
         else:
-            curr = dyn_current[i] + stc_current
+            curr = reg_curr[i]
 
         v_curr = pdn.get_volt(curr)
         if v_curr < thres and v_prev > thres:
@@ -99,7 +114,6 @@ cdef int detect_VE_throttle(
         v_prev = v_curr
     return count
 
-
 cpdef detect_VE_wrapper(current, _THRES, _L, _C, _R, _VDC, _CLK):
     cdef pdn = PDN(
         L = _L,
@@ -112,7 +126,7 @@ cpdef detect_VE_wrapper(current, _THRES, _L, _C, _R, _VDC, _CLK):
 
     return detect_VE(c_current, _THRES, pdn)
 
-cpdef detect_VE_throttle_wrapper(dyn_current, stc_current,
+def detect_VE_throttle_wrapper(throttle_curr, reg_curr,
     THROTTLE_DUR, LEAD_TIME,
     _THRES, _L, _C, _R, _VDC, _CLK, _start_throttle, _end_throttle):
     cdef pdn = PDN(
@@ -122,10 +136,24 @@ cpdef detect_VE_throttle_wrapper(dyn_current, stc_current,
         VDC = _VDC,
         CLK = _CLK,
     )  
-    cdef double [:] c_dyn_current = dyn_current
+    cdef double [:] c_throttle_curr = throttle_curr
+    cdef double [:] c_reg_curr = reg_curr
+
     cdef int [:] start_throttle = _start_throttle
     cdef int [:] end_throttle = _end_throttle
 
-    return detect_VE_throttle(c_dyn_current, stc_current, 
+    return detect_VE_throttle(c_throttle_curr, c_reg_curr, 
         THROTTLE_DUR, LEAD_TIME,
         _THRES, pdn, start_throttle, end_throttle)
+
+cpdef get_volt_wrapper(current, _THRES, _L, _C, _R, _VDC, _CLK):
+    cdef pdn = PDN(
+        L = _L,
+        C = _C,
+        R = _R,
+        VDC = _VDC,
+        CLK = _CLK,
+    )  
+    cdef double [:] c_current = current
+
+    return get_voltage(c_current, _THRES, pdn)

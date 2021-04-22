@@ -96,14 +96,14 @@ print_info "TRAINING_ROOT $TRAINING_ROOT"
 #---------------------------------------------------
 # Simulation Params
 #---------------------------------------------------
-DURATION=("35") # Data Points to Simulate
+DURATION=("150") # Data Points to Simulate
 START_DELAY=("10000000")
 # Stat Dump Cycles
-CPU_CYCLES=("500000")
+CPU_CYCLES=("1000000")
 
 ## When to start ROI, in Sim Ticks, -or- ROI by setting "-1"
-PROFILE_START=("-1") #this doesnt do anything right now
-INSTRUCTIONS=("-1")
+PROFILE_START=("-1") #TODO this doesnt do anything right now
+INSTRUCTIONS=("-1") #TODO nor this?
 
 
 #---------------------------------------------------
@@ -118,7 +118,7 @@ McPAT_SCALE_FACTOR=("1.0") # This is a HACK, Fix McPAT to support < 22nm planar
 NUM_CORES=("1")
 
 VOLTAGE=("1.4")
-VOLTAGE_EMERGENCY=("1.33")
+VOLTAGE_EMERGENCY=("1.3")
 VOLTAGE_THRESHOLD=("1.372")
 
 #---------------------------------------------------
@@ -144,9 +144,9 @@ L3=("16MB")
 #---------------------------------------------------
 
 PREDICTOR=(
-# "HarvardPowerPredictorMitigation"
+"HarvardPowerPredictorMitigation"
 # "HarvardPowerPredictor"
-"IdealSensor"
+# "IdealSensor"
 # "IdealSensorHarvardMitigation"
 )
 
@@ -174,52 +174,6 @@ PPRED_ACTIONS=(
 "1"
 "1"
 )
-#"1"
-#"1"
-#"1"
-
-#PREDICTOR=(
-#"Test" 
-#)
-#PPRED_TRAINED_MODEL=(
-#"bottom.txt"
-#)
-#PPRED_EVENTS=(
-#"1"
-#)
-#PPRED_ACTIONS=(
-#"1"
-#)
-
-#PREDICTOR=(
-#"PerceptronPredictorUTA"
-#"PerceptronPredictor"
-#"PerceptronPredictor"
-#"DNNPredictor"
-#"DNNPredictor"
-#)
-## Bottom.txt is a meme; its ok for cringing
-#PPRED_TRAINED_MODEL=(
-#"bottom.txt"
-#"${PREDICT_T_ROOT}/perceptron_DESKTOP_32_2_512_RAW.txt"
-#"${PREDICT_T_ROOT}/perceptron_DESKTOP_32_8_512_RAW.txt"
-#"${PREDICT_T_ROOT}/dnn_DESKTOP_32_2_1_32_8192_RAW.txt"
-#"${PREDICT_T_ROOT}/dnn_DESKTOP_32_8_1_32_8192_STANDARDIZE.txt"
-#)
-#PPRED_EVENTS=(
-#"16"
-#"16"
-#"16"
-#"16"
-#"16"
-#)
-#PPRED_ACTIONS=(
-#"2"
-#"2"
-#"8"
-#"2"
-#"8"
-#)
 
 #---------------------------------------------------
 # CPU Params:
@@ -227,6 +181,7 @@ PPRED_ACTIONS=(
 # Desktop
 CLK=( "4GHz")
 CLK_=("4000000000")
+THROTTLE_CLK=$(echo "scale=30;2*10^9" | bc)
 ## Superscalar Core Width
 CORE_WIDTH=("8")
 ## Fetch Params
@@ -256,109 +211,26 @@ SIMD_UNIT_COUNT=("4")
 # Test Executables:
 #---------------------------------------------------
 name=(
-	"429.mcf" \
-	"433.milc" \
-	"435.gromacs" \
-	"436.cactusADM" \
-	"437.leslie3d" \
-	"444.namd" \
-	"445.gobmk" \
-	"453.povray" \
-	"454.calculix" \
-	"456.hmmer" \
-	"458.sjeng" \
 	"459.GemsFDTD" \
-	"462.libquantum" \
-	"464.h264ref" \
-	"471.omnetpp" \
-	"473.astar" \
-	"481.wrf" \
-	"482.sphinx3" \
 )
 
 dir=(
-	"$HOME/passat/spec2006/benchspec/CPU2006/429.mcf/run/run_base_ref_amd64-m64-gcc43-nn.0000/" \
-	"$HOME/passat/spec2006/benchspec/CPU2006/433.milc/run/run_base_ref_amd64-m64-gcc43-nn.0000/" \
-	"$HOME/passat/spec2006/benchspec/CPU2006/435.gromacs/run/run_base_ref_amd64-m64-gcc43-nn.0000/" \
-	"$HOME/passat/spec2006/benchspec/CPU2006/436.cactusADM/run/run_base_ref_amd64-m64-gcc43-nn.0000/" \
-	"$HOME/passat/spec2006/benchspec/CPU2006/437.leslie3d/run/run_base_ref_amd64-m64-gcc43-nn.0000/" \
-	"$HOME/passat/spec2006/benchspec/CPU2006/444.namd/run/run_base_ref_amd64-m64-gcc43-nn.0000/" \
-	"$HOME/passat/spec2006/benchspec/CPU2006/445.gobmk/run/run_base_ref_amd64-m64-gcc43-nn.0000/" \
-	"$HOME/passat/spec2006/benchspec/CPU2006/453.povray/run/run_base_ref_amd64-m64-gcc43-nn.0000/" \
-	"$HOME/passat/spec2006/benchspec/CPU2006/454.calculix/run/run_base_ref_amd64-m64-gcc43-nn.0000/" \
-	"$HOME/passat/spec2006/benchspec/CPU2006/456.hmmer/run/run_base_ref_amd64-m64-gcc43-nn.0000/" \
-	"$HOME/passat/spec2006/benchspec/CPU2006/458.sjeng/run/run_base_ref_amd64-m64-gcc43-nn.0000/" \
 	"$HOME/passat/spec2006/benchspec/CPU2006/459.GemsFDTD/run/run_base_ref_amd64-m64-gcc43-nn.0000/" \
-	"$HOME/passat/spec2006/benchspec/CPU2006/462.libquantum/run/run_base_ref_amd64-m64-gcc43-nn.0000/" \
-	"$HOME/passat/spec2006/benchspec/CPU2006/464.h264ref/run/run_base_ref_amd64-m64-gcc43-nn.0000/" \
-	"$HOME/passat/spec2006/benchspec/CPU2006/471.omnetpp/run/run_base_ref_amd64-m64-gcc43-nn.0000/" \
-	"$HOME/passat/spec2006/benchspec/CPU2006/473.astar/run/run_base_ref_amd64-m64-gcc43-nn.0000/" \
-	"$HOME/passat/spec2006/benchspec/CPU2006/481.wrf/run/run_base_ref_amd64-m64-gcc43-nn.0000/" \
-	"$HOME/passat/spec2006/benchspec/CPU2006/482.sphinx3/run/run_base_ref_amd64-m64-gcc43-nn.0000/" \
 )
 
 cmd=(
-	"mcf_base.amd64-m64-gcc43-nn" \
-	"milc_base.amd64-m64-gcc43-nn" \
-	"gromacs_base.amd64-m64-gcc43-nn" \
-	"cactusADM_base.amd64-m64-gcc43-nn" \
-	"leslie3d_base.amd64-m64-gcc43-nn" \
-	"namd_base.amd64-m64-gcc43-nn" \
-	"gobmk_base.amd64-m64-gcc43-nn" \
-	"povray_base.amd64-m64-gcc43-nn" \
-	"calculix_base.amd64-m64-gcc43-nn" \
-	"hmmer_base.amd64-m64-gcc43-nn" \
-	"sjeng_base.amd64-m64-gcc43-nn" \
 	"GemsFDTD_base.amd64-m64-gcc43-nn" \
-	"libquantum_base.amd64-m64-gcc43-nn" \
-	"h264ref_base.amd64-m64-gcc43-nn" \
-	"omnetpp_base.amd64-m64-gcc43-nn" \
-	"astar_base.amd64-m64-gcc43-nn" \
-	"wrf_base.amd64-m64-gcc43-nn" \
-	"sphinx_livepretend_base.amd64-m64-gcc43-nn" \
 )
 
 opt=(
-	"inp.in " \
 	"" \
-	"-silent -deffnm gromacs -nice 0 " \
-	"benchADM.par " \
-	"" \
-	"--input namd.input --output namd.out --iterations 38 " \
-	"--quiet --mode gtp " \
-	"SPEC-benchmark-ref.ini " \
-	"-i hyperviscoplastic " \
-	"nph3.hmm swiss41 " \
-	"ref.txt " \
-	"" \
-	"1297 8 " \
-	"-d foreman_ref_encoder_baseline.cfg " \
-	"omnetpp.ini " \
-	"rivers.cfg " \
-	"" \
-	"ctlfile . args.an4 " \
 )
 
 stdin=(
 	"" \
-	"$HOME/passat/spec2006/benchspec/CPU2006/433.milc/run/run_base_ref_amd64-m64-gcc43-nn.0000/su3imp.in" \
-	"" \
-	"" \
-	"$HOME/passat/spec2006/benchspec/CPU2006/437.leslie3d/run/run_base_ref_amd64-m64-gcc43-nn.0000/leslie3d.in" \
-	"" \
-	"$HOME/passat/spec2006/benchspec/CPU2006/445.gobmk/run/run_base_ref_amd64-m64-gcc43-nn.0000/13x13.tst" \
-	"" \
-	"" \
-	"" \
-	"" \
-	"" \
-	"" \
-	"" \
-	"" \
-	"" \
-	"" \
-	"" \
 )
+
+
 
 
 #---------------------------------------------------
@@ -434,6 +306,7 @@ for j in ${!name[@]}; do
         ${C} \
         ${R} \
         ${START_DELAY} \
+        ${THROTTLE_CLK} \
         ${stdin[$j]} \
 
 

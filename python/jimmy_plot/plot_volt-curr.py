@@ -8,74 +8,74 @@ from enum import Enum
 from datetime import datetime
 import math
 import random
-from file_read_backwards import FileReadBackwards
+import sim_pdn
 
-def plot(data, DATE):
+
+def run(test_name,DATE):
     HOME = os.environ['HOME']
-
-    fig = plt.figure(figsize=(60,5))
+    plt.tight_layout()
+    fig = plt.figure(figsize=(120,5))
     ax = plt.axes()
     fig.suptitle('Supply Voltage Over Time', fontsize=14)
     ax.set_xlabel('Cycle', fontsize=18) 
     ax.set_ylabel('Supply Voltage', fontsize=18)
     ax2 = ax.twinx()
     ax2.set_ylabel('Current', color='tab:blue', fontsize=18)  # we already handled the x-label with ax1
+    xplot_min = int(0.5e6)
+    xplot_max = int(0.501e6)
 
-    file_name, file_data = data
-    current = file_data['system.cpu.powerPred.supply_current']
-    voltage = file_data['system.cpu.powerPred.supply_voltage']
+    VDC = 1.4
+    THRES = 1.3
+    L = 20e-12
+    C = 1.32e-06
+    R = 3.2e-3
+    CLK = 4E9
 
-    xvar = np.linspace(0,len(voltage),len(voltage))
+    for tn in test_name:
 
-    ax.plot(xvar, voltage,color='black', linewidth=1.0)
-    ax.set_ylim(bottom= 1.31, top =1.4)
+        output_dir = 'output_4_22/gem5_out'
 
-    ax2.plot(xvar, current, color='tab:blue')
-    ax2.tick_params(axis='y', labelcolor='tab:blue')
-    ax2.set_ylim(bottom=0, top=5+max(current))
+        file_path = os.path.join(HOME,output_dir)
+        file_path = os.path.join(file_path,tn)
+        file_path = os.path.join(file_path,'power.bin')
+        print(file_path)
+        with open(file_path, "rb") as binaryfile :
+            myArr = bytearray(binaryfile.read())          
+        power = np.frombuffer(myArr)
+
+        curr = np.true_divide(power, VDC)
+        print(curr[500000:500500])
+
+        [voltage,ve_cycle] = sim_pdn.get_volt_wrapper(curr,THRES,L,C,R,VDC,CLK)
+        print('TOTAL VEs', len(ve_cycle))
+        ve_cycle = [(i-xplot_min) for i in ve_cycle if (i<xplot_max and i>xplot_min) ]
+        for ve in ve_cycle:
+            ax.axvspan(ve,ve+1,alpha=0.8)
+
+        voltage = voltage[xplot_min:xplot_max]
+        curr = curr[xplot_min:xplot_max]
+
+        ax.plot(range(0,len(voltage),1), voltage,linewidth=0.5, color='black')
+        ax2.plot(range(0,len(curr),1), curr,linewidth=0.5)
+        print(int(len(curr)/30))
+        ax.set_xticks(
+            range(0,len(curr),
+                int(len(curr)/30)
+            )
+        )
+        # ax.set_xlabel(
+        #     range(xplot_min,xplot_max,
+        #         int(len(curr)/30)
+        #     ))
     
-    plot_path = HOME+'/plot/' + DATE + '_voltage+current_' + file_name + '.png'
-    plt.savefig(plot_path, dpi=300)
+
+    plot_path = HOME+'/plot/' + DATE + '_throttle_test' + '.png'
+    plt.savefig(plot_path, dpi=100,bbox_inches='tight')
     print(plot_path)
 
-def gather_data(files):
-    file_path = files[1]
-    file_name = files[0]
-
-    stats = open(file_path, 'r')
-    line = stats.readline()   
-
-    f_storage = dict()
-    f_storage['system.cpu.powerPred.supply_current'] = list()
-    f_storage['system.cpu.powerPred.supply_voltage'] = list()
-
-    while (line): 
-        line = stats.readline()   
-        if 'system.cpu.powerPred.supply_current' in line:
-            val = float(line.split()[1])
-            f_storage['system.cpu.powerPred.supply_current'].append(val) 
-        elif 'system.cpu.powerPred.supply_voltage' in line and 'prev' not in line:
-            val = float(line.split()[1])
-            f_storage['system.cpu.powerPred.supply_voltage'].append(val) 
-            
-    return [file_name, f_storage]
-
-def gen_files_paths():
-
-    file_name = 'qsort_3000_1_DESKTOP_HarvardPowerPredictor'
-
-    HOME = os.environ['HOME']
-    file_path = os.path.join(HOME, 'output_3_8/gem5_out')
-    
-    folder_name = file_name + '/stats.txt'
-
-    file_path = os.path.join(file_path,folder_name)
-    print(file_path)
-
-    return [file_name,file_path]
-
-
 if __name__ == "__main__":
-    files = gen_files_paths()
-    data = gather_data(files)
-    plot(data = data, DATE='3-11-2021')
+    # test_name = ['qsort_10_100000_DESKTOP_HarvardPowerPredictor_nothrottle',
+    #     'qsort_10_100000_DESKTOP_HarvardPowerPredictor_throttle']
+    # test_name = ['454.calculix_50_1000000_DESKTOP_HarvardPowerPredictorMitigation']
+    test_name = ['qsort_10_100000_DESKTOP_LongLatencyPredictor']
+    run(test_name,'4-22')

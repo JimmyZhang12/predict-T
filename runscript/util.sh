@@ -70,6 +70,7 @@ se_classic_mc_ncv() {
   PDN_CAP=${43}   # Voltage Emergency Level
   PDN_RES=${44}  # Voltage Threshold Level; applies to sensor predictor
   START_DELAY=${45}
+  THROTTLE_FREQ=${46}
   
 
 #  --ncverilog_enable \
@@ -81,6 +82,7 @@ se_classic_mc_ncv() {
 # --power_pred_actions=${PPACTION} \
 
   time $GEM5_ROOT/build/X86/gem5.opt \
+    --debug-flags=PowerPred \
     --outdir=${OUTPUT_ROOT}/gem5_out/$TN \
     --mcpat_enable \
     --mcpat_path=${MCPAT_ROOT} \
@@ -97,6 +99,7 @@ se_classic_mc_ncv() {
     --ncverilog_path=${PREDICT_T_ROOT}/circuit_model \
     --power-supply-type=$P \
     $GEM5_ROOT/configs/example/se.py \
+    --debug_throttle=1 \
     --save_data=1 \
     --debug_print_delay=0 \
     --run_verilog_power_sim=0 \
@@ -107,6 +110,7 @@ se_classic_mc_ncv() {
     --power_pred_cycles_per_dump=${CS} \
     --power_pred_num_dumps=${DUR} \
     --power_pred_cpu_freq=${F} \
+    --power_pred_cpu_throttle_freq=${THROTTLE_FREQ} \
     --power_pred_voltage=${V} \
     --power_pred_voltage_emergency=${PPVE} \
     --power_pred_voltage_threshold=${PPVTH} \
@@ -142,7 +146,7 @@ se_classic_mc_ncv() {
     --l3_size=${L3_} \
     --caches \
     --sys-clock=${CLK} \
-    --mem-size=8GB #> ${OUTPUT_ROOT}/text_out/$TN.out &
+    --mem-size=8GB > ${OUTPUT_ROOT}/text_out/$TN.out &
 }
 
 se_classic_mc_ncv_spec() {
@@ -191,8 +195,8 @@ se_classic_mc_ncv_spec() {
   PDN_CAP=${43}   # Voltage Emergency Level
   PDN_RES=${44}  # Voltage Threshold Level; applies to sensor predictor
   START_DELAY=${45}
-  STDIN=${46}
-
+  THROTTLE_FREQ=${46}
+  STDIN=${47}
 # --ncverilog_enable \
 # --power_pred_train_name=${TRAINING_ROOT}/${TN}.csv \
 # --power_pred_model=${PTM} \
@@ -217,6 +221,7 @@ se_classic_mc_ncv_spec() {
     --power-supply-type=$P \
     $GEM5_ROOT/configs/example/se.py \
     --save_data=1 \
+    --debug_throttle=0 \
     --debug_print_delay=0 \
     --run_verilog_power_sim=0 \
     --mcpat_output_path=${OUTPUT_ROOT}/mcpat_out/$TN \
@@ -224,9 +229,11 @@ se_classic_mc_ncv_spec() {
     --cmd=${EXE} \
     --opt="${OPT}" \
     --input="${STDIN}" \
+    --power_start_delay=${START_DELAY} \
     --power_pred_cycles_per_dump=${CS} \
     --power_pred_num_dumps=${DUR} \
     --power_pred_cpu_freq=${F} \
+    --power_pred_cpu_throttle_freq=${THROTTLE_FREQ} \
     --power_pred_voltage=${V} \
     --power_pred_voltage_emergency=${PPVE} \
     --power_pred_voltage_threshold=${PPVTH} \
@@ -262,5 +269,5 @@ se_classic_mc_ncv_spec() {
     --l3_size=${L3_} \
     --caches \
     --sys-clock=${CLK} \
-    --mem-size=8GB > ${OUTPUT_ROOT}/text_out/$TN.out &
+    --mem-size=8GB #> ${OUTPUT_ROOT}/text_out/$TN.out &
 }

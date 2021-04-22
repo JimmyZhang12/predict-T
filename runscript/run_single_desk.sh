@@ -137,8 +137,9 @@ L3=("16MB")
 
 PREDICTOR=(
 # "HarvardPowerPredictorMitigation"
-"HarvardPowerPredictor"
+# "HarvardPowerPredictor"
 # "IdealSensor"
+"LongLatencyPredictor"
 )
 
 PPRED_TRAINED_MODEL=(
@@ -172,6 +173,8 @@ PPRED_ACTIONS=(
 # Desktop
 CLK=( "4GHz")
 CLK_=("4000000000")
+THROTTLE_CLK=$(echo "scale=30;3.5*10^9" | bc)
+
 ## Superscalar Core Width
 CORE_WIDTH=("8")
 ## Fetch Params
@@ -252,7 +255,9 @@ opt=("${INPUT}/qsort.dat")
 #exe=("same_cycle")
 #opt=("")
 
-
+# name=("sha")
+# exe=("sha")
+# opt=("${INPUT}/sha.asc")
 #name=("sha" "untoast")
 #exe=("sha" "untoast")
 #opt=("${INPUT}/sha.asc" "-fps -c ${INPUT}/untoast.au.run.gsm")
@@ -268,9 +273,9 @@ opt=("${INPUT}/qsort.dat")
 #name=("toast"i)
 #exe=("toast")
 #opt=("-fps -c ${INPUT}/toast.au")
-#name=("dijkstra")
-#exe=("dijkstra")
-#opt=("${INPUT}/dijkstra.dat")
+# name=("dijkstra")
+# exe=("dijkstra")
+# opt=("${INPUT}/dijkstra.dat")
 
 #---------------------------------------------------
 # PDN PARAMS:
@@ -333,7 +338,8 @@ for j in ${!name[@]}; do
           ${L} \
           ${C} \
           ${R} \
-          ${START_DELAY[0]}
+          ${START_DELAY[0]} \
+          ${THROTTLE_CLK}
           
 
       while [ `jobs | wc -l` -ge 4 ]; do

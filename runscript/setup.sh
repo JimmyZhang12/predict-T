@@ -53,7 +53,7 @@ export VSIM_TOOLS="/software/cadence-Aug2016"
 #export SIM_ROOT="$PREDICT_T_ROOT/circuit_model"
 export PREDICT_T_ROOT="$HOME/passat/predict-T"
 export GEM5_ROOT="$HOME/passat/gem5"
-export OUTPUT_ROOT="$HOME/output_4_1"
+export OUTPUT_ROOT="$HOME/output_4_22"
 export MCPAT_ROOT="$HOME/passat/mcpat/build"
 export SIM_ROOT="$PREDICT_T_ROOT/circuit_model"
 
